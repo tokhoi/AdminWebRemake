@@ -1,0 +1,186 @@
+﻿@page "/teacher-attendance"
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý giáo viên</PageTitle>
+
+<div class="page-teacher-attendance animate-fade-in">
+    <div class="std-card" style="flex: 0 0 auto; padding: 1rem 1.5rem; margin-bottom: 0;">
+        <div class="flex-between">
+            <div class="card-title" style="font-size: 1.25rem;">
+                <div class="tea-icon"><span class="material-icons-round">people</span></div>
+                Điểm danh giáo viên
+            </div>
+        </div>
+    </div>
+    <div class="std-card tea-filter-box">
+        <div class="tea-filters">
+            <div class="tea-f-item">
+                <label class="form-label">Ngày</label>
+                <input type="date" class="form-input" @bind="SelectedDate" @bind:after="FilterData" />
+            </div>
+            <div class="tea-f-item">
+                <label class="form-label">Trạng thái</label>
+                <select class="form-input" @bind="SelectedStatus" @bind:after="FilterData">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Có mặt">Có mặt</option>
+                    <option value="Đi muộn">Đi muộn</option>
+                    <option value="Vắng mặt">Vắng mặt</option>
+                </select>
+            </div>
+            <div class="tea-f-wide">
+                <label class="form-label">Tìm kiếm</label>
+                <div class="input-wrapper">
+                    <span class="material-icons-round input-icon">search</span>
+                    <input class="form-input input-has-icon" placeholder="Tên hoặc mã giáo viên..." @bind="SearchTerm" @bind:event="oninput" @bind:after="FilterData" />
+                </div>
+            </div>
+            <div class="action-group">
+                <button class="btn btn-primary" @onclick="ToggleExportMenu">
+                    <span class="material-icons-round">file_download</span> Thao tác
+                    <span class="material-icons-round" style="font-size: 16px;">expand_more</span>
+                </button>
+                @if (_showExportMenu)
+                {
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
+                        <div style="border-top:1px solid #eee; margin:4px 0;"></div>
+                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
+                        <button class="dropdown-item-btn"><span class="material-icons-round bg-orange">person_off</span> Xuất Excel vắng mặt </button>
+                        <button class="dropdown-item-btn"><span class="material-icons-round bg-blue ">dataset</span> Xuất Excel thống kê </button>
+
+                    </div>
+                    <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
+                }
+            </div>
+        </div>
+    </div>
+    @* <div class="tea-summary">
+        <div class="tea-sum-item bg-blue"><span>Sĩ số</span><b>@FilteredTeachers.Count</b></div>
+        <div class="tea-sum-item bg-green"><span>Có mặt</span><b>@FilteredTeachers.Count(t => t.AmStatus == "Có mặt")</b></div>
+        <div class="tea-sum-item bg-orange"><span>Muộn</span><b>@FilteredTeachers.Count(t => t.AmStatus == "Đi muộn")</b></div>
+        <div class="tea-sum-item bg-red"><span>Vắng</span><b>@FilteredTeachers.Count(t => t.AmStatus == "Vắng mặt")</b></div>
+    </div> *@
+
+    <div class="std-card tea-table-box">
+        <div class="tea-table-header">
+            <div class="card-title" style="font-size: 1rem;">
+                <div class="bar-indicator" style="background: var(--c-green);"></div>
+                Danh sách giáo viên
+            </div>
+            
+            <div class="tea-legend">
+                <span class="status-badge bg-blue">Sĩ số: <b>@FilteredTeachers.Count</b></span>
+                <span class="status-badge bg-green-light">Có mặt: <b>@FilteredTeachers.Count(t => t.AmStatus == "Có mặt")</b></span>
+                <span class="status-badge bg-orange">Đi muộn: <b>@FilteredTeachers.Count(t => t.AmStatus == "Vắng mặt")</b></span>
+                <span class="status-badge bg-red-light">Vắng: <b>@FilteredTeachers.Count(t => t.AmStatus == "Vắng mặt")</b></span>
+            </div>
+        </div>
+
+
+        <div class="table-wrapper tea-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center col-fit">STT</th>
+                        <th class="col-fit">Mã GV</th>
+                        <th class="col-grow">Họ tên</th>
+                        <th class="text-center col-fit">Sáng</th>
+                        <th class="text-center col-fit">Chiều</th>
+                        <th class="text-center col-fit">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (PaginatedTeachers.Any())
+                    {
+                        var index = (CurrentPage - 1) * PageSize;
+                        foreach (var t in PaginatedTeachers)
+                        {
+                            index++;
+                            <tr>
+                                <td class="text-center text-muted">@index</td>
+                                <td style="font-family: monospace; color: var(--text-muted);">@t.Code</td>
+                                <td style="font-weight: 500; font-size: 1rem;">@t.Name</td>
+                                <td class="text-center">
+                                    <span class="status-badge @GetStatusClass(t.AmStatus)">
+                                        <span class="dot @GetDotClass(t.AmStatus)"></span> @t.AmStatus
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-badge @GetStatusClass(t.PmStatus)">
+                                        <span class="dot @GetDotClass(t.PmStatus)"></span> @t.PmStatus
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn-icon" title="Chỉnh sửa"><span class="material-icons-round">edit</span></button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center" style="padding: 3rem;">
+                                <span class="material-icons-round" style="font-size: 48px; color: #e2e8f0;">person_off</span>
+                                <div style="margin-top:8px; color: var(--text-muted);">Không tìm thấy giáo viên</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tea-footer">
+            <span class="text-muted" style="font-size: 0.85rem;">Trang @CurrentPage / @TotalPages</span>
+            <div style="display: flex; gap: 4px;">
+                <button class="btn-outline pg-btn" disabled="@(CurrentPage <= 1)" @onclick="() => ChangePage(CurrentPage - 1)"><span class="material-icons-round">chevron_left</span></button>
+                <button class="btn-primary pg-btn">@CurrentPage</button>
+                <button class="btn-outline pg-btn" disabled="@(CurrentPage >= TotalPages)" @onclick="() => ChangePage(CurrentPage + 1)"><span class="material-icons-round">chevron_right</span></button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    public class Teacher { public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string AmStatus { get; set; } = ""; public string PmStatus { get; set; } = ""; }
+
+    List<Teacher> AllTeachers = new();
+    List<Teacher> FilteredTeachers = new();
+    DateTime SelectedDate { get; set; } = DateTime.Today;
+    string SearchTerm { get; set; } = "";
+    string SelectedStatus { get; set; } = "";
+    bool _showExportMenu = false;
+    int CurrentPage = 1;
+    int PageSize = 15;
+
+    protected override void OnInitialized()
+    {
+        if (!AllTeachers.Any())
+        {
+            var names = new[] { "Nguyễn Văn A", "Trần Thị B", "Lê Văn C", "Phạm Thị D", "Hoàng Văn E" };
+            var r = new Random();
+            for (int i = 1; i <= 60; i++)
+            {
+                var s = r.NextDouble() > 0.8 ? "Vắng mặt" : (r.NextDouble() > 0.7 ? "Đi muộn" : "Có mặt");
+                AllTeachers.Add(new Teacher { Code = $"GV{i:000}", Name = $"{names[r.Next(names.Length)]} {i}", AmStatus = s, PmStatus = "Có mặt" });
+            }
+        }
+        FilterData();
+    }
+
+    void FilterData()
+    {
+        FilteredTeachers = AllTeachers.Where(t =>
+            (string.IsNullOrEmpty(SearchTerm) || t.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || t.Code.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(SelectedStatus) || t.AmStatus == SelectedStatus)
+        ).ToList();
+        CurrentPage = 1;
+    }
+
+    List<Teacher> PaginatedTeachers => FilteredTeachers.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+    int TotalPages => FilteredTeachers.Count == 0 ? 1 : (int)Math.Ceiling((double)FilteredTeachers.Count / PageSize);
+    void ChangePage(int p) { if (p >= 1 && p <= TotalPages) CurrentPage = p; }
+    void ToggleExportMenu() => _showExportMenu = !_showExportMenu;
+    string GetStatusClass(string s) => s switch { "Vắng mặt" => "bg-red-light", "Đi muộn" => "bg-yellow-light", _ => "bg-green-light" };
+    string GetDotClass(string s) => s switch { "Vắng mặt" => "dot-red", "Đi muộn" => "dot-yellow", _ => "dot-green" };
+}

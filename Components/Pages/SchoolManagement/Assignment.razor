@@ -1,0 +1,61 @@
+﻿@page "/school/assignment"
+@rendermode InteractiveServer
+
+<PageTitle>Phân công giảng dạy</PageTitle>
+
+<div class="animate-fade-in flex-col gap-6">
+    <div class="std-card">
+        <div class="flex-between mb-4 flex-wrap gap-4">
+            <h2 class="card-title">Phân công chuyên môn</h2>
+            <div class="flex gap-2">
+                <button class="btn btn-outline"><span class="material-icons-round" style="font-size: 18px;">content_copy</span> Sao chép từ kỳ trước</button>
+                <button class="btn btn-primary"><span class="material-icons-round" style="font-size: 18px;">add</span> Phân công mới</button>
+            </div>
+        </div>
+
+        <div class="filter-container mb-4">
+            <div class="filter-item"><label class="form-label">Năm học</label><select class="form-input"><option>2025-2026</option></select></div>
+            <div class="filter-item"><label class="form-label">Giáo viên</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="filter-item"><label class="form-label">Môn học</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="filter-item"><label class="form-label">Lớp</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="filter-actions"><button class="btn btn-primary w-full">Lọc</button></div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center w-16">STT</th>
+                        <th>Giáo viên</th>
+                        <th>Môn học</th>
+                        <th>Lớp giảng dạy</th>
+                        <th class="text-center">Số tiết/Tuần</th>
+                        <th class="text-center">Học kỳ</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 1; i <= 8; i++)
+                    {
+                        <tr>
+                            <td class="text-center">@i</td>
+                            <td style="font-weight: 500;">
+                                <div class="flex-center" style="justify-content: start; gap: 8px;">
+                                    <div class="logo-circle" style="width: 24px; height: 24px; font-size: 10px; background: #e0e7ff; color: var(--primary);">GV</div>
+                                    Nguyễn Văn Giáo Viên @i
+                                </div>
+                            </td>
+                            <td>@(i % 2 == 0 ? "Toán" : "Tiếng Việt")</td>
+                            <td><span class="status-badge bg-gray-100 border">1A@(i)</span></td>
+                            <td class="text-center">5</td>
+                            <td class="text-center">Học kỳ I</td>
+                            <td class="text-center">
+                                <button class="btn-icon" title="Xóa"><span class="material-icons-round text-red" style="font-size: 18px;">close</span></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

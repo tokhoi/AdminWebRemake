@@ -1,0 +1,121 @@
+﻿/* Container chính của Dashboard: Khóa chiều cao 100% */
+/*.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-bottom: 0.5rem;
+    overflow: hidden;*/ /* Quan trọng: Không cho scroll cả trang */
+/*}*/
+
+/* Grid layout chỉ dành cho Dashboard */
+/*.dash-top-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+.dash-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;*/ /* Cho phép con scroll */
+/*}*/
+
+/* Card riêng của dashboard - Gọn gàng hơn */
+/*.dash-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+}
+
+.dash-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+}*/
+
+/* Các thành phần trang trí Dashboard (Blob, Chart Legend...) */
+/*.dash-stat-box {
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: 90px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.dash-icon {
+    background: rgba(255,255,255,0.25);
+    padding: 8px;
+    border-radius: 10px;
+    margin-right: 1rem;
+    backdrop-filter: blur(4px);
+    display: flex;
+}
+
+.dash-stat-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin: 0 0 2px 0;
+}
+
+.dash-stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.blob-1 {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    top: -20px;
+    right: -20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+}*/
+
+/* Progress bar trong Dashboard list */
+/*.dash-progress-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    cursor: default;
+}
+
+    .dash-progress-item:hover {
+        background: #f8fafc;
+    }
+
+.dash-progress-bg {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+
+.dash-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+}*/

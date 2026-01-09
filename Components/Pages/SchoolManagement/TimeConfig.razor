@@ -1,0 +1,126 @@
+﻿@page "/school/time-config"
+
+<PageTitle>Cấu hình thời gian</PageTitle>
+
+<div class="animate-fade-in">
+    <div class="std-card">
+        <h2 class="card-title mb-4" style="margin-bottom: 2rem;">Cấu hình thời gian điểm danh</h2>
+
+        <div class="config-grid">
+
+            <div class="config-column">
+                <h3 class="section-title">
+                    <span class="material-icons-round">wb_sunny</span> Buổi Sáng
+                </h3>
+
+                <div class="form-group-item">
+                    <label class="form-label">Thời gian bắt đầu buổi sáng:</label>
+                    <div class="input-wrapper">
+                        <input type="time" class="form-input" value="06:30" />
+                        <span class="material-icons-round input-icon">schedule</span>
+                    </div>
+                </div>
+
+                <div class="form-group-item">
+                    <label class="form-label">Thời gian vào lớp:</label>
+                    <div class="input-wrapper">
+                        <input type="time" class="form-input" value="07:00" />
+                        <span class="material-icons-round input-icon">schedule</span>
+                    </div>
+                </div>
+
+                <div class="form-group-item">
+                    <label class="form-label">Thời gian kết thúc điểm danh:</label>
+                    <div class="input-wrapper">
+                        <input type="time" class="form-input" value="08:00" />
+                        <span class="material-icons-round input-icon">schedule</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-column">
+                <h3 class="section-title">
+                    <span class="material-icons-round">nights_stay</span> Buổi Chiều
+                </h3>
+
+                <div class="form-group-item">
+                    <label class="form-label">Thời gian bắt đầu buổi chiều:</label>
+                    <div class="input-wrapper">
+                        <input type="time" class="form-input" value="13:30" />
+                        <span class="material-icons-round input-icon">schedule</span>
+                    </div>
+                </div>
+
+                <div class="form-group-item">
+                    <label class="form-label">Thời gian vào lớp:</label>
+                    <div class="input-wrapper">
+                        <input type="time" class="form-input" value="14:00" />
+                        <span class="material-icons-round input-icon">schedule</span>
+                    </div>
+                </div>
+
+                <div class="form-group-item">
+                    <label class="form-label">Thời gian kết thúc điểm danh:</label>
+                    <div class="input-wrapper">
+                        <input type="time" class="form-input" value="15:00" />
+                        <span class="material-icons-round input-icon">schedule</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <button class="btn btn-primary">
+                <span class="material-icons-round" style="font-size: 18px;">save</span> Lưu cấu hình
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CSS Cục bộ cho trang này để đảm bảo chia cột chuẩn */
+    .config-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Mobile: 1 cột */
+        gap: 2rem;
+    }
+
+    /* Tablet & PC: 2 cột */
+    @@media (min-width: 768px) {
+        .config-grid
+
+    {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    }
+
+    .config-column {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+    }
+
+    .form-group-item {
+        margin-bottom: 1.25rem;
+    }
+
+    .input-icon {
+        right: 12px !important;
+        left: auto !important; /* Đè lại style mặc định */
+    }
+</style>

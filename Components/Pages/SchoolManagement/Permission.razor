@@ -1,0 +1,54 @@
+﻿@page "/school/permissions"
+@rendermode InteractiveServer
+
+<PageTitle>Phân quyền hệ thống</PageTitle>
+
+<div class="animate-fade-in flex-col gap-6">
+    <div class="std-card">
+        <div class="flex-between mb-4">
+            <h2 class="card-title">Nhóm quyền người dùng</h2>
+            <button class="btn btn-primary"><span class="material-icons-round" style="font-size: 18px;">add_moderator</span> Tạo nhóm quyền</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center w-16">STT</th>
+                        <th>Tên nhóm quyền</th>
+                        <th>Mô tả</th>
+                        <th>Quyền hạn chính</th>
+                        <th class="text-center">Số thành viên</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td style="font-weight: 700; color: #dc2626;">Hiệu trưởng</td>
+                        <td class="text-muted">Hiệu trưởng, Hiệu phó</td>
+                        <td><span class="status-badge bg-red-light">Toàn quyền</span></td>
+                        <td class="text-center">2</td>
+                        <td class="text-center"><button class="btn-icon"><span class="material-icons-round" style="font-size: 18px;">settings</span></button></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">2</td>
+                        <td style="font-weight: 700; color: var(--primary);">Ban Giám Hiệu</td>
+                        <td class="text-muted">Giám thị</td>
+                        <td>Xem báo cáo, Duyệt đơn, Quản lý nhân sự</td>
+                        <td class="text-center">3</td>
+                        <td class="text-center"><button class="btn-icon"><span class="material-icons-round" style="font-size: 18px;">settings</span></button></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">3</td>
+                        <td style="font-weight: 700; color: #059669;">Giáo viên</td>
+                        <td class="text-muted">Giáo viên bộ môn & chủ nhiệm</td>
+                        <td>Điểm danh, Nhập điểm, Xem lớp dạy</td>
+                        <td class="text-center">76</td>
+                        <td class="text-center"><button class="btn-icon"><span class="material-icons-round" style="font-size: 18px;">settings</span></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+﻿@page "/school/parents"
+@rendermode InteractiveServer
+
+<PageTitle>Học sinh - Phụ huynh</PageTitle>
+
+<div class="animate-fade-in flex-col gap-6">
+    <div class="std-card">
+        <div class="flex-between mb-4 flex-wrap gap-4">
+            <h2 class="card-title">Thông tin liên lạc gia đình</h2>
+            <div class="input-wrapper" style="width: 300px;">
+                <span class="material-icons-round input-icon">search</span>
+                <input class="form-input input-has-icon" placeholder="Tìm theo tên học sinh hoặc phụ huynh..." />
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center w-16">STT</th>
+                        <th>Học sinh</th>
+                        <th>Lớp</th>
+                        <th>Họ tên Cha</th>
+                        <th>Họ tên Mẹ</th>
+                        <th>SĐT Liên lạc</th>
+                        <th class="text-center">App PH</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 1; i <= 8; i++)
+                    {
+                        <tr>
+                            <td class="text-center">@i</td>
+                            <td style="font-weight: 500;">Trần Văn Học Sinh @i</td>
+                            <td><span class="status-badge bg-blue-light">1A1</span></td>
+                            <td>Trần Văn Cha</td>
+                            <td>Nguyễn Thị Mẹ</td>
+                            <td style="font-family: monospace;">090912345@i</td>
+                            <td class="text-center">
+                                @if (i % 3 == 0)
+                                {
+                                    <span class="status-badge bg-gray-100" style="color: #94a3b8;">Chưa cài</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge bg-green-light"><span class="dot dot-green"></span> Đã kích hoạt</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex-between p-4 bg-gray-50 border-t mt-4" style="padding: 1rem; border-top: 1px solid var(--border);">
+            <div class="flex gap-1" style="display: flex; gap: 4px;">
+                <button class="btn-primary" style="width: 32px; height: 32px; padding: 0;">1</button>
+                <button class="btn-outline" style="width: 32px; height: 32px; padding: 0;">2</button>
+            </div>
+        </div>
+    </div>
+</div>

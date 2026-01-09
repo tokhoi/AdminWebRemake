@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="app.css" />
+    <HeadOutlet />
+</head>
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        window.updateAttendanceChart = (chartId, present, absent, label) => {
+            const ctx = document.getElementById(chartId);
+            if (!ctx) return;
+            if (window.myPieChart) window.myPieChart.destroy();
+            window.myPieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Có mặt', 'Vắng/Trễ'],
+                    datasets: [{ data: [present, absent], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0, cutout: '70%' }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }
+                }
+            });
+        };
+    </script>
+</body>
+</html>

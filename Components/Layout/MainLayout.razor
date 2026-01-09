@@ -1,0 +1,116 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+
+<div class="layout-wrapper">
+    <header class="layout-header">
+        <div class="header-inner">
+            <div class="brand-area">
+                <div class="logo-box text-white">TH</div>
+                <h1 class="brand-name">Trường Tiểu học Tân Hưng</h1>
+            </div>
+            <div class="user-area">
+                <div class="user-info">
+                    <span class="material-icons-round" style="color: #fde047;">person</span>
+                    <span>Admin</span>
+                </div>
+                <button class="year-btn">
+                    2025-2026 <span class="material-icons-round">expand_more</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-nav-container">
+            <nav class="main-nav">
+                @foreach (var item in MenuItems)
+                {
+                    <div class="nav-item-wrap">
+                        @{
+                            bool hasSub = item.SubItems != null && item.SubItems.Any();
+                        }
+                        @if (hasSub)
+                        {
+                            var isActive = !string.IsNullOrEmpty(item.Link) && NavManager.Uri.Contains(item.Link);
+                            <div class="nav-link @(isActive ? "active" : "")" style="cursor: default;">
+                                <span class="material-icons-round" style="font-size:18px;">@item.Icon</span> @item.Title
+                                <span class="material-icons-round arrow-icon" style="font-size:14px; margin-left:2px;">expand_more</span>
+                            </div>
+
+                            <div class="nav-dropdown @(item.SubItems!.Count > 6 ? "two-cols" : "")">
+                                @foreach (var sub in item.SubItems)
+                                {
+                                    <NavLink href="@sub.Link" class="dropdown-item">
+                                        <span class="material-icons-round sub-icon">@(string.IsNullOrEmpty(sub.Icon) ? "fiber_manual_record" : sub.Icon)</span>
+                                        @sub.Title
+                                    </NavLink>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <NavLink href="@item.Link" Match="NavLinkMatch.All" class="nav-link">
+                                <span class="material-icons-round" style="font-size:18px;">@item.Icon</span> @item.Title
+                            </NavLink>
+                        }
+                    </div>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <main class="layout-body">
+        <div class="layout-content  @(IsHomePage ? "" : "is-fluid")">
+            @if (ShouldShowSubTabs())
+            {
+                <div class="sub-tabs-bar">
+                    <NavLink href="" Match="NavLinkMatch.All" class="sub-tab-link">Tổng quan</NavLink>
+                    <NavLink href="teacher-attendance" class="sub-tab-link">Điểm danh giáo viên</NavLink>
+                    <NavLink href="student-attendance" class="sub-tab-link">Điểm danh học sinh</NavLink>
+                    <NavLink href="attendance-stats" class="sub-tab-link">Thống kê điểm danh</NavLink>
+                </div>
+            }
+            <div class="layout-viewport">
+                @Body
+            </div>
+        </div>
+    </main>
+</div>
+
+@code {
+    private bool IsHomePage =>
+        string.IsNullOrEmpty(NavManager.ToBaseRelativePath(NavManager.Uri)) ||
+        NavManager.Uri.EndsWith("/", StringComparison.OrdinalIgnoreCase);
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged(); 
+    }
+
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= HandleLocationChanged;
+    }
+    private bool ShouldShowSubTabs()
+    {
+        var uri = NavManager.Uri;
+        var relativePath = NavManager.ToBaseRelativePath(uri);
+        return string.IsNullOrEmpty(relativePath) ||
+               relativePath.StartsWith("teacher-attendance") ||
+               relativePath.StartsWith("student-attendance") ||
+               relativePath.StartsWith("attendance-stats");
+    }
+    public class MenuItem { public string Title { get; set; } = ""; public string Link { get; set; } = "#"; public string Icon { get; set; } = ""; public string IconColor { get; set; } = "white"; public List<MenuItem>? SubItems { get; set; } }
+    private List<MenuItem> MenuItems = new List<MenuItem> {
+        new MenuItem { Title = "Tổng quan", Link = "", Icon = "dashboard", IconColor = "#facc15" },
+        new MenuItem { Title = "QL Trường học", Link = "school", Icon = "school", IconColor = "#67e8f9", SubItems = new List<MenuItem> { new MenuItem { Title = "Thông tin trường", Link = "school/info", Icon = "info" }, new MenuItem { Title = "Chức vụ", Link = "school/roles", Icon = "badge" }, new MenuItem { Title = "Khối", Link = "school/grades", Icon = "view_column" }, new MenuItem { Title = "Lớp", Link = "school/classes", Icon = "class" }, new MenuItem { Title = "Giáo viên", Link = "school/teachers", Icon = "person" }, new MenuItem { Title = "Phân công giảng dạy", Link = "school/assignment", Icon = "assignment_ind" }, new MenuItem { Title = "Duyệt đơn nghỉ phép", Link = "school/leaves", Icon = "playlist_add_check" }, new MenuItem { Title = "Học sinh", Link = "school/students", Icon = "face" }, new MenuItem { Title = "Phân quyền", Link = "school/permissions", Icon = "security" }, new MenuItem { Title = "Cấu hình thời gian", Link = "school/time-config", Icon = "schedule" }, new MenuItem { Title = "Học sinh - Phụ huynh", Link = "school/parents", Icon = "family_restroom" }, new MenuItem { Title = "Camera AI HS-GV", Link = "school/camera", Icon = "videocam" } } },
+        new MenuItem { Title = "QL Đào tạo", Link = "training", Icon = "school", IconColor = "#86efac", SubItems = new List<MenuItem> { new MenuItem { Title = "Học kỳ", Link = "training/semesters", Icon = "date_range" }, new MenuItem { Title = "Môn học", Link = "training/subjects", Icon = "menu_book" }, new MenuItem { Title = "Thời khoá biểu", Link = "training/schedule", Icon = "calendar_month" } } },
+        new MenuItem { Title = "QL Thông báo", Link = "notifications", Icon = "notifications", IconColor = "#fca5a5", SubItems = new List<MenuItem> { new MenuItem { Title = "Thông báo chung", Link = "notifications/general", Icon = "campaign" }, new MenuItem { Title = "Báo bài", Link = "notifications/assignments", Icon = "assignment" }, new MenuItem { Title = "Thực đơn", Link = "notifications/menu", Icon = "restaurant_menu" } } },
+        new MenuItem { Title = "QL Học tập", Link = "study", Icon = "menu_book", IconColor = "#d8b4fe" },
+        new MenuItem { Title = "QL Bán trú", Link = "meals", Icon = "restaurant", IconColor = "#fdba74" },
+        new MenuItem { Title = "Đồng bộ", Link = "sync", Icon = "sync", IconColor = "#f472b6" },
+        new MenuItem { Title = "Thư viện số", Link = "library", Icon = "local_library", IconColor = "#2dd4bf" }
+    };
+}

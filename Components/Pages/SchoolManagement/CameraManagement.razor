@@ -1,0 +1,53 @@
+﻿@page "/school/camera"
+
+<PageTitle>Quản lý Camera</PageTitle>
+
+<div class="animate-fade-in">
+    <div class="text-center mb-4" style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span class="material-icons-round text-muted">videocam</span> Quản lý Camera điểm danh
+        </h2>
+    </div>
+
+    <div class="std-card" style="padding: 0; overflow: hidden;">
+        <div style="background: #1e4e9d; color: white; padding: 12px 16px; font-weight: 700; font-size: 0.85rem; display: grid; grid-template-columns: 50px 150px 1fr 150px;">
+            <div class="text-center">#</div>
+            <div class="text-center">TRẠNG THÁI</div>
+            <div>TÊN THIẾT BỊ</div>
+            <div>MÃ THIẾT BỊ</div>
+        </div>
+
+        <div style="background: white;">
+            @for (int i = 1; i <= 6; i++)
+            {
+                <div style="display: grid; grid-template-columns: 50px 150px 1fr 150px; padding: 16px; border-bottom: 1px solid #f1f5f9; align-items: center; transition: background 0.2s;" class="camera-row">
+                    <div class="text-center text-muted">@i</div>
+                    <div class="text-center">
+                        <span class="status-badge bg-green-light" style="padding: 4px 12px;">
+                            <span class="dot dot-green" style="margin-right: 6px;"></span> Online
+                        </span>
+                    </div>
+                    <div style="font-weight: 500; color: #334155;">Camera Cổng Chính @i</div>
+                    <div>
+                        <span style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; color: #64748b;">
+                            CAM-TANHUNG-0@i
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div style="padding: 16px; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; border-top: 1px solid var(--border);">
+            <button class="btn btn-outline" style="border-color: var(--c-blue); color: var(--c-blue);">
+                <span class="material-icons-round" style="font-size: 16px;">face</span> Dữ liệu Học sinh
+            </button>
+            <button class="btn btn-outline" style="border-color: var(--c-green); color: var(--c-green);">
+                <span class="material-icons-round" style="font-size: 16px;">how_to_reg</span> Dữ liệu Giáo viên
+            </button>
+        </div>
+    </div>
+</div>
+<style>
+    .camera-row:hover {
+        background-color: #f9fafb;
+    }</style>

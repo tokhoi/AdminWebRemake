@@ -1,0 +1,33 @@
+﻿@page "/attendance-stats"
+@rendermode InteractiveServer
+
+<PageTitle>Thống kê</PageTitle>
+
+<div class="stats-summary-row">
+    <div class="stat-card" style="background: var(--grad-blue);">
+        <div class="stat-icon-box"><span class="material-icons-round">groups</span></div>
+        <div class="stat-info"><p class="stat-label">Tổng học sinh</p><p class="stat-value">1384</p></div>
+        <div class="blob-1"></div>
+    </div>
+    <div class="stat-card" style="background: var(--grad-orange);">
+        <div class="stat-icon-box"><span class="material-icons-round">person_off</span></div>
+        <div class="stat-info"><p class="stat-label">Vắng hôm nay</p><p class="stat-value">42</p></div>
+        <div class="blob-1"></div>
+    </div>
+    <div class="stat-card" style="background: var(--grad-green);">
+        <div class="stat-icon-box"><span class="material-icons-round">history</span></div>
+        <div class="stat-info"><p class="stat-label">Đi trễ</p><p class="stat-value">15</p></div>
+        <div class="blob-1"></div>
+    </div>
+</div>
+<div class="page-attendance-stats animate-fade-in">
+    <div class="std-card att-filter-box">
+        <div class="card-header"><div class="card-title">Bộ lọc thống kê</div></div>
+        <div class="att-filters-row">
+            <div class="att-f-item"><label class="form-label">Khối</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="att-f-item"><label class="form-label">Lớp</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="att-f-actions"><button class="btn btn-primary w-full">Xem báo cáo</button></div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,96 @@
+﻿@page "/school/info"
+
+<PageTitle>Thông tin trường học</PageTitle>
+
+<div class="animate-fade-in">
+    <div class="std-card">
+        <div class="flex-between mb-4" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+            <h2 class="card-title text-primary" style="font-size: 1.25rem;">THÔNG TIN TRƯỜNG HỌC</h2>
+            <button class="btn btn-primary">
+                <span class="material-icons-round" style="font-size: 18px;">edit</span> Chỉnh sửa
+            </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 250px 1fr; gap: 2rem;">
+            <div class="flex-center" style="flex-direction: column; gap: 1rem;">
+                <div style="width: 200px; height: 200px; border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #f1f5f9;">
+                    <div style="text-align: center;">
+                        <span class="material-icons-round" style="font-size: 64px; color: #cbd5e1;">school</span>
+                        <div style="font-weight: 700; color: #94a3b8; margin-top: 8px;">LOGO TRƯỜNG</div>
+                    </div>
+                </div>
+
+                <div style="width: 200px; height: 80px; border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #fff;">
+                    <span style="font-weight: 600; color: #cbd5e1;">LOGO ĐỐI TÁC</span>
+                </div>
+            </div>
+
+            <div>
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 1rem; border-bottom: 2px solid var(--border); display: inline-block; padding-bottom: 5px;">
+                        Thông tin trường học
+                    </h3>
+                    <div class="info-grid">
+                        <div class="label">Tên trường:</div> <div class="value" style="font-weight: 700; color: var(--text-main);">Trường Tiểu học Tân Hưng</div>
+                        <div class="label">Thời gian bắt đầu sáng:</div> <div class="value">06:30 AM</div>
+                        <div class="label">Thời gian kết thúc sáng:</div> <div class="value">11:00 AM</div>
+                        <div class="label">Thời gian bắt đầu chiều:</div> <div class="value">01:30 PM</div>
+                        <div class="label">Thời gian kết thúc chiều:</div> <div class="value">04:30 PM</div>
+                        <div class="label">Địa chỉ:</div> <div class="value">Số 123 Đường ABC, Quận X...</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 1rem; border-bottom: 2px solid var(--border); display: inline-block; padding-bottom: 5px;">
+                        Thông tin hiệu trưởng
+                    </h3>
+                    <div class="info-grid">
+                        <div class="label">Tên hiệu trưởng:</div> <div class="value">Nguyễn Văn A</div>
+                        <div class="label">Ngày sinh:</div> <div class="value">01/01/1980</div>
+                        <div class="label">Số điện thoại:</div> <div class="value">0909000111</div>
+                        <div class="label">Email:</div> <div class="value">hieutruong@tanhung.edu.vn</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+                    <span class="material-icons-round" style="font-size: 14px; vertical-align: middle;">history</span> Thông tin cập nhật lần cuối: 05/01/2026
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .info-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 10px 20px;
+    }
+
+        .info-grid .label {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .info-grid .value {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    @@media(max - width: 768px)
+
+    {
+        .info-grid
+
+    {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    div[style*="grid-template-columns: 250px 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    }
+</style>

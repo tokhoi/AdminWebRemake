@@ -1,0 +1,72 @@
+﻿@page "/school/leaves"
+
+<PageTitle>Duyệt đơn nghỉ phép</PageTitle>
+
+<div class="animate-fade-in">
+    <div style="display: flex; gap: 2rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;">
+        <div style="padding: 10px 0; border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span class="material-icons-round">description</span> DUYỆT ĐƠN NGHỈ PHÉP
+        </div>
+        <div style="padding: 10px 0; color: var(--text-muted); font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; opacity: 0.7;">
+            <span class="material-icons-round">assessment</span> BÁO CÁO ĐIỂM DANH
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+        <button class="btn btn-success">
+            <span class="material-icons-round" style="font-size: 18px;">file_download</span> Xuất Excel
+        </button>
+    </div>
+
+    <div class="std-card" style="margin-bottom: 1.5rem;">
+        <div class="filter-container">
+            <div class="filter-item">
+                <label class="form-label">Năm học</label>
+                <select class="form-input"><option>2025-2026</option></select>
+            </div>
+            <div class="filter-item">
+                <label class="form-label">Khối</label>
+                <select class="form-input"><option>Tất cả khối</option></select>
+            </div>
+            <div class="filter-item">
+                <label class="form-label">Lớp</label>
+                <select class="form-input"><option>Tất cả lớp</option></select>
+            </div>
+            <div class="filter-item">
+                <label class="form-label">Ngày</label>
+                <input type="date" class="form-input" value="2026-05-01" />
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" style="width: 100%;">
+                    <span class="material-icons-round" style="font-size: 18px;">search</span> Tìm kiếm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="std-card" style="padding: 0; min-height: 400px; display: flex; flex-direction: column;">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center w-12">STT</th>
+                        <th>HỌC SINH</th>
+                        <th class="text-center">LỚP</th>
+                        <th class="text-center">NGÀY NGHỈ</th>
+                        <th class="text-center">BUỔI NGHỈ</th>
+                        <th>LÝ DO</th>
+                        <th class="text-center">TRẠNG THÁI</th>
+                        <th class="text-center">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); padding: 40px;">
+            <span class="material-icons-round" style="font-size: 64px; color: #cbd5e1; margin-bottom: 16px;">description</span>
+            <p>Không có đơn nghỉ phép nào</p>
+        </div>
+    </div>
+</div>

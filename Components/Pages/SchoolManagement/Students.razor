@@ -1,0 +1,78 @@
+﻿@page "/school/students"
+@rendermode InteractiveServer
+
+<PageTitle>Danh sách học sinh</PageTitle>
+
+<div class="animate-fade-in flex-col gap-6">
+    <div class="std-card">
+        <div class="flex-between mb-4 flex-wrap gap-4">
+            <h2 class="card-title">Hồ sơ học sinh</h2>
+            <div class="flex gap-2">
+                <button class="btn btn-outline"><span class="material-icons-round" style="font-size: 18px;">file_upload</span> Import</button>
+                <button class="btn btn-primary"><span class="material-icons-round" style="font-size: 18px;">person_add</span> Thêm mới</button>
+            </div>
+        </div>
+
+        <div class="filter-container mb-4">
+            <div class="filter-item"><label class="form-label">Khối</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="filter-item"><label class="form-label">Lớp</label><select class="form-input"><option>Tất cả</option></select></div>
+            <div class="filter-item"><label class="form-label">Trạng thái</label><select class="form-input"><option>Đang học</option></select></div>
+            <div class="filter-item-large">
+                <label class="form-label">Từ khóa</label>
+                <div class="input-wrapper">
+                    <span class="material-icons-round input-icon">search</span>
+                    <input class="form-input input-has-icon" placeholder="Tìm tên, mã học sinh..." />
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" style="width: 100%;">Tìm kiếm</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center w-12">STT</th>
+                        <th>Mã HS</th>
+                        <th>Họ và tên</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Lớp</th>
+                        <th>Phụ huynh</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 1; i <= 10; i++)
+                    {
+                        <tr>
+                            <td class="text-center">@i</td>
+                            <td class="text-muted font-mono">HS202500@i</td>
+                            <td style="font-weight: 500;">Trần Văn Học Sinh @i</td>
+                            <td>15/08/2018</td>
+                            <td>@(i % 2 == 0 ? "Nam" : "Nữ")</td>
+                            <td><span class="status-badge bg-purple-light">1A1</span></td>
+                            <td>Nguyễn Văn Phụ Huynh</td>
+                            <td class="text-center"><span class="status-badge bg-green-light"><span class="dot dot-green"></span> Đang học</span></td>
+                            <td class="text-center">
+                                <button class="btn-icon"><span class="material-icons-round" style="font-size: 18px;">visibility</span></button>
+                                <button class="btn-icon"><span class="material-icons-round text-primary" style="font-size: 18px;">edit</span></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex-between p-4 bg-gray-50 border-t mt-4" style="padding: 1rem; border-top: 1px solid var(--border);">
+            <div class="flex gap-1" style="display: flex; gap: 4px;">
+                <button class="btn-primary" style="width: 32px; height: 32px; padding: 0;">1</button>
+                <button class="btn-outline" style="width: 32px; height: 32px; padding: 0;">2</button>
+                <button class="btn-outline" style="width: 32px; height: 32px; padding: 0;"><span class="material-icons-round" style="font-size: 14px;">arrow_forward</span></button>
+            </div>
+            <div class="text-muted" style="font-size: 0.8rem;">1 - 10 của 1384 học sinh</div>
+        </div>
+    </div>
+</div>

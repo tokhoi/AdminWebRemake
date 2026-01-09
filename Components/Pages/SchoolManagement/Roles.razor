@@ -1,0 +1,55 @@
+﻿@page "/school/roles"
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý chức vụ</PageTitle>
+
+<div class="animate-fade-in flex-col gap-6">
+    <div class="std-card">
+        <div class="flex-between mb-4 flex-wrap gap-4">
+            <h2 class="card-title">Danh sách chức vụ</h2>
+            <button class="btn btn-primary">
+                <span class="material-icons-round" style="font-size: 18px;">add</span> Thêm chức vụ
+            </button>
+        </div>
+
+        <div class="filter-container mb-4">
+            <div class="filter-item-large">
+                <div class="input-wrapper">
+                    <span class="material-icons-round input-icon">search</span>
+                    <input class="form-input input-has-icon" placeholder="Tìm kiếm chức vụ..." />
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center w-16">STT</th>
+                        <th>Mã chức vụ</th>
+                        <th>Tên chức vụ</th>
+                        <th>Mô tả</th>
+                        <th class="text-center">Số lượng nhân sự</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <tr>
+                            <td class="text-center">@i</td>
+                            <td class="text-muted font-mono">ROLE_00@i</td>
+                            <td style="font-weight: 500;">@(i == 1 ? "Ban Giám Hiệu" : (i == 2 ? "Giáo viên CN" : "Nhân viên"))</td>
+                            <td class="text-muted">Quản lý toàn bộ hoạt động...</td>
+                            <td class="text-center"><span class="status-badge bg-blue-light">@(i * 5) người</span></td>
+                            <td class="text-center">
+                                <button class="btn-icon" title="Sửa"><span class="material-icons-round text-primary" style="font-size: 18px;">edit</span></button>
+                                <button class="btn-icon" title="Xóa"><span class="material-icons-round text-red" style="font-size: 18px;">delete</span></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

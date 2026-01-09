@@ -1,0 +1,186 @@
+﻿@page "/student-attendance"
+@rendermode InteractiveServer
+
+<PageTitle>Điểm danh học sinh</PageTitle>
+
+<div class="page-student-attendance animate-fade-in">
+    <div class="std-card" style="flex: 0 0 auto; padding: 1rem 1.5rem; margin-bottom: 0;">
+        <div class="flex-between">
+            <div class="card-title" style="font-size: 1.25rem;">
+                <div class="tea-icon"><span class="material-icons-round">school</span></div>
+                Điểm danh học sinh
+            </div>
+        </div>
+    </div>
+
+    <div class="std-card att-filter-box">
+        <div class="att-filters-row">
+            <div class="att-f-item">
+                <label class="form-label">Ngày điểm danh</label>
+                <input type="date" class="form-input" @bind="SelectedDate" @bind:after="FilterData" />
+            </div>
+
+            <div class="att-f-item">
+                <label class="form-label">Lớp học</label>
+                <select class="form-input" @bind="SelectedClass" @bind:after="FilterData">
+                    <option value="">Tất cả các lớp</option>
+                    @foreach (var c in Classes)
+                    {
+                        <option value="@c">Lớp @c</option>
+                    }
+                </select>
+            </div>
+
+            <div class="att-f-item-wide">
+                <label class="form-label">Tìm kiếm học sinh</label>
+                <div class="input-wrapper">
+                    <span class="material-icons-round input-icon">search</span>
+                    <input class="form-input input-has-icon" placeholder="Nhập tên hoặc mã học sinh..." @bind="SearchTerm" @bind:event="oninput" @bind:after="FilterData" />
+                </div>
+            </div>
+            <div class="action-group">
+                <button class="btn btn-primary" @onclick="ToggleExportMenu">
+                    <span class="material-icons-round">file_download</span> Thao tác
+                    <span class="material-icons-round" style="font-size: 16px;">expand_more</span>
+                </button>
+                @if (_showExportMenu)
+                {
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
+                        <div style="border-top:1px solid #eee; margin:4px 0;"></div>
+                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
+                        <button class="dropdown-item-btn"><span class="material-icons-round bg-orange">person_off</span> Xuất Excel vắng mặt </button>
+                        <button class="dropdown-item-btn"><span class="material-icons-round bg-blue ">dataset</span> Xuất Excel thống kê </button>
+
+                    </div>
+                    <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="std-card att-table-box">
+        <div class="att-header-row">
+            <div class="card-title" style="font-size:1rem;">
+                <div class="bar-indicator" style="background: var(--c-blue);"></div>
+                Danh sách học sinh
+            </div>
+            <div class="att-legend">
+                <span class="status-badge bg-green-light">Có mặt: <b>@CountPresent</b></span>
+                <span class="status-badge bg-red-light">Vắng: <b>@CountAbsent</b></span>
+            </div>
+        </div>
+
+        <div class="table-wrapper att-table-content">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center col-fit">STT</th>
+                        <th class="col-fit">Mã HS</th>
+                        <th class="col-grow">Họ và Tên</th>
+                        <th class="col-fit">Lớp</th>
+                        <th class="text-center col-fit">Trạng thái</th>
+                        <th class="text-center col-fit">Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (PaginatedStudents.Any())
+                    {
+                        var index = (CurrentPage - 1) * PageSize;
+                        foreach (var s in PaginatedStudents)
+                        {
+                            index++;
+                            <tr>
+                                <td class="text-center text-muted">@index</td>
+                                <td style="font-family: monospace; color: var(--text-muted);">@s.Code</td>
+                                <td style="font-weight: 500; font-size: 1rem;">@s.Name</td>
+                                <td><span class="att-badge">@s.Class</span></td>
+                                <td class="text-center">
+                                    <span class="status-badge @(s.IsPresent ? "bg-green-light" : "bg-red-light")"
+                                          style="cursor:pointer; min-width: 80px; justify-content: center;"
+                                          @onclick="() => ToggleStatus(s)">
+                                        <span class="dot @(s.IsPresent ? "dot-green" : "dot-red")"></span>
+                                        @(s.IsPresent ? "Có mặt" : "Vắng")
+                                    </span>
+                                </td>
+                                <td class="text-center text-muted">-</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center" style="padding: 4rem;">
+                                <span class="material-icons-round" style="font-size: 48px; color: #e2e8f0;">manage_search</span>
+                                <div style="margin-top:8px; color: var(--text-muted);">Không tìm thấy dữ liệu</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="att-footer">
+            <span class="text-muted" style="font-size: 0.85rem;">Hiển thị @PaginatedStudents.Count / @FilteredStudents.Count bản ghi</span>
+            <div class="att-paging">
+                <button class="btn-outline pg-btn" disabled="@(CurrentPage <= 1)" @onclick="() => ChangePage(CurrentPage - 1)">
+                    <span class="material-icons-round">chevron_left</span>
+                </button>
+                <button class="btn-primary pg-btn">@CurrentPage</button>
+                <button class="btn-outline pg-btn" disabled="@(CurrentPage >= TotalPages)" @onclick="() => ChangePage(CurrentPage + 1)">
+                    <span class="material-icons-round">chevron_right</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    class Student { public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string Class { get; set; } = ""; public bool IsPresent { get; set; } }
+
+    List<Student> AllStudents = new();
+    List<Student> FilteredStudents = new();
+    List<string> Classes = new() { "1A", "1B", "2A", "2B", "3A", "5B" };
+
+    DateTime SelectedDate { get; set; } = DateTime.Today;
+    string SelectedClass { get; set; } = "";
+    string SearchTerm { get; set; } = "";
+    bool _showExportMenu = false;
+    int PageSize = 15;
+    int CurrentPage = 1;
+
+    protected override void OnInitialized()
+    {
+        var rnd = new Random();
+        var names = new[] { "Nguyễn Văn Hùng", "Trần Thị Lan", "Lê Minh Tuấn", "Phạm Thu Hà", "Hoàng Đức Anh", "Vũ Thị Mai" };
+        for (int i = 1; i <= 100; i++)
+        {
+            AllStudents.Add(new Student
+            {
+                Code = $"HS{i:000}",
+                Name = $"{names[rnd.Next(names.Length)]} {i}",
+                Class = Classes[rnd.Next(Classes.Count)],
+                IsPresent = rnd.Next(0, 10) > 1
+            });
+        }
+        FilterData();
+    }
+
+    void FilterData()
+    {
+        FilteredStudents = AllStudents.Where(s =>
+            (string.IsNullOrEmpty(SearchTerm) || s.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || s.Code.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(SelectedClass) || s.Class == SelectedClass)
+        ).ToList();
+        CurrentPage = 1;
+    }
+
+    List<Student> PaginatedStudents => FilteredStudents.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+    int TotalPages => FilteredStudents.Count == 0 ? 1 : (int)Math.Ceiling((double)FilteredStudents.Count / PageSize);
+    int CountPresent => FilteredStudents.Count(s => s.IsPresent);
+    int CountAbsent => FilteredStudents.Count(s => !s.IsPresent);
+    void ChangePage(int p) { if (p >= 1 && p <= TotalPages) CurrentPage = p; }
+    void ToggleStatus(Student s) { s.IsPresent = !s.IsPresent; }
+    void ToggleExportMenu() => _showExportMenu = !_showExportMenu;
+    void Export(string type) { _showExportMenu = false; }
+}
