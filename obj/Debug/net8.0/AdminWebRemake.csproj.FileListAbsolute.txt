@@ -33,3 +33,4 @@ D:\STUDY\VS CSharp\Some Demo PAge\AdminWebRemake\AdminWebRemake\obj\Debug\net8.0
 D:\STUDY\VS CSharp\Some Demo PAge\AdminWebRemake\AdminWebRemake\obj\Debug\net8.0\AdminWebRemake.pdb
 D:\STUDY\VS CSharp\Some Demo PAge\AdminWebRemake\AdminWebRemake\obj\Debug\net8.0\AdminWebRemake.genruntimeconfig.cache
 D:\STUDY\VS CSharp\Some Demo PAge\AdminWebRemake\AdminWebRemake\obj\Debug\net8.0\ref\AdminWebRemake.dll
+D:\STUDY\VS CSharp\Some Demo PAge\AdminWebRemake\AdminWebRemake\obj\Debug\net8.0\AdminWebRemake.sourcelink.json

@@ -49,9 +49,8 @@
                         <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
                         <div style="border-top:1px solid #eee; margin:4px 0;"></div>
                         <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
-                        <button class="dropdown-item-btn"><span class="material-icons-round bg-orange">person_off</span> Xuất Excel vắng mặt </button>
-                        <button class="dropdown-item-btn"><span class="material-icons-round bg-blue ">dataset</span> Xuất Excel thống kê </button>
-
+                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#f97316;">person_off</span> Xuất Excel vắng mặt </button>
+                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">dataset</span> Xuất Excel thống kê </button>
                     </div>
                     <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
                 }
@@ -63,24 +62,52 @@
         <div class="att-header-row">
             <div class="card-title" style="font-size:1rem;">
                 <div class="bar-indicator" style="background: var(--c-blue);"></div>
-                Danh sách học sinh
+                Danh sách học sinh - <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Tổng số: @FilteredStudents.Count</span>
             </div>
             <div class="att-legend">
-                <span class="status-badge bg-green-light">Có mặt: <b>@CountPresent</b></span>
-                <span class="status-badge bg-red-light">Vắng: <b>@CountAbsent</b></span>
+                <span class="status-badge" style="background: #dcfce7; color: #166534; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                    <span>Có mặt: <b>@CountPresent</b></span>
+                </span>
+                <span class="status-badge" style="background: #fef9c3; color: #854d0e; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #eab308;"></span>
+                    <span>Muộn: <b>@CountLate</b></span>
+                </span>
+                <span class="status-badge" style="background: #fee2e2; color: #991b1b; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626;"></span>
+                    <span>Vắng: <b>@CountAbsent</b></span>
+                </span>
             </div>
         </div>
 
         <div class="table-wrapper att-table-content">
-            <table class="data-table">
+            <table class="data-table" style="table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 50px;">
+                    <col style="width: 70px;">
+                    <col style="width: 180px;">
+                    <col style="width: 60px;">
+                    <col style="width: 70px;">
+                    <col style="width: 90px;">
+                    <col style="width: 70px;">
+                    <col style="width: 70px;">
+                    <col style="width: 90px;">
+                    <col style="width: 60px;">
+                    <col style="width: 50px;">
+                </colgroup>
                 <thead>
-                    <tr>
+                    <tr style="background-color: #f8fafc;">
                         <th class="text-center col-fit">STT</th>
                         <th class="col-fit">Mã HS</th>
-                        <th class="col-grow">Họ và Tên</th>
-                        <th class="col-fit">Lớp</th>
-                        <th class="text-center col-fit">Trạng thái</th>
+                        <th style="text-align: left;">Tên học sinh</th>
+                        <th class="text-center col-fit">Lớp</th>
+                        <th class="text-center col-fit">Ngày</th>
+                        <th class="text-center col-fit">Trạng thái sáng</th>
+                        <th class="text-center col-fit">Giờ vào</th>
+                        <th class="text-center col-fit">Giờ ra</th>
+                        <th class="text-center col-fit">Trạng thái chiều</th>
                         <th class="text-center col-fit">Ghi chú</th>
+                        <th class="text-center col-fit">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,26 +118,42 @@
                         {
                             index++;
                             <tr>
-                                <td class="text-center text-muted">@index</td>
-                                <td style="font-family: monospace; color: var(--text-muted);">@s.Code</td>
-                                <td style="font-weight: 500; font-size: 1rem;">@s.Name</td>
-                                <td><span class="att-badge">@s.Class</span></td>
+                                <td class="text-center text-muted" style="font-weight: 500;">@index</td>
+                                <td style="font-family: monospace; color: var(--primary); font-weight: 600;">@s.Code</td>
+                                <td style="font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis;">@s.Name</td>
                                 <td class="text-center">
-                                    <span class="status-badge @(s.IsPresent ? "bg-green-light" : "bg-red-light")"
-                                          style="cursor:pointer; min-width: 80px; justify-content: center;"
+                                    <span class="att-badge" style="background: #eff6ff; color: #1e40af; font-weight: 600;">
+                                        @s.Class
+                                    </span>
+                                </td>
+                                <td class="text-center" style="color: var(--text-muted); font-size: 0.9rem;">
+                                    @SelectedDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="text-center">
+                                    <span class="att-status-badge @GetStatusClass(s.AmStatus)">
+                                        @GetStatusIcon(s.AmStatus) @s.AmStatus
+                                    </span>
+                                </td>
+                                <td class="text-center" style="color: #ef4444; font-weight: 600; font-size: 0.9rem;">@(s.TimeIn ?? "-")</td>
+                                <td class="text-center" style="color: #0ea5e9; font-weight: 600; font-size: 0.9rem;">@(s.TimeOut ?? "-")</td>
+                                <td class="text-center">
+                                    <span class="att-status-badge @GetStatusClass(s.PmStatus)" 
+                                          style="cursor:pointer;" 
                                           @onclick="() => ToggleStatus(s)">
-                                        <span class="dot @(s.IsPresent ? "dot-green" : "dot-red")"></span>
-                                        @(s.IsPresent ? "Có mặt" : "Vắng")
+                                        @GetStatusIcon(s.PmStatus) @s.PmStatus
                                     </span>
                                 </td>
                                 <td class="text-center text-muted">-</td>
+                                <td class="text-center">
+                                    <button class="btn-icon" title="Chỉnh sửa"><span class="material-icons-round">edit</span></button>
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center" style="padding: 4rem;">
+                            <td colspan="11" class="text-center" style="padding: 4rem;">
                                 <span class="material-icons-round" style="font-size: 48px; color: #e2e8f0;">manage_search</span>
                                 <div style="margin-top:8px; color: var(--text-muted);">Không tìm thấy dữ liệu</div>
                             </td>
@@ -136,7 +179,16 @@
 </div>
 
 @code {
-    class Student { public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string Class { get; set; } = ""; public bool IsPresent { get; set; } }
+    class Student 
+    { 
+        public string Code { get; set; } = ""; 
+        public string Name { get; set; } = ""; 
+        public string Class { get; set; } = ""; 
+        public string AmStatus { get; set; } = "Có mặt";
+        public string PmStatus { get; set; } = "Có mặt";
+        public string? TimeIn { get; set; }
+        public string? TimeOut { get; set; }
+    }
 
     List<Student> AllStudents = new();
     List<Student> FilteredStudents = new();
@@ -155,12 +207,19 @@
         var names = new[] { "Nguyễn Văn Hùng", "Trần Thị Lan", "Lê Minh Tuấn", "Phạm Thu Hà", "Hoàng Đức Anh", "Vũ Thị Mai" };
         for (int i = 1; i <= 100; i++)
         {
+            var amStatus = rnd.Next(0, 10) > 2 ? "Có mặt" : (rnd.Next(0, 10) > 5 ? "Đi muộn" : "Vắng CP");
+            var timeIn = amStatus == "Đi muộn" ? "06:45" : (amStatus == "Có mặt" ? "06:20" : null);
+            var timeOut = rnd.Next(0, 10) > 3 ? "17:30" : null;
+
             AllStudents.Add(new Student
             {
                 Code = $"HS{i:000}",
                 Name = $"{names[rnd.Next(names.Length)]} {i}",
                 Class = Classes[rnd.Next(Classes.Count)],
-                IsPresent = rnd.Next(0, 10) > 1
+                AmStatus = amStatus,
+                PmStatus = rnd.Next(0, 10) > 1 ? "Có mặt" : "Vắng KP",
+                TimeIn = timeIn,
+                TimeOut = timeOut
             });
         }
         FilterData();
@@ -177,10 +236,24 @@
 
     List<Student> PaginatedStudents => FilteredStudents.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
     int TotalPages => FilteredStudents.Count == 0 ? 1 : (int)Math.Ceiling((double)FilteredStudents.Count / PageSize);
-    int CountPresent => FilteredStudents.Count(s => s.IsPresent);
-    int CountAbsent => FilteredStudents.Count(s => !s.IsPresent);
+    int CountPresent => FilteredStudents.Count(s => s.AmStatus == "Có mặt");
+    int CountLate => FilteredStudents.Count(s => s.AmStatus.Contains("Đi muộn"));
+    int CountAbsent => FilteredStudents.Count(s => s.AmStatus.Contains("Vắng"));
     void ChangePage(int p) { if (p >= 1 && p <= TotalPages) CurrentPage = p; }
-    void ToggleStatus(Student s) { s.IsPresent = !s.IsPresent; }
+    void ToggleStatus(Student s) { s.PmStatus = s.PmStatus == "Có mặt" ? "Vắng KP" : "Có mặt"; }
     void ToggleExportMenu() => _showExportMenu = !_showExportMenu;
-    void Export(string type) { _showExportMenu = false; }
+
+    string GetStatusClass(string s) => s switch 
+    { 
+        string x when x.Contains("Vắng") => "status-absent",
+        string x when x.Contains("muộn") || x.Contains("Muộn") => "status-late",
+        _ => "status-present"
+    };
+
+    string GetStatusIcon(string s) => s switch 
+    { 
+        string x when x.Contains("Vắng") => "●",
+        string x when x.Contains("muộn") || x.Contains("Muộn") => "●", 
+        _ => "●" 
+    };
 }

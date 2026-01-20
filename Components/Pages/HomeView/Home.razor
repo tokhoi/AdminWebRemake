@@ -45,51 +45,88 @@
         </div>
     </div>
 
-    <div class="home-main-grid">
+    <div class="home-charts-grid">
+        <!-- Student Chart -->
         <div class="std-card home-chart-card">
             <div class="card-header">
-                <div class="card-title"><div class="bar-indicator" style="background: var(--c-blue)"></div> Thống kê</div>
-                <div class="home-chart-tabs">
-                    <div class="tab-item @(ChartMode == "Student" ? "active" : "")" @onclick='() => ChangeChartMode("Student")'>Học sinh</div>
-                    <div class="tab-item @(ChartMode == "Teacher" ? "active" : "")" @onclick='() => ChangeChartMode("Teacher")'>Giáo viên</div>
+                <div class="card-title" style="font-size: 1rem;">
+                    <div class="bar-indicator" style="background: #3b82f6;"></div>
+                    Điểm danh học sinh
                 </div>
             </div>
-            <div class="home-chart-body flex-center">
+            <div class="home-chart-body flex-center" style="flex-direction: column;">
                 <div class="chart-wrapper">
-                    <canvas id="attendancePieChart"></canvas>
+                    <canvas id="studentAttendanceChart" style="width: 180px; height: 180px;"></canvas>
                     <div class="chart-center">
-                        <span class="c-sub">@(ChartMode == "Student" ? "Học sinh" : "Giáo viên")</span>
-                        <span class="c-main">@(ChartMode == "Student" ? "92%" : "98%")</span>
-                        <span class="c-sub text-green">Có mặt</span>
+                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">92%</span>
                     </div>
                 </div>
-                <div class="chart-legend">
-                    <div class="l-item"><span class="dot bg-green-light" style="background: #10b981;"></span> Có mặt: <b>@(ChartMode == "Student" ? 1280 : 74)</b></div>
-                    <div class="l-item"><span class="dot bg-red-light" style="background: #ef4444;"></span> Vắng: <b>@(ChartMode == "Student" ? 104 : 2)</b></div>
+                <div class="chart-legend-compact">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #22c55e;"></span>
+                        <span class="legend-text">Có mặt: <b>1,280</b></span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #ef4444;"></span>
+                        <span class="legend-text">Vắng: <b>104</b></span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="std-card home-list-card">
+        <!-- Teacher Chart -->
+        <div class="std-card home-chart-card">
             <div class="card-header">
-                <div class="card-title"><div class="bar-indicator" style="background: var(--c-green)"></div> Chi tiết</div>
+                <div class="card-title" style="font-size: 1rem;">
+                    <div class="bar-indicator" style="background: #f97316;"></div>
+                    Điểm danh giáo viên
+                </div>
+            </div>
+            <div class="home-chart-body flex-center" style="flex-direction: column;">
+                <div class="chart-wrapper">
+                    <canvas id="teacherAttendanceChart" style="width: 180px; height: 180px;"></canvas>
+                    <div class="chart-center">
+                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">98%</span>
+                    </div>
+                </div>
+                <div class="chart-legend-compact">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #22c55e;"></span>
+                        <span class="legend-text">Có mặt: <b>74</b></span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #ef4444;"></span>
+                        <span class="legend-text">Vắng: <b>2</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Card (Smaller) -->
+        <div class="std-card home-list-card-small">
+            <div class="card-header">
+                <div class="card-title" style="font-size: 1rem;">
+                    <div class="bar-indicator" style="background: var(--c-green)"></div>
+                    Chi tiết khối
+                </div>
                 @if (SelectedGrade != null)
                 {
                     <button class="btn-icon" @onclick="BackToOverview"><span class="material-icons-round text-red">keyboard_return</span></button>
                 }
             </div>
-            <div class="home-list-scroll">
+            <div class="home-list-scroll-small">
                 @if (SelectedGrade == null)
                 {
                     @foreach (var item in GradeStats)
                     {
-                        <div class="progress-row" @onclick="() => SelectGrade(item)">
-                            <div class="grade-icon" style="background: @item.Color;">@item.ShortName</div>
-                            <div class="p-content">
-                                <div class="flex-between mb-1"><span class="p-name">@item.Name</span><span class="p-val">@item.Present/@item.Total</span></div>
-                                <div class="p-bar"><div class="p-fill" style="width: @((double)item.Present / item.Total * 100)%; background: @item.Color;"></div></div>
+                        <div class="progress-row-small" @onclick="() => SelectGrade(item)">
+                            <div class="grade-icon-small" style="background: @item.Color;">@item.ShortName</div>
+                            <div class="p-content-small">
+                                <div class="flex-between" style="gap: 8px; margin-bottom: 4px;"><span class="p-name-small">@item.Name</span><span class="p-val-small">@item.Present/@item.Total</span></div>
+                                <div class="p-bar-small">
+                                    <div class="p-fill" style="width: @Math.Round((double)item.Present / item.Total * 100)%; background: @item.Color; height: 100%;"></div>
+                                </div>
                             </div>
-                            <span class="material-icons-round text-muted">chevron_right</span>
                         </div>
                     }
                 }
@@ -97,11 +134,13 @@
                 {
                     @foreach (var cls in DetailClasses)
                     {
-                        <div class="progress-row cursor-default">
-                            <div class="grade-icon" style="background: #f1f5f9; color: #333; font-size: 0.65rem;">@cls.ClassName</div>
-                            <div class="p-content">
-                                <div class="flex-between mb-1"><span class="p-name">Lớp @cls.ClassName</span><span class="p-val">@cls.Present/@cls.Total</span></div>
-                                <div class="p-bar"><div class="p-fill" style="width: @((double)cls.Present / cls.Total * 100)%; background: @SelectedGrade.Color;"></div></div>
+                        <div class="progress-row-small cursor-default">
+                            <div class="grade-icon-small" style="background: #f1f5f9; color: #333; font-size: 0.6rem;">@cls.ClassName</div>
+                            <div class="p-content-small">
+                                <div class="flex-between" style="gap: 8px; margin-bottom: 4px;"><span class="p-name-small">Lớp @cls.ClassName</span><span class="p-val-small">@cls.Present/@cls.Total</span></div>
+                                <div class="p-bar-small">
+                                    <div class="p-fill" style="width: @Math.Round((double)cls.Present / cls.Total * 100)%; background: @SelectedGrade.Color; height: 100%;"></div>
+                                </div>
                             </div>
                         </div>
                     }
@@ -133,10 +172,31 @@
 }
 
 @code {
-    string ChartMode = "Student"; bool IsCalendarOpen = false; DateTime SelectedDate = DateTime.Today; DateTime CurrentDisplayDate = DateTime.Today; List<DateTime> CalendarDays = new List<DateTime>();
-    class GradeStat { public string Name { get; set; } public string ShortName { get; set; } public int Total { get; set; } public int Present { get; set; } public string Color { get; set; } }
-    class ClassStat { public string ClassName { get; set; } public int Total { get; set; } public int Present { get; set; } }
-    GradeStat? SelectedGrade = null; List<ClassStat> DetailClasses = new List<ClassStat>();
+    string ChartMode = "Student"; 
+    bool IsCalendarOpen = false; 
+    DateTime SelectedDate = DateTime.Today; 
+    DateTime CurrentDisplayDate = DateTime.Today; 
+    List<DateTime> CalendarDays = new List<DateTime>();
+    
+    class GradeStat 
+    { 
+        public string Name { get; set; } 
+        public string ShortName { get; set; } 
+        public int Total { get; set; } 
+        public int Present { get; set; } 
+        public string Color { get; set; } 
+    }
+    
+    class ClassStat 
+    { 
+        public string ClassName { get; set; } 
+        public int Total { get; set; } 
+        public int Present { get; set; } 
+    }
+    
+    GradeStat? SelectedGrade = null; 
+    List<ClassStat> DetailClasses = new List<ClassStat>();
+    
     List<GradeStat> GradeStats = new List<GradeStat> {
         new GradeStat { Name="Khối 1", ShortName="K1", Total=350, Present=342, Color="#ef4444" },
         new GradeStat { Name="Khối 2", ShortName="K2", Total=300, Present=285, Color="#f97316" },
@@ -144,14 +204,80 @@
         new GradeStat { Name="Khối 4", ShortName="K4", Total=200, Present=195, Color="#22c55e" },
         new GradeStat { Name="Khối 5", ShortName="K5", Total=284, Present=280, Color="#3b82f6" }
     };
-    protected override void OnInitialized() { GenerateCalendar(); }
-    protected override async Task OnAfterRenderAsync(bool f) { if (f) await UpdateChart(); }
-    async Task ChangeChartMode(string m) { ChartMode = m; await UpdateChart(); }
-    async Task UpdateChart() { await JS.InvokeVoidAsync("updateAttendanceChart", "attendancePieChart", ChartMode == "Student" ? 1280 : 74, ChartMode == "Student" ? 104 : 2, "Label"); }
-    void GenerateCalendar() { CalendarDays.Clear(); var start = new DateTime(CurrentDisplayDate.Year, CurrentDisplayDate.Month, 1); var offset = start.AddDays(-(int)start.DayOfWeek); for (int i = 0; i < 42; i++) CalendarDays.Add(offset.AddDays(i)); }
-    void PrevMonth() { CurrentDisplayDate = CurrentDisplayDate.AddMonths(-1); GenerateCalendar(); }
-    void NextMonth() { CurrentDisplayDate = CurrentDisplayDate.AddMonths(1); GenerateCalendar(); }
-    async Task OnDateSelect(DateTime d) { SelectedDate = d; if (d.Month != CurrentDisplayDate.Month) { CurrentDisplayDate = d; GenerateCalendar(); } await UpdateChart(); IsCalendarOpen = false; }
-    void SelectGrade(GradeStat g) { SelectedGrade = g; DetailClasses = Enumerable.Range(1, 8).Select(i => new ClassStat { ClassName = $"{g.ShortName.Replace("K", "")}A{i}", Total = 35, Present = 33 }).ToList(); }
+    
+    protected override void OnInitialized() 
+    { 
+        GenerateCalendar(); 
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    { 
+        if (firstRender)
+        {
+            await Task.Delay(500);
+            await InitChartsAsync();
+        }
+    }
+    
+    private async Task InitChartsAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("initializeChart", "studentAttendanceChart", 1280, 104);
+            await Task.Delay(100);
+            await JS.InvokeVoidAsync("initializeChart", "teacherAttendanceChart", 74, 2);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Chart initialization error: {ex.Message}");
+        }
+    }
+    
+    void GenerateCalendar() 
+    { 
+        CalendarDays.Clear(); 
+        var start = new DateTime(CurrentDisplayDate.Year, CurrentDisplayDate.Month, 1); 
+        var offset = start.AddDays(-(int)start.DayOfWeek); 
+        for ( int i = 0; i < 42; i++ ) 
+            CalendarDays.Add(offset.AddDays(i)); 
+    }
+    
+    void PrevMonth() 
+    { 
+        CurrentDisplayDate = CurrentDisplayDate.AddMonths(-1); 
+        GenerateCalendar(); 
+    }
+    
+    void NextMonth() 
+    { 
+        CurrentDisplayDate = CurrentDisplayDate.AddMonths(1); 
+        GenerateCalendar(); 
+    }
+    
+    async Task OnDateSelect(DateTime d) 
+    { 
+        SelectedDate = d; 
+        if (d.Month != CurrentDisplayDate.Month) 
+        { 
+            CurrentDisplayDate = d; 
+            GenerateCalendar(); 
+        } 
+        await InitChartsAsync(); 
+        IsCalendarOpen = false; 
+    }
+    
+    void SelectGrade(GradeStat g) 
+    { 
+        SelectedGrade = g; 
+        DetailClasses = Enumerable.Range(1, 8)
+            .Select(i => new ClassStat 
+            { 
+                ClassName = $"{g.ShortName.Replace("K", "")}A{i}", 
+                Total = 35, 
+                Present = 33 
+            })
+            .ToList(); 
+    }
+    
     void BackToOverview() => SelectedGrade = null;
-}
+    }

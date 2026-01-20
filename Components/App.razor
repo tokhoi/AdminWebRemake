@@ -13,22 +13,6 @@
     <Routes />
     <script src="_framework/blazor.web.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        window.updateAttendanceChart = (chartId, present, absent, label) => {
-            const ctx = document.getElementById(chartId);
-            if (!ctx) return;
-            if (window.myPieChart) window.myPieChart.destroy();
-            window.myPieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Có mặt', 'Vắng/Trễ'],
-                    datasets: [{ data: [present, absent], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0, cutout: '70%' }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }
-                }
-            });
-        };
-    </script>
+    <script src="chart-manager.js"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 wwwroot\bootstrap\bootstrap.min.css
 wwwroot\bootstrap\bootstrap.min.css.map
+wwwroot\chart-manager.js
 wwwroot\favicon.png
 wwwroot\app.css
