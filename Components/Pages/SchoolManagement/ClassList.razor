@@ -1,61 +1,99 @@
 ﻿@page "/school/classes"
+@rendermode InteractiveServer
 
 <PageTitle>Danh sách lớp học</PageTitle>
 
 <div class="animate-fade-in flex-col gap-6">
+    <!-- Stats Row -->
+    <div class="grid-4">
+        <div class="stat-box">
+            <div class="stat-box-label">Tổng lớp</div>
+            <div class="stat-box-value">35</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-box-label">Tổng học sinh</div>
+            <div class="stat-box-value">1384</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-box-label">Avg/Lớp</div>
+            <div class="stat-box-value">39</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-box-label">Lớp trưởng</div>
+            <div class="stat-box-value">35</div>
+        </div>
+    </div>
+
+    <!-- Main Card -->
     <div class="std-card">
+        <!-- Header -->
         <div class="flex-between mb-4 flex-wrap gap-4">
-            <h2 class="card-title">Danh sách lớp học</h2>
+            <h2 class="card-title">
+                <span class="material-icons-round">class</span>
+                Danh sách lớp học
+            </h2>
+            <button class="btn btn-primary">
+                <span class="material-icons-round">add</span> Thêm lớp mới
+            </button>
+        </div>
 
-            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <select class="form-input" style="width: auto; min-width: 150px;">
-                    <option>Tất cả khối</option>
-                    <option>Khối 1</option>
-                    <option>Khối 2</option>
-                    <option>Khối 3</option>
-                    <option>Khối 4</option>
-                    <option>Khối 5</option>
+        <!-- Filters -->
+        <div class="filter-container">
+            <div class="filter-item">
+                <label class="form-label">Khối</label>
+                <select class="form-input">
+                    <option>Tất cả</option>
                 </select>
-
-                <button class="btn btn-primary">
-                    <span class="material-icons-round" style="font-size: 18px;">add</span> Thêm mới
-                </button>
-
-                <div class="input-wrapper" style="width: 200px;">
-                    <input class="form-input" placeholder="Nhập tên lớp..." style="padding-right: 36px;" />
-                    <button class="btn-primary" style="position: absolute; right: 0; top: 0; height: 100%; border-radius: 0 8px 8px 0; padding: 0 12px;">
-                        <span class="material-icons-round" style="font-size: 18px;">search</span>
-                    </button>
+            </div>
+            <div class="filter-item-large">
+                <label class="form-label">Từ khóa</label>
+                <div class="input-wrapper">
+                    <span class="material-icons-round input-icon">search</span>
+                    <input class="form-input input-has-icon" placeholder="Tìm tên, mã lớp..." />
                 </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary">Tìm kiếm</button>
             </div>
         </div>
 
+        <!-- Table -->
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th class="text-center w-16">STT</th>
-                        <th>Mã lớp</th>
-                        <th>Tên lớp</th>
+                        <th class="text-center w-12">STT</th>
+                        <th>Mã Lớp</th>
+                        <th>Tên Lớp</th>
                         <th>Khối</th>
+                        <th>Giáo viên chủ nhiệm</th>
                         <th class="text-center">Sĩ số</th>
-                        <th class="text-center">GVCN</th>
+                        <th class="text-center">Trạng thái</th>
                         <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (int i = 1; i <= 10; i++)
+                    @for (int i = 1; i <= 12; i++)
                     {
                         <tr>
                             <td class="text-center">@i</td>
-                            <td style="font-family: monospace;">LH@(100 + i)</td>
+                            <td class="text-muted font-mono">LOP_1A@i</td>
                             <td style="font-weight: 500;">Lớp 1A@i</td>
-                            <td>Khối 1</td>
-                            <td class="text-center">35</td>
-                            <td class="text-center">Nguyễn Văn A</td>
+                            <td><span class="status-badge bg-blue-light">Khối 1</span></td>
+                            <td>Nguyễn Thị Chủ Nhiệm</td>
+                            <td class="text-center"><span class="status-badge bg-green-light">35 em</span></td>
                             <td class="text-center">
-                                <button class="btn-icon" title="Sửa"><span class="material-icons-round text-primary" style="font-size: 18px;">edit</span></button>
-                                <button class="btn-icon" title="Xóa"><span class="material-icons-round text-red" style="font-size: 18px;">delete</span></button>
+                                <span class="status-badge bg-green-light">
+                                    <span class="dot dot-green"></span> Hoạt động
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn-icon" title="Xem chi tiết">
+                                    <span class="material-icons-round">visibility</span>
+                                </button>
+                                <button class="btn-icon" title="Sửa">
+                                    <span class="material-icons-round text-primary">edit</span>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -63,14 +101,16 @@
             </table>
         </div>
 
-        <div class="flex-between p-4 bg-gray-50 border-t mt-4" style="padding: 1rem; border-top: 1px solid var(--border);">
-            <div class="flex gap-1" style="display: flex; gap: 4px;">
-                <button class="btn-primary" style="width: 32px; height: 32px; padding: 0;">1</button>
-                <button class="btn-outline" style="width: 32px; height: 32px; padding: 0;">2</button>
-                <button class="btn-outline" style="width: 32px; height: 32px; padding: 0;">3</button>
-                <button class="btn-outline" style="width: 32px; height: 32px; padding: 0;"><span class="material-icons-round" style="font-size: 14px;">arrow_forward</span></button>
+        <!-- Pagination -->
+        <div class="flex-between p-4 bg-gray-50" style="border-top: 1px solid var(--border); margin-top: 1rem;">
+            <div class="pagination">
+                <button class="pagination-btn"><span class="material-icons-round" style="font-size: 16px;">chevron_left</span></button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn"><span class="material-icons-round" style="font-size: 16px;">chevron_right</span></button>
             </div>
-            <div class="text-muted" style="font-size: 0.8rem;">1 - 10 của 35 lớp học</div>
+            <div class="text-muted" style="font-size: 0.8rem;">1 - 12 của 35 lớp</div>
         </div>
     </div>
 </div>

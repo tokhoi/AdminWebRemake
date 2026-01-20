@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AdminWebRemake")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5c1580fd271ed1358dbaf885893a31c481bdc70")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3fcfdab15b020b041ce74b22bd8a3fd493040361")]
 [assembly: System.Reflection.AssemblyProductAttribute("AdminWebRemake")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AdminWebRemake")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

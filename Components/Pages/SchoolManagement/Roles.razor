@@ -5,22 +5,32 @@
 
 <div class="animate-fade-in flex-col gap-6">
     <div class="std-card">
+        <!-- Header -->
         <div class="flex-between mb-4 flex-wrap gap-4">
-            <h2 class="card-title">Danh sách chức vụ</h2>
+            <h2 class="card-title">
+                <span class="material-icons-round">admin_panel_settings</span>
+                Danh sách chức vụ
+            </h2>
             <button class="btn btn-primary">
-                <span class="material-icons-round" style="font-size: 18px;">add</span> Thêm chức vụ
+                <span class="material-icons-round">add</span> Thêm chức vụ
             </button>
         </div>
 
-        <div class="filter-container mb-4">
+        <!-- Filters -->
+        <div class="filter-container">
             <div class="filter-item-large">
+                <label class="form-label">Từ khóa</label>
                 <div class="input-wrapper">
                     <span class="material-icons-round input-icon">search</span>
                     <input class="form-input input-has-icon" placeholder="Tìm kiếm chức vụ..." />
                 </div>
             </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary">Tìm kiếm</button>
+            </div>
         </div>
 
+        <!-- Table -->
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
@@ -39,12 +49,20 @@
                         <tr>
                             <td class="text-center">@i</td>
                             <td class="text-muted font-mono">ROLE_00@i</td>
-                            <td style="font-weight: 500;">@(i == 1 ? "Ban Giám Hiệu" : (i == 2 ? "Giáo viên CN" : "Nhân viên"))</td>
+                            <td style="font-weight: 500;">
+                                @if (i == 1) { <text>Ban Giám Hiệu</text> }
+                                else if (i == 2) { <text>Giáo viên CN</text> }
+                                else { <text>Nhân viên</text> }
+                            </td>
                             <td class="text-muted">Quản lý toàn bộ hoạt động...</td>
                             <td class="text-center"><span class="status-badge bg-blue-light">@(i * 5) người</span></td>
                             <td class="text-center">
-                                <button class="btn-icon" title="Sửa"><span class="material-icons-round text-primary" style="font-size: 18px;">edit</span></button>
-                                <button class="btn-icon" title="Xóa"><span class="material-icons-round text-red" style="font-size: 18px;">delete</span></button>
+                                <button class="btn-icon" title="Sửa">
+                                    <span class="material-icons-round text-primary">edit</span>
+                                </button>
+                                <button class="btn-icon danger" title="Xóa">
+                                    <span class="material-icons-round">delete</span>
+                                </button>
                             </td>
                         </tr>
                     }
