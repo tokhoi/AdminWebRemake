@@ -11,7 +11,6 @@
                 <div class="tea-icon"><span class="material-icons-round">dashboard</span></div>
                 Tổng quan
             </div>
-
             <div class="action-group">
                 <button class="btn btn-primary" @onclick="() => IsCalendarOpen = true">
                     <span class="material-icons-round">calendar_month</span>
@@ -46,63 +45,88 @@
     </div>
 
     <div class="home-charts-grid">
-        <!-- Student Chart -->
         <div class="std-card home-chart-card">
             <div class="card-header">
                 <div class="card-title" style="font-size: 1rem;">
                     <div class="bar-indicator" style="background: #3b82f6;"></div>
                     Điểm danh học sinh
                 </div>
+                <div class="session-tabs">
+                    <span class="@(StudentSession == "AM" ? "active" : "")" @onclick='() => ChangeStudentSession("AM")'>Sáng</span>
+                    <span class="@(StudentSession == "PM" ? "active" : "")" @onclick='() => ChangeStudentSession("PM")'>Chiều</span>
+                </div>
             </div>
+
             <div class="home-chart-body flex-center" style="flex-direction: column;">
                 <div class="chart-wrapper">
                     <canvas id="studentAttendanceChart" style="width: 180px; height: 180px;"></canvas>
                     <div class="chart-center">
-                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">92%</span>
+                        @{
+                            var sData = StudentSession == "AM" ? StudentDataAM : StudentDataPM;
+                            double sTotal = sData.Present + sData.Late + sData.Absent;
+                            double sRate = sTotal > 0 ? Math.Round((sData.Present + sData.Late) / sTotal * 100, 1) : 0;
+                        }
+                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">@sRate%</span>
                     </div>
                 </div>
                 <div class="chart-legend-compact">
-                    <div class="legend-item">
+                    <div class="legend-item" title="Có mặt">
                         <span class="legend-dot" style="background: #22c55e;"></span>
-                        <span class="legend-text">Có mặt: <b>1,280</b></span>
+                        <span class="legend-text"><b>@sData.Present</b></span>
                     </div>
-                    <div class="legend-item">
+                    <div class="legend-item" title="Đi trễ">
+                        <span class="legend-dot" style="background: #eab308;"></span>
+                        <span class="legend-text"><b>@sData.Late</b></span>
+                    </div>
+                    <div class="legend-item" title="Vắng">
                         <span class="legend-dot" style="background: #ef4444;"></span>
-                        <span class="legend-text">Vắng: <b>104</b></span>
+                        <span class="legend-text"><b>@sData.Absent</b></span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Teacher Chart -->
         <div class="std-card home-chart-card">
             <div class="card-header">
                 <div class="card-title" style="font-size: 1rem;">
                     <div class="bar-indicator" style="background: #f97316;"></div>
                     Điểm danh giáo viên
                 </div>
+                <div class="session-tabs">
+                    <span class="@(TeacherSession == "AM" ? "active" : "")" @onclick='() => ChangeTeacherSession("AM")'>Sáng</span>
+                    <span class="@(TeacherSession == "PM" ? "active" : "")" @onclick='() => ChangeTeacherSession("PM")'>Chiều</span>
+                </div>
             </div>
+
             <div class="home-chart-body flex-center" style="flex-direction: column;">
                 <div class="chart-wrapper">
                     <canvas id="teacherAttendanceChart" style="width: 180px; height: 180px;"></canvas>
                     <div class="chart-center">
-                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">98%</span>
+                        @{
+                            var tData = TeacherSession == "AM" ? TeacherDataAM : TeacherDataPM;
+                            double tTotal = tData.Present + tData.Late + tData.Absent;
+                            double tRate = tTotal > 0 ? Math.Round((tData.Present + tData.Late) / tTotal * 100, 1) : 0;
+                        }
+                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">@tRate%</span>
                     </div>
                 </div>
                 <div class="chart-legend-compact">
-                    <div class="legend-item">
+                    <div class="legend-item" title="Có mặt">
                         <span class="legend-dot" style="background: #22c55e;"></span>
-                        <span class="legend-text">Có mặt: <b>74</b></span>
+                        <span class="legend-text"><b>@tData.Present</b></span>
                     </div>
-                    <div class="legend-item">
+                    <div class="legend-item" title="Đi trễ">
+                        <span class="legend-dot" style="background: #eab308;"></span>
+                        <span class="legend-text"><b>@tData.Late</b></span>
+                    </div>
+                    <div class="legend-item" title="Vắng">
                         <span class="legend-dot" style="background: #ef4444;"></span>
-                        <span class="legend-text">Vắng: <b>2</b></span>
+                        <span class="legend-text"><b>@tData.Absent</b></span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Details Card (Smaller) -->
         <div class="std-card home-list-card-small">
             <div class="card-header">
                 <div class="card-title" style="font-size: 1rem;">
@@ -171,32 +195,33 @@
     </div>
 }
 
+
 @code {
-    string ChartMode = "Student"; 
-    bool IsCalendarOpen = false; 
-    DateTime SelectedDate = DateTime.Today; 
-    DateTime CurrentDisplayDate = DateTime.Today; 
+    // --- State ---
+    bool IsCalendarOpen = false;
+    DateTime SelectedDate = DateTime.Today;
+    DateTime CurrentDisplayDate = DateTime.Today;
     List<DateTime> CalendarDays = new List<DateTime>();
-    
-    class GradeStat 
-    { 
-        public string Name { get; set; } 
-        public string ShortName { get; set; } 
-        public int Total { get; set; } 
-        public int Present { get; set; } 
-        public string Color { get; set; } 
-    }
-    
-    class ClassStat 
-    { 
-        public string ClassName { get; set; } 
-        public int Total { get; set; } 
-        public int Present { get; set; } 
-    }
-    
-    GradeStat? SelectedGrade = null; 
+
+    // Tách 2 biến session riêng biệt
+    string StudentSession = "AM";
+    string TeacherSession = "AM";
+
+    // --- Data Models ---
+    class AttendanceData { public int Present { get; set; } public int Late { get; set; } public int Absent { get; set; } }
+    class GradeStat { public string Name { get; set; } public string ShortName { get; set; } public int Total { get; set; } public int Present { get; set; } public string Color { get; set; } }
+    class ClassStat { public string ClassName { get; set; } public int Total { get; set; } public int Present { get; set; } }
+
+    // --- Mock Data ---
+    AttendanceData StudentDataAM = new() { Present = 1200, Late = 50, Absent = 134 };
+    AttendanceData StudentDataPM = new() { Present = 1150, Late = 80, Absent = 154 };
+
+    AttendanceData TeacherDataAM = new() { Present = 70, Late = 4, Absent = 2 };
+    AttendanceData TeacherDataPM = new() { Present = 72, Late = 1, Absent = 3 };
+
+    GradeStat? SelectedGrade = null;
     List<ClassStat> DetailClasses = new List<ClassStat>();
-    
+
     List<GradeStat> GradeStats = new List<GradeStat> {
         new GradeStat { Name="Khối 1", ShortName="K1", Total=350, Present=342, Color="#ef4444" },
         new GradeStat { Name="Khối 2", ShortName="K2", Total=300, Present=285, Color="#f97316" },
@@ -204,80 +229,87 @@
         new GradeStat { Name="Khối 4", ShortName="K4", Total=200, Present=195, Color="#22c55e" },
         new GradeStat { Name="Khối 5", ShortName="K5", Total=284, Present=280, Color="#3b82f6" }
     };
-    
-    protected override void OnInitialized() 
-    { 
-        GenerateCalendar(); 
-    }
-    
-    protected override async Task OnAfterRenderAsync(bool firstRender) 
-    { 
+
+    // --- Lifecycle ---
+    protected override void OnInitialized() { GenerateCalendar(); }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
         if (firstRender)
         {
             await Task.Delay(500);
-            await InitChartsAsync();
+            // Vẽ lần đầu cả 2 biểu đồ
+            await RenderStudentChart();
+            await RenderTeacherChart();
         }
     }
-    
-    private async Task InitChartsAsync()
+
+    // --- Logic Chuyển Tab Học Sinh ---
+    private async Task ChangeStudentSession(string session)
+    {
+        if (StudentSession != session)
+        {
+            StudentSession = session;
+            await RenderStudentChart(); // Chỉ vẽ lại chart học sinh
+        }
+    }
+
+    // --- Logic Chuyển Tab Giáo Viên ---
+    private async Task ChangeTeacherSession(string session)
+    {
+        if (TeacherSession != session)
+        {
+            TeacherSession = session;
+            await RenderTeacherChart(); // Chỉ vẽ lại chart giáo viên
+        }
+    }
+
+    // Hàm vẽ chart Học sinh
+    private async Task RenderStudentChart()
     {
         try
         {
-            await JS.InvokeVoidAsync("initializeChart", "studentAttendanceChart", 1280, 104);
-            await Task.Delay(100);
-            await JS.InvokeVoidAsync("initializeChart", "teacherAttendanceChart", 74, 2);
+            var sData = StudentSession == "AM" ? StudentDataAM : StudentDataPM;
+            await JS.InvokeVoidAsync("initializeChart", "studentAttendanceChart", sData.Present, sData.Late, sData.Absent);
         }
-        catch (Exception ex)
+        catch { }
+    }
+
+    // Hàm vẽ chart Giáo viên
+    private async Task RenderTeacherChart()
+    {
+        try
         {
-            Console.WriteLine($"Chart initialization error: {ex.Message}");
+            var tData = TeacherSession == "AM" ? TeacherDataAM : TeacherDataPM;
+            await JS.InvokeVoidAsync("initializeChart", "teacherAttendanceChart", tData.Present, tData.Late, tData.Absent);
         }
+        catch { }
     }
-    
-    void GenerateCalendar() 
-    { 
-        CalendarDays.Clear(); 
-        var start = new DateTime(CurrentDisplayDate.Year, CurrentDisplayDate.Month, 1); 
-        var offset = start.AddDays(-(int)start.DayOfWeek); 
-        for ( int i = 0; i < 42; i++ ) 
-            CalendarDays.Add(offset.AddDays(i)); 
+
+    // --- Calendar Logic ---
+    void GenerateCalendar()
+    {
+        CalendarDays.Clear();
+        var start = new DateTime(CurrentDisplayDate.Year, CurrentDisplayDate.Month, 1);
+        var offset = start.AddDays(-(int)start.DayOfWeek);
+        for (int i = 0; i < 42; i++) CalendarDays.Add(offset.AddDays(i));
     }
-    
-    void PrevMonth() 
-    { 
-        CurrentDisplayDate = CurrentDisplayDate.AddMonths(-1); 
-        GenerateCalendar(); 
+    void PrevMonth() { CurrentDisplayDate = CurrentDisplayDate.AddMonths(-1); GenerateCalendar(); }
+    void NextMonth() { CurrentDisplayDate = CurrentDisplayDate.AddMonths(1); GenerateCalendar(); }
+    async Task OnDateSelect(DateTime d)
+    {
+        SelectedDate = d;
+        if (d.Month != CurrentDisplayDate.Month) { CurrentDisplayDate = d; GenerateCalendar(); }
+        // Load lại cả 2 chart khi đổi ngày
+        await RenderStudentChart();
+        await RenderTeacherChart();
+        IsCalendarOpen = false;
     }
-    
-    void NextMonth() 
-    { 
-        CurrentDisplayDate = CurrentDisplayDate.AddMonths(1); 
-        GenerateCalendar(); 
+
+    void SelectGrade(GradeStat g)
+    {
+        SelectedGrade = g;
+        DetailClasses = Enumerable.Range(1, 8).Select(i => new ClassStat { ClassName = $"{g.ShortName.Replace("K", "")}A{i}", Total = 35, Present = 33 }).ToList();
     }
-    
-    async Task OnDateSelect(DateTime d) 
-    { 
-        SelectedDate = d; 
-        if (d.Month != CurrentDisplayDate.Month) 
-        { 
-            CurrentDisplayDate = d; 
-            GenerateCalendar(); 
-        } 
-        await InitChartsAsync(); 
-        IsCalendarOpen = false; 
-    }
-    
-    void SelectGrade(GradeStat g) 
-    { 
-        SelectedGrade = g; 
-        DetailClasses = Enumerable.Range(1, 8)
-            .Select(i => new ClassStat 
-            { 
-                ClassName = $"{g.ShortName.Replace("K", "")}A{i}", 
-                Total = 35, 
-                Present = 33 
-            })
-            .ToList(); 
-    }
-    
     void BackToOverview() => SelectedGrade = null;
-    }
+}

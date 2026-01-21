@@ -3,25 +3,22 @@
 
 <PageTitle>Quản lý Khối</PageTitle>
 
-<div class="animate-fade-in flex-col gap-6">
-    <div class="std-card">
-        <!-- Header -->
-        <div class="flex-between mb-4 flex-wrap gap-4">
-            <h2 class="card-title">
-                <span class="material-icons-round">apartment</span>
-                Danh sách Khối học
+<div class="sm-page-container sm-animate-fade-in">
+    <div class="sm-card">
+        <div class="sm-card-header">
+            <h2 class="sm-card-title">
+                <span class="material-icons-round">apartment</span> Danh sách Khối học
             </h2>
-            <button class="btn btn-primary">
+            <button class="sm-btn sm-btn-primary">
                 <span class="material-icons-round">add</span> Thêm khối
             </button>
         </div>
 
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table class="data-table">
+        <div class="sm-table-responsive">
+            <table class="sm-table">
                 <thead>
                     <tr>
-                        <th class="text-center w-16">STT</th>
+                        <th class="text-center" style="width: 50px;">STT</th>
                         <th>Mã Khối</th>
                         <th>Tên Khối</th>
                         <th>Trưởng khối</th>
@@ -35,15 +32,13 @@
                     {
                         <tr>
                             <td class="text-center">@i</td>
-                            <td class="text-muted font-mono">KHOI_@i</td>
-                            <td style="font-weight: 700; color: var(--primary);">Khối @i</td>
+                            <td><span class="sm-badge sm-badge-primary">KHOI_@i</span></td>
+                            <td class="fw-bold" style="color:var(--sm-primary);">Khối @i</td>
                             <td>Nguyễn Thị Trưởng Khối @i</td>
-                            <td class="text-center"><span class="status-badge bg-yellow-light">8 lớp</span></td>
-                            <td class="text-center"><span class="status-badge bg-blue-light">350 em</span></td>
+                            <td class="text-center"><span class="sm-badge sm-badge-warning">8 lớp</span></td>
+                            <td class="text-center"><span class="sm-badge sm-badge-primary">350 em</span></td>
                             <td class="text-center">
-                                <button class="btn-icon" title="Cấu hình">
-                                    <span class="material-icons-round text-primary">settings</span>
-                                </button>
+                                <button class="sm-btn-icon"><span class="material-icons-round">settings</span></button>
                             </td>
                         </tr>
                     }

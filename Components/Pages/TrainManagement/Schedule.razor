@@ -1,0 +1,274 @@
+﻿@page "/training/schedule"
+@using System.Globalization
+@rendermode InteractiveServer
+
+<PageTitle>Thời Khóa Biểu</PageTitle>
+
+<div class="lm-page-container lm-animate-fade-in">
+    <div class="lm-card">
+        <div class="lm-card-header">
+            <div>
+                <h2 class="lm-card-title">
+                    <span class="material-icons-round">calendar_today</span> THỜI KHÓA BIỂU
+                </h2>
+                <div class="lm-card-subtitle">
+                    Tuần: @startDate.ToString("dd/MM/yyyy") - @endDate.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                @if (CountSelected() > 0)
+                {
+                    <button class="lm-btn lm-btn-danger-soft lm-animate-fade-in" @onclick="DeleteSelectedTKB">
+                        <span class="material-icons-round" style="font-size:18px; margin-right:4px;">delete</span> Xóa (@CountSelected())
+                    </button>
+                }
+
+                <div style="display:flex; border:1px solid #e5e7eb; border-radius:6px; overflow:hidden;">
+                    <button class="lm-btn lm-btn-white" style="border:none; border-right:1px solid #e5e7eb; border-radius:0; padding:0 12px;" @onclick="PreviousWeek"><span class="material-icons-round">chevron_left</span></button>
+                    <button class="lm-btn lm-btn-white" style="border:none; border-right:1px solid #e5e7eb; border-radius:0;" @onclick="SetCurrentWeek">Tuần này</button>
+                    <button class="lm-btn lm-btn-white" style="border:none; border-radius:0; padding:0 12px;" @onclick="NextWeek"><span class="material-icons-round">chevron_right</span></button>
+                </div>
+
+                <button class="lm-btn lm-btn-primary" @onclick="ShowAddForm">
+                    <span class="material-icons-round" style="font-size:18px; margin-right:4px;">add</span> Thêm Mới
+                </button>
+            </div>
+        </div>
+
+        <div class="lm-toolbar">
+            <div class="lm-filter-group">
+                <label class="lm-label">Năm học</label>
+                <select class="lm-select">
+                    <option>2025-2026</option>
+                    <option>2024-2025</option>
+                </select>
+            </div>
+            <div class="lm-filter-group">
+                <label class="lm-label">Khối</label>
+                <select class="lm-select"><option>Tất cả khối</option></select>
+            </div>
+            <div class="lm-filter-group">
+                <label class="lm-label">Lớp</label>
+                <select class="lm-select"><option>Tất cả lớp</option></select>
+            </div>
+            <div class="lm-filter-group" style="flex: 1.5;">
+                <label class="lm-label">Giáo viên</label>
+                <div class="lm-input-icon-wrapper">
+                    <span class="material-icons-round">search</span>
+                    <input type="text" class="lm-input" placeholder="Tìm giáo viên..." @bind="filterTeacherName" @bind:event="oninput" />
+                </div>
+            </div>
+            <button class="lm-btn lm-btn-primary" style="width: 100%;">
+                <span class="material-icons-round" style="font-size:18px; margin-right:4px;">filter_list</span> Lọc
+            </button>
+        </div>
+
+        <div class="lm-table-wrapper" style="max-height: calc(100vh - 280px);">
+            <table class="lm-table">
+                <thead>
+                    <tr>
+                        <th class="lm-sticky-header-corner text-center" style="width: 80px;">TIẾT</th>
+                        @for (int i = 0; i < 6; i++)
+                        {
+                            var date = startDate.AddDays(i);
+                            var isToday = date.Date == DateTime.Today;
+                            <th class="@(isToday ? "today-col" : "") text-center">
+                                <div>@GetDayName(i + 2)</div>
+                                <div style="font-size: 0.75rem; font-weight: 400; opacity: 0.7;">@date.ToString("dd/MM")</div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var period in MockPeriods)
+                    {
+                        <tr>
+                            <td class="lm-sticky-col-first text-center">
+                                <div style="font-weight: 800; font-size: 1.1rem; color: var(--lm-text-main);">@period.Index</div>
+                                <div style="font-size: 0.7rem; color: var(--lm-text-muted);">@period.Time</div>
+                            </td>
+                            @for (int dayIndex = 2; dayIndex <= 7; dayIndex++)
+                            {
+                                var date = startDate.AddDays(dayIndex - 2);
+                                var isToday = date.Date == DateTime.Today;
+                                var cellData = MockData.Where(x => x.Thu == dayIndex && x.Tiet == period.Index).ToList();
+
+                                <td style="vertical-align: top; height: 120px; min-width: 180px; background-color: @(isToday ? "#f0f9ff" : "inherit");">
+                                    @if (cellData.Any())
+                                    {
+                                        @foreach (var item in cellData)
+                                        {
+                                            <div class="lm-tkb-card" style="border-left-color: @GetSubjectColor(item.MonHoc);" @onclick="() => EditTKB(item)">
+
+                                                <input type="checkbox" class="lm-tkb-checkbox"
+                                                       checked="@item.IsSelected"
+                                                       @onclick:stopPropagation="true"
+                                                       @onchange="@((e) => { item.IsSelected = (bool)e.Value; })" />
+
+                                                <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: var(--lm-text-main);">
+                                                    @item.MonHoc
+
+                                                    @if (item.IsActive)
+                                                    {
+                                                        <span class="lm-live-indicator" title="Đang học"></span>
+                                                    }
+                                                </div>
+                                                <div style="font-size: 0.75rem; color: var(--lm-text-muted); display:flex; align-items:center; gap:4px;">
+                                                    <span class="material-icons-round" style="font-size:14px;">door_front</span> @item.Lop
+                                                </div>
+                                                <div style="font-size: 0.75rem; color: var(--lm-text-muted); display:flex; align-items:center; gap:4px;">
+                                                    <span class="material-icons-round" style="font-size:14px;">person</span> @item.GiaoVien
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (showModal)
+{
+    <div class="lm-modal-backdrop">
+        <div class="lm-modal-dialog">
+            <div class="lm-modal-content">
+                <div class="lm-modal-header">
+                    <h4 class="lm-card-title" style="font-size: 1.1rem;">
+                        <span class="material-icons-round">@(isEditing ? "edit" : "add_circle")</span>
+                        @(isEditing ? "Cập Nhật Thời Khóa Biểu" : "Thêm Mới")
+                    </h4>
+                    <button class="lm-btn-icon" @onclick="CloseModal"><span class="material-icons-round">close</span></button>
+                </div>
+                <div class="lm-modal-body">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                        <div class="lm-filter-group" style="grid-column: 1/-1;">
+                            <label class="lm-label">Môn học</label>
+                            <input class="lm-input" @bind="searchSubject" placeholder="Nhập tên môn..." />
+                        </div>
+                        <div class="lm-filter-group">
+                            <label class="lm-label">Tiết</label>
+                            <select class="lm-select" @bind="selectedPeriod">
+                                @foreach (var p in MockPeriods)
+                                {
+                                    <option value="@p.Index">Tiết @p.Index</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="lm-filter-group">
+                            <label class="lm-label">Ngày học</label>
+                            <input type="date" class="lm-input" @bind="selectedDateSingle" />
+                        </div>
+                        <div class="lm-filter-group">
+                            <label class="lm-label">Lớp</label>
+                            <select class="lm-select"><option>DC25T</option></select>
+                        </div>
+                        <div class="lm-filter-group">
+                            <label class="lm-label">Giáo viên</label>
+                            <input class="lm-input" @bind="searchTeacher" />
+                        </div>
+                    </div>
+                </div>
+                <div class="lm-modal-footer">
+                    <button class="lm-btn lm-btn-white" @onclick="CloseModal">Hủy bỏ</button>
+                    <button class="lm-btn lm-btn-primary" @onclick="SaveData">Lưu lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // --- STATE ---
+    private bool showModal = false;
+    private bool isEditing = false;
+    private DateTime startDate;
+    private DateTime endDate;
+    private DateTime selectedDateSingle = DateTime.Today;
+    private int selectedPeriod = 1;
+
+    // Search Filters
+    private string searchSubject = "";
+    private string searchTeacher = "";
+    private string filterTeacherName = "";
+
+    protected override void OnInitialized()
+    {
+        SetCurrentWeek();
+    }
+
+    // --- LOGIC ---
+    private void SetCurrentWeek()
+    {
+        var today = DateTime.Today;
+        int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+        startDate = today.AddDays(-1 * diff);
+        endDate = startDate.AddDays(6);
+    }
+
+    private void PreviousWeek() { startDate = startDate.AddDays(-7); endDate = endDate.AddDays(-7); }
+    private void NextWeek() { startDate = startDate.AddDays(7); endDate = endDate.AddDays(7); }
+    private string GetDayName(int thu) => thu == 8 ? "Chủ Nhật" : $"Thứ {thu}";
+
+    // --- ACTIONS ---
+    private void ShowAddForm() { showModal = true; isEditing = false; }
+
+    private void EditTKB(MockTKB item)
+    {
+        showModal = true;
+        isEditing = true;
+        searchSubject = item.MonHoc;
+        searchTeacher = item.GiaoVien;
+    }
+
+    private void CloseModal() => showModal = false;
+    private void SaveData() => showModal = false;
+
+    // Xóa nhiều
+    private int CountSelected() => MockData.Count(x => x.IsSelected);
+    private void DeleteSelectedTKB() => MockData.RemoveAll(x => x.IsSelected);
+
+    // Color Helper
+    private string GetSubjectColor(string name)
+    {
+        string[] colors = { "#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4" };
+        if (string.IsNullOrEmpty(name)) return "#ccc";
+        return colors[Math.Abs(name.GetHashCode()) % colors.Length];
+    }
+
+    // --- MOCK DATA ---
+    public class MockTKB
+    {
+        public int Thu { get; set; }
+        public int Tiet { get; set; }
+        public string MonHoc { get; set; } = "";
+        public string Lop { get; set; } = "";
+        public string GiaoVien { get; set; } = "";
+
+        // Hai thuộc tính quan trọng bạn cần
+        public bool IsActive { get; set; } = false;   // Cho dấu chấm đỏ
+        public bool IsSelected { get; set; } = false; // Cho checkbox
+    }
+
+    public class MockPeriod { public int Index { get; set; } public string Time { get; set; } = ""; }
+
+    private List<MockPeriod> MockPeriods = new()
+    {
+        new() {Index=1, Time="07:15 - 08:15"}, new() {Index=2, Time="08:15 - 09:00"}, new() {Index=3, Time="09:00 - 09:45"},
+        new() {Index=4, Time="10:00 - 10:45"}, new() {Index=5, Time="10:45 - 11:30"}
+    };
+
+    private List<MockTKB> MockData = new()
+    {
+        new MockTKB { Thu = 2, Tiet = 1, MonHoc = "GD Chính Trị", Lop = "DC25T", GiaoVien = "Nguyễn Văn A" },
+        new MockTKB { Thu = 3, Tiet = 1, MonHoc = "Nghiệp vụ Lễ tân", Lop = "NH25A", GiaoVien = "Trần Thị B" },
+        // Item này có IsActive = true để test dấu chấm đỏ
+        new MockTKB { Thu = 4, Tiet = 2, MonHoc = "Tin học", Lop = "DC25T", GiaoVien = "Đặng Văn C", IsActive = true },
+        new MockTKB { Thu = 6, Tiet = 1, MonHoc = "Giáo dục chính trị", Lop = "DL25B1", GiaoVien = "Lê Văn D" }
+    };
+}

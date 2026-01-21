@@ -1,0 +1,165 @@
+﻿@page "/training/semesters"
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý Học Kỳ</PageTitle>
+
+<div class="lm-page-container lm-animate-fade-in">
+    <div class="lm-card">
+        <div class="lm-card-header">
+            <h2 class="lm-card-title">
+                <span class="material-icons-round">date_range</span> Quản lý Học Kỳ
+            </h2>
+            <button class="lm-btn lm-btn-primary" @onclick="OpenCreateModal">
+                <span class="material-icons-round" style="font-size:18px; margin-right:4px;">add</span> Thêm Học Kỳ
+            </button>
+        </div>
+
+        <div class="lm-toolbar">
+            <div class="lm-filter-group">
+                <label class="lm-label">Năm học</label>
+                <select class="lm-select">
+                    <option>Tất cả</option>
+                    <option>2025-2026</option>
+                    <option>2024-2025</option>
+                </select>
+            </div>
+            <div class="lm-filter-group" style="flex: 2;">
+                <label class="lm-label">Tìm kiếm</label>
+                <div class="lm-input-icon-wrapper">
+                    <span class="material-icons-round">search</span>
+                    <input class="lm-input" placeholder="Tìm tên học kỳ..." />
+                </div>
+            </div>
+            <button class="lm-btn lm-btn-primary">Tìm kiếm</button>
+        </div>
+
+        <div class="lm-table-wrapper">
+            <table class="lm-table">
+                <thead>
+                    <tr>
+                        <th class="lm-text-center" style="width: 60px;">STT</th>
+                        <th>Tên Học Kỳ</th>
+                        <th>Năm Học</th>
+                        <th>Ngày Bắt Đầu</th>
+                        <th>Ngày Kết Thúc</th>
+                        <th class="lm-text-center">Trạng Thái</th>
+                        <th class="lm-text-center" style="width: 120px;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (PagedSemesters.Any())
+                    {
+                        int index = (CurrentPage - 1) * PageSize + 1;
+                        foreach (var item in PagedSemesters)
+                        {
+                            <tr>
+                                <td class="lm-text-center">@(index++)</td>
+                                <td style="font-weight: 600; color: var(--lm-primary);">@item.Name</td>
+                                <td>@item.Year</td>
+                                <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
+                                <td class="lm-text-center">
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="lm-badge lm-badge-success"><span class="lm-badge-dot"></span> Đang diễn ra</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="lm-badge lm-badge-gray">Sắp tới</span>
+                                    }
+                                </td>
+                                <td class="lm-text-center" style="display:flex; justify-content:center; gap:8px;">
+                                    <button class="lm-btn-icon" title="Sửa"><span class="material-icons-round">edit</span></button>
+                                    <button class="lm-btn-icon delete" title="Xóa"><span class="material-icons-round">delete</span></button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="lm-text-center" style="padding: 20px; color: var(--lm-text-muted);">Không có dữ liệu</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="lm-pagination">
+            <span style="font-size:0.85rem; color:var(--lm-text-muted);">
+                Hiển thị @((CurrentPage - 1) * PageSize + 1) - @Math.Min(CurrentPage * PageSize, TotalItems) trong @TotalItems bản ghi
+            </span>
+            <div style="display:flex; gap:6px;">
+                <button class="lm-page-btn" @onclick="PrevPage" disabled="@(CurrentPage == 1)" style="@(CurrentPage == 1 ? "opacity:0.5; cursor:default;" : "")">
+                    <span class="material-icons-round">chevron_left</span>
+                </button>
+
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    var pageNumber = i;
+                    <button class="lm-page-btn @(CurrentPage == pageNumber ? "active" : "")" @onclick="() => GoToPage(pageNumber)">
+                        @pageNumber
+                    </button>
+                }
+
+                <button class="lm-page-btn" @onclick="NextPage" disabled="@(CurrentPage == TotalPages)" style="@(CurrentPage == TotalPages ? "opacity:0.5; cursor:default;" : "")">
+                    <span class="material-icons-round">chevron_right</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) { /* ... Code Modal cũ ... */ }
+
+@code {
+    private bool showModal = false;
+    private bool isEdit = false;
+    private void OpenCreateModal() { showModal = true; isEdit = false; }
+
+    // --- PAGINATION & DATA ---
+    private int CurrentPage = 1;
+    private int PageSize = 5; // Số dòng mỗi trang
+    private List<SemesterModel> AllSemesters = new();
+
+    // Tính toán dữ liệu hiển thị cho trang hiện tại
+    private List<SemesterModel> PagedSemesters => AllSemesters
+        .Skip((CurrentPage - 1) * PageSize)
+        .Take(PageSize)
+        .ToList();
+
+    private int TotalItems => AllSemesters.Count;
+    private int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
+
+    protected override void OnInitialized()
+    {
+        // Tạo dữ liệu giả (Mock Data)
+        for (int i = 1; i <= 12; i++)
+        {
+            AllSemesters.Add(new SemesterModel
+            {
+                Id = i,
+                Name = $"Học kỳ {((i - 1) % 3) + 1}",
+                Year = $"202{4 + (i / 3)}-202{5 + (i / 3)}",
+                StartDate = DateTime.Today.AddMonths(i * 3),
+                EndDate = DateTime.Today.AddMonths(i * 3 + 4),
+                IsActive = i == 1
+            });
+        }
+    }
+
+    private void NextPage() { if (CurrentPage < TotalPages) CurrentPage++; }
+    private void PrevPage() { if (CurrentPage > 1) CurrentPage--; }
+    private void GoToPage(int page) { CurrentPage = page; }
+
+    // Model class
+    public class SemesterModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Year { get; set; } = "";
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public bool IsActive { get; set; }
+    }
+}

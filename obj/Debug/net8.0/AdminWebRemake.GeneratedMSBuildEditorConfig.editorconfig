@@ -84,6 +84,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XFRpbWVDb25maWcucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/TrainManagement/Schedule.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFpbk1hbmFnZW1lbnRcU2NoZWR1bGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/TrainManagement/Semester.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFpbk1hbmFnZW1lbnRcU2VtZXN0ZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/TrainManagement/Subject.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFpbk1hbmFnZW1lbnRcU3ViamVjdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Routes.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSb3V0ZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

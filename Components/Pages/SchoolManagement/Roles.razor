@@ -3,44 +3,41 @@
 
 <PageTitle>Quản lý chức vụ</PageTitle>
 
-<div class="animate-fade-in flex-col gap-6">
-    <div class="std-card">
-        <!-- Header -->
-        <div class="flex-between mb-4 flex-wrap gap-4">
-            <h2 class="card-title">
-                <span class="material-icons-round">admin_panel_settings</span>
-                Danh sách chức vụ
-            </h2>
-            <button class="btn btn-primary">
+<div class="sm-page-container sm-animate-fade-in">
+    <div class="sm-card">
+        <div class="sm-card-header">
+            <div>
+                <h2 class="sm-card-title">
+                    <span class="material-icons-round">admin_panel_settings</span> Danh sách chức vụ
+                </h2>
+                <span class="sm-text-muted" style="font-size: 0.9rem; margin-left: 38px;">Phân quyền chức vụ nhân viên</span>
+            </div>
+            <button class="sm-btn sm-btn-primary">
                 <span class="material-icons-round">add</span> Thêm chức vụ
             </button>
         </div>
 
-        <!-- Filters -->
-        <div class="filter-container">
-            <div class="filter-item-large">
-                <label class="form-label">Từ khóa</label>
-                <div class="input-wrapper">
-                    <span class="material-icons-round input-icon">search</span>
-                    <input class="form-input input-has-icon" placeholder="Tìm kiếm chức vụ..." />
+        <div class="sm-toolbar">
+            <div class="sm-filter-group" style="grid-column: span 2;">
+                <label class="sm-label">Từ khóa</label>
+                <div class="sm-input-icon-wrapper">
+                    <span class="material-icons-round">search</span>
+                    <input class="sm-form-control" placeholder="Tìm kiếm tên chức vụ, mã chức vụ..." />
                 </div>
             </div>
-            <div class="filter-actions">
-                <button class="btn btn-primary">Tìm kiếm</button>
-            </div>
+            <button class="sm-btn sm-btn-primary" style="width: fit-content;">Tìm kiếm</button>
         </div>
 
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table class="data-table">
+        <div class="sm-table-responsive">
+            <table class="sm-table">
                 <thead>
                     <tr>
-                        <th class="text-center w-16">STT</th>
-                        <th>Mã chức vụ</th>
+                        <th class="text-center" style="width: 60px;">STT</th>
+                        <th style="width: 140px;">Mã chức vụ</th>
                         <th>Tên chức vụ</th>
                         <th>Mô tả</th>
-                        <th class="text-center">Số lượng nhân sự</th>
-                        <th class="text-center">Thao tác</th>
+                        <th class="text-center">Nhân sự</th>
+                        <th class="text-center" style="width: 120px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,21 +45,28 @@
                     {
                         <tr>
                             <td class="text-center">@i</td>
-                            <td class="text-muted font-mono">ROLE_00@i</td>
-                            <td style="font-weight: 500;">
-                                @if (i == 1) { <text>Ban Giám Hiệu</text> }
-                                else if (i == 2) { <text>Giáo viên CN</text> }
-                                else { <text>Nhân viên</text> }
+                            <td><span class="sm-badge sm-badge-gray sm-font-mono">ROLE_00@i</span></td>
+                            <td class="fw-bold">
+                                @if (i == 1)
+                                {
+                                    <span class="sm-text-danger">Ban Giám Hiệu</span>
+                                }
+                                else if (i == 2)
+                                {
+
+                                    <span class="sm-text-primary">Giáo viên CN</span>
+                                }
+                                else
+                                {
+
+                                    <span>Nhân viên</span>
+                                }
                             </td>
-                            <td class="text-muted">Quản lý toàn bộ hoạt động...</td>
-                            <td class="text-center"><span class="status-badge bg-blue-light">@(i * 5) người</span></td>
+                            <td class="sm-text-muted">Quản lý toàn bộ hoạt động...</td>
+                            <td class="text-center"><span class="sm-badge sm-badge-primary">@(i * 5) người</span></td>
                             <td class="text-center">
-                                <button class="btn-icon" title="Sửa">
-                                    <span class="material-icons-round text-primary">edit</span>
-                                </button>
-                                <button class="btn-icon danger" title="Xóa">
-                                    <span class="material-icons-round">delete</span>
-                                </button>
+                                <button class="sm-btn-icon" title="Chỉnh sửa"><span class="material-icons-round">edit</span></button>
+                                <button class="sm-btn-icon delete" title="Xóa"><span class="material-icons-round">delete</span></button>
                             </td>
                         </tr>
                     }

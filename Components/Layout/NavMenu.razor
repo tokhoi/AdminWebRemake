@@ -1,30 +1,183 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">AdminWebRemake</a>
+﻿@implements IDisposable
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+
+<header class="layout-header">
+    <div class="header-inner">
+        <div class="brand-area">
+            <button class="menu-toggle-btn" @onclick="ToggleMobileMenu">
+                <span class="material-icons-round">menu</span>
+            </button>
+
+            <div class="logo-box">
+                <img class="logo-img" src="https://placehold.co/400" alt="logo-truong" />
+            </div>
+            <h1 class="brand-name">Tên Trường</h1>
+        </div>
+
+        <div class="user-area">
+            <div class="user-info">
+                <span class="material-icons-round" style="color: #fde047;">person</span>
+                <span>Admin</span>
+            </div>
+            <button class="year-btn">
+                2025-2026 <span class="material-icons-round">expand_more</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-nav-container desktop-only">
+        <nav class="main-nav">
+            @foreach (var item in MenuItems)
+            {
+                <div class="nav-item-wrap">
+                    @{
+                        bool hasSub = item.SubItems != null && item.SubItems.Any();
+                    }
+                    @if (hasSub)
+                    {
+                        var isActive = !string.IsNullOrEmpty(item.Link) && NavManager.Uri.Contains(item.Link);
+                        <div class="nav-link @(isActive ? "active" : "")">
+                            <span class="material-icons-round" style="font-size:18px; color: @item.IconColor;">@item.Icon</span> @item.Title
+                            <span class="material-icons-round arrow-icon" style="font-size:14px; margin-left:2px;">expand_more</span>
+                        </div>
+                        <div class="nav-dropdown @(item.SubItems!.Count > 6 ? "two-cols" : "")">
+                            @foreach (var sub in item.SubItems)
+                            {
+                                <NavLink href="@sub.Link" class="dropdown-item">
+                                    <span class="material-icons-round sub-icon">@(string.IsNullOrEmpty(sub.Icon) ? "fiber_manual_record" : sub.Icon)</span> @sub.Title
+                                </NavLink>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <NavLink href="@item.Link" Match="NavLinkMatch.All" class="nav-link">
+                            <span class="material-icons-round" style="font-size:18px; color: @item.IconColor;">@item.Icon</span> @item.Title
+                        </NavLink>
+                    }
+                </div>
+            }
+        </nav>
+    </div>
+</header>
+
+<div class="mobile-wrapper @(_isMobileMenuOpen ? "open" : "")">
+    <div class="mobile-backdrop" @onclick="CloseMobileMenu"></div>
+
+    <div class="mobile-drawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">
+                <div class="logo-box" style="color:#333; background: #fff">TH</div>
+                <span style="font-weight: 700; color: #fff;">Menu Chính</span>
+            </div>
+            <button class="drawer-close-btn" @onclick="CloseMobileMenu">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+
+        <div class="drawer-body">
+            @foreach (var item in MenuItems)
+            {
+                bool hasSub = item.SubItems != null && item.SubItems.Any();
+                bool isExpanded = expandedMenuTitle == item.Title;
+
+                <div class="drawer-item-group @(isExpanded ? "expanded" : "")">
+                    <div class="drawer-link-parent" @onclick="() => ToggleSubMenu(item.Title, hasSub, item.Link)">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="material-icons-round" style="color: @(item.IconColor == "white" ? "#666" : item.IconColor);">@item.Icon</span>
+                            <span class="drawer-text">@item.Title</span>
+                        </div>
+                        @if (hasSub)
+                        {
+                            <span class="material-icons-round chevron">expand_more</span>
+                        }
+                    </div>
+
+                    @if (hasSub && isExpanded)
+                    {
+                        <div class="drawer-sub-panel animate-slide-down">
+                            @foreach (var sub in item.SubItems!)
+                            {
+                                <NavLink href="@sub.Link" class="drawer-sub-item" @onclick="CloseMobileMenu">
+                                    <div class="sub-icon-box">
+                                        <span class="material-icons-round">@(string.IsNullOrEmpty(sub.Icon) ? "fiber_manual_record" : sub.Icon)</span>
+                                    </div>
+                                    <span class="sub-text">@sub.Title</span>
+                                </NavLink>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+@code {
+    private bool _isMobileMenuOpen = false;
+    private string? expandedMenuTitle = null; // Theo dõi menu nào đang mở
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += HandleLocationChanged;
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (_isMobileMenuOpen)
+        {
+            _isMobileMenuOpen = false;
+            expandedMenuTitle = null; // Reset menu con khi chuyển trang
+            StateHasChanged();
+        }
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= HandleLocationChanged;
+    }
 
+    private void ToggleMobileMenu()
+    {
+        _isMobileMenuOpen = !_isMobileMenuOpen;
+    }
+
+    private void CloseMobileMenu()
+    {
+        _isMobileMenuOpen = false;
+    }
+
+    // Xử lý mở accordion menu con
+    private void ToggleSubMenu(string title, bool hasSub, string link)
+    {
+        if (!hasSub)
+        {
+            NavManager.NavigateTo(link);
+            CloseMobileMenu();
+            return;
+        }
+
+        if (expandedMenuTitle == title)
+        {
+            expandedMenuTitle = null; // Đóng nếu đang mở
+        }
+        else
+        {
+            expandedMenuTitle = title; // Mở cái mới
+        }
+    }
+
+    public class MenuItem { public string Title { get; set; } = ""; public string Link { get; set; } = "#"; public string Icon { get; set; } = ""; public string IconColor { get; set; } = "white"; public List<MenuItem>? SubItems { get; set; } }
+
+    private List<MenuItem> MenuItems = new List<MenuItem> {
+        new MenuItem { Title = "Tổng quan", Link = "", Icon = "dashboard", IconColor = "#facc15" },
+        new MenuItem { Title = "QL Trường học", Link = "school", Icon = "school", IconColor = "#0ea5e9", SubItems = new List<MenuItem> { new MenuItem { Title = "Thông tin trường", Link = "school/info", Icon = "info" }, new MenuItem { Title = "Chức vụ", Link = "school/roles", Icon = "badge" }, new MenuItem { Title = "Khối", Link = "school/grades", Icon = "view_column" }, new MenuItem { Title = "Lớp", Link = "school/classes", Icon = "class" }, new MenuItem { Title = "Giáo viên", Link = "school/teachers", Icon = "person" }, new MenuItem { Title = "Phân công", Link = "school/assignment", Icon = "assignment_ind" }, new MenuItem { Title = "Duyệt phép", Link = "school/leaves", Icon = "playlist_add_check" }, new MenuItem { Title = "Học sinh", Link = "school/students", Icon = "face" }, new MenuItem { Title = "Phân quyền", Link = "school/permissions", Icon = "security" }, new MenuItem { Title = "Cấu hình giờ", Link = "school/time-config", Icon = "schedule" }, new MenuItem { Title = "Phụ huynh", Link = "school/parents", Icon = "family_restroom" }, new MenuItem { Title = "Camera AI", Link = "school/camera", Icon = "videocam" } } },
+        new MenuItem { Title = "QL Đào tạo", Link = "training", Icon = "school", IconColor = "#22c55e", SubItems = new List<MenuItem> { new MenuItem { Title = "Học kỳ", Link = "training/semesters", Icon = "date_range" }, new MenuItem { Title = "Môn học", Link = "training/subjects", Icon = "menu_book" }, new MenuItem { Title = "Thời khoá biểu", Link = "training/schedule", Icon = "calendar_month" } } },
+        new MenuItem { Title = "QL Thông báo", Link = "notifications", Icon = "notifications", IconColor = "#ef4444", SubItems = new List<MenuItem> { new MenuItem { Title = "Thông báo chung", Link = "notifications/general", Icon = "campaign" }, new MenuItem { Title = "Báo bài", Link = "notifications/assignments", Icon = "assignment" }, new MenuItem { Title = "Thực đơn", Link = "notifications/menu", Icon = "restaurant_menu" } } },
+        new MenuItem { Title = "QL Học tập", Link = "study", Icon = "menu_book", IconColor = "#a855f7" },
+        new MenuItem { Title = "QL Bán trú", Link = "meals", Icon = "restaurant", IconColor = "#f97316" },
+        new MenuItem { Title = "Đồng bộ", Link = "sync", Icon = "sync", IconColor = "#ec4899" },
+        new MenuItem { Title = "Thư viện số", Link = "library", Icon = "local_library", IconColor = "#14b8a6" }
+    };
+}

@@ -3,62 +3,49 @@
 
 <PageTitle>Danh sách học sinh</PageTitle>
 
-<div class="animate-fade-in flex-col gap-6">
-    <div class="std-card">
-        <!-- Header -->
-        <div class="flex-between mb-4 flex-wrap gap-4">
-            <h2 class="card-title">
-                <span class="material-icons-round">person</span>
-                Hồ sơ học sinh
-            </h2>
-            <div class="flex gap-2">
-                <button class="btn btn-outline">
-                    <span class="material-icons-round">file_upload</span> Import
-                </button>
-                <button class="btn btn-primary">
-                    <span class="material-icons-round">person_add</span> Thêm mới
-                </button>
+<div class="sm-page-container sm-animate-fade-in">
+    <div class="sm-card">
+        <div class="sm-card-header">
+            <div>
+                <h2 class="sm-card-title">
+                    <span class="material-icons-round">school</span> Hồ sơ học sinh
+                </h2>
+                <span class="sm-text-muted" style="font-size: 0.9rem; margin-left: 38px;">Quản lý thông tin học sinh</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="sm-btn sm-btn-outline"><span class="material-icons-round">upload</span> Import</button>
+                <button class="sm-btn sm-btn-primary"><span class="material-icons-round">person_add</span> Thêm mới</button>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="filter-container">
-            <div class="filter-item">
-                <label class="form-label">Khối</label>
-                <select class="form-input">
-                    <option>Tất cả</option>
-                </select>
+        <div class="sm-toolbar">
+            <div class="sm-filter-group">
+                <label class="sm-label">Khối</label>
+                <select class="sm-form-select"><option>Tất cả</option></select>
             </div>
-            <div class="filter-item">
-                <label class="form-label">Lớp</label>
-                <select class="form-input">
-                    <option>Tất cả</option>
-                </select>
+            <div class="sm-filter-group">
+                <label class="sm-label">Lớp</label>
+                <select class="sm-form-select"><option>Tất cả</option></select>
             </div>
-            <div class="filter-item">
-                <label class="form-label">Trạng thái</label>
-                <select class="form-input">
-                    <option>Đang học</option>
-                </select>
+            <div class="sm-filter-group">
+                <label class="sm-label">Trạng thái</label>
+                <select class="sm-form-select"><option>Đang học</option></select>
             </div>
-            <div class="filter-item-large">
-                <label class="form-label">Từ khóa</label>
-                <div class="input-wrapper">
-                    <span class="material-icons-round input-icon">search</span>
-                    <input class="form-input input-has-icon" placeholder="Tìm tên, mã học sinh..." />
+            <div class="sm-filter-group" style="grid-column: span 2;">
+                <label class="sm-label">Tìm kiếm</label>
+                <div class="sm-input-icon-wrapper">
+                    <span class="material-icons-round">search</span>
+                    <input class="sm-form-control" placeholder="Tìm tên, mã học sinh..." />
                 </div>
             </div>
-            <div class="filter-actions">
-                <button class="btn btn-primary">Tìm kiếm</button>
-            </div>
+            <button class="sm-btn sm-btn-primary">Tìm kiếm</button>
         </div>
 
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table class="data-table">
+        <div class="sm-table-responsive">
+            <table class="sm-table">
                 <thead>
                     <tr>
-                        <th class="text-center w-12">STT</th>
+                        <th class="text-center" style="width: 50px;">STT</th>
                         <th>Mã HS</th>
                         <th>Họ và tên</th>
                         <th>Ngày sinh</th>
@@ -74,24 +61,25 @@
                     {
                         <tr>
                             <td class="text-center">@i</td>
-                            <td class="text-muted font-mono">HS202500@i</td>
-                            <td style="font-weight: 500;">Trần Văn Học Sinh @i</td>
-                            <td>15/08/2018</td>
+                            <td><span class="sm-font-mono sm-text-primary fw-bold">HS202500@i</span></td>
+                            <td>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #eef2ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                                        @((i + 5).ToString()[0])
+                                    </div>
+                                    <span class="fw-bold">Trần Văn Học Sinh @i</span>
+                                </div>
+                            </td>
+                            <td class="sm-text-muted">15/08/2018</td>
                             <td>@(i % 2 == 0 ? "Nam" : "Nữ")</td>
-                            <td><span class="status-badge bg-purple-light">1A1</span></td>
-                            <td>Nguyễn Văn Phụ Huynh</td>
+                            <td><span class="sm-badge sm-badge-purple">1A1</span></td>
+                            <td class="sm-text-muted">Nguyễn Văn Phụ Huynh</td>
                             <td class="text-center">
-                                <span class="status-badge bg-green-light">
-                                    <span class="dot dot-green"></span> Đang học
-                                </span>
+                                <span class="sm-badge sm-badge-success"><span class="sm-badge-dot"></span> Đang học</span>
                             </td>
                             <td class="text-center">
-                                <button class="btn-icon" title="Xem">
-                                    <span class="material-icons-round">visibility</span>
-                                </button>
-                                <button class="btn-icon" title="Sửa">
-                                    <span class="material-icons-round text-primary">edit</span>
-                                </button>
+                                <button class="sm-btn-icon" title="Xem"><span class="material-icons-round">visibility</span></button>
+                                <button class="sm-btn-icon" title="Sửa"><span class="material-icons-round">edit</span></button>
                             </td>
                         </tr>
                     }
@@ -99,16 +87,13 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="flex-between p-4 bg-gray-50" style="border-top: 1px solid var(--border); margin-top: 1rem;">
-            <div class="pagination">
-                <button class="pagination-btn"><span class="material-icons-round" style="font-size: 16px;">chevron_left</span></button>
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-                <button class="pagination-btn"><span class="material-icons-round" style="font-size: 16px;">chevron_right</span></button>
+        <div class="sm-pagination">
+            <span class="sm-text-muted" style="font-size:0.85rem;">Hiển thị 1 - 10 trong 1384 học sinh</span>
+            <div style="display:flex; gap:6px;">
+                <button class="sm-page-btn active">1</button>
+                <button class="sm-page-btn">2</button>
+                <button class="sm-page-btn"><span class="material-icons-round">chevron_right</span></button>
             </div>
-            <div class="text-muted" style="font-size: 0.8rem;">1 - 10 của 1384 học sinh</div>
         </div>
     </div>
 </div>
