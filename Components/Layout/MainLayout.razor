@@ -12,7 +12,6 @@
                     <NavLink href="" Match="NavLinkMatch.All" class="sub-tab-link">Tổng quan</NavLink>
                     <NavLink href="teacher-attendance" class="sub-tab-link">Điểm danh giáo viên</NavLink>
                     <NavLink href="student-attendance" class="sub-tab-link">Điểm danh học sinh</NavLink>
-                    <NavLink href="attendance-stats" class="sub-tab-link">Thống kê điểm danh</NavLink>
                 </div>
             }
             <div class="layout-viewport">
@@ -23,7 +22,6 @@
 </div>
 
 @code {
-    // Logic xác định trang chủ để chỉnh CSS
     private bool IsHomePage =>
         string.IsNullOrEmpty(NavManager.ToBaseRelativePath(NavManager.Uri)) ||
         NavManager.Uri.EndsWith("/", StringComparison.OrdinalIgnoreCase);

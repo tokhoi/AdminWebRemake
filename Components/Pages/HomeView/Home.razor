@@ -1,315 +1,1499 @@
 ﻿@page "/"
+@using System.Globalization
 @rendermode InteractiveServer
-@inject IJSRuntime JS
 
-<PageTitle>Tổng quan</PageTitle>
+<PageTitle>Trang Tổng Quan Hệ Thống - TitKul</PageTitle>
 
-<div class="page-home-dashboard animate-fade-in">
-    <div class="std-card" style="flex: 0 0 auto; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
-        <div class="flex-between">
-            <div class="card-title" style="font-size: 1.25rem; margin:0;">
-                <div class="tea-icon"><span class="material-icons-round">dashboard</span></div>
-                Tổng quan
-            </div>
-            <div class="action-group">
-                <button class="btn btn-primary" @onclick="() => IsCalendarOpen = true">
-                    <span class="material-icons-round">calendar_month</span>
-                    <span>@SelectedDate.ToString("dd/MM/yyyy")</span>
-                    <span class="material-icons-round" style="font-size: 16px;">expand_more</span>
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="tk-dashboard-wrapper">
+    <div class="tk-container">
+        <div class="tk-grid-layout">
 
-    <div class="home-stats-row">
-        <div class="stat-card" style="background: var(--grad-blue);">
-            <div class="stat-icon-box"><span class="material-icons-round">school</span></div>
-            <div class="stat-info"><p class="stat-label">Học sinh</p><p class="stat-value">1384</p></div>
-            <div class="blob-1"></div>
-        </div>
-        <div class="stat-card" style="background: var(--grad-orange);">
-            <div class="stat-icon-box"><span class="material-icons-round">person</span></div>
-            <div class="stat-info"><p class="stat-label">Giáo viên</p><p class="stat-value">76</p></div>
-            <div class="blob-1"></div>
-        </div>
-        <div class="stat-card" style="background: var(--grad-green);">
-            <div class="stat-icon-box"><span class="material-icons-round">apartment</span></div>
-            <div class="stat-info"><p class="stat-label">Khối</p><p class="stat-value">5</p></div>
-            <div class="blob-1"></div>
-        </div>
-        <div class="stat-card" style="background: var(--grad-purple);">
-            <div class="stat-icon-box"><span class="material-icons-round">domain</span></div>
-            <div class="stat-info"><p class="stat-label">Lớp học</p><p class="stat-value">35</p></div>
-            <div class="blob-1"></div>
-        </div>
-    </div>
+            @* ================= HÀNG 1 ================= *@
 
-    <div class="home-charts-grid">
-        <div class="std-card home-chart-card">
-            <div class="card-header">
-                <div class="card-title" style="font-size: 1rem;">
-                    <div class="bar-indicator" style="background: #3b82f6;"></div>
-                    Điểm danh học sinh
+            @* 1. BANNER (Bên Trái) *@
+            <div class="tk-banner tk-banner-slim tk-grid-col-left">
+
+                <div class="tk-banner-bg-wrapper">
+                    <div class="tk-blob tk-blob-1"></div>
+                    <div class="tk-blob tk-blob-2"></div>
+
+                    <div class="tk-bubble tk-bubble-1"></div>
+                    <div class="tk-bubble tk-bubble-2"></div>
+                    <div class="tk-bubble tk-bubble-3"></div>
+                    <div class="tk-bubble tk-bubble-4"></div>
+                    <div class="tk-bubble tk-bubble-5"></div>
+                    <div class="tk-bubble tk-bubble-6"></div>
+                    <div class="tk-bubble tk-bubble-7"></div>
                 </div>
-                <div class="session-tabs">
-                    <span class="@(StudentSession == "AM" ? "active" : "")" @onclick='() => ChangeStudentSession("AM")'>Sáng</span>
-                    <span class="@(StudentSession == "PM" ? "active" : "")" @onclick='() => ChangeStudentSession("PM")'>Chiều</span>
-                </div>
-            </div>
 
-            <div class="home-chart-body flex-center" style="flex-direction: column;">
-                <div class="chart-wrapper">
-                    <canvas id="studentAttendanceChart" style="width: 180px; height: 180px;"></canvas>
-                    <div class="chart-center">
-                        @{
-                            var sData = StudentSession == "AM" ? StudentDataAM : StudentDataPM;
-                            double sTotal = sData.Present + sData.Late + sData.Absent;
-                            double sRate = sTotal > 0 ? Math.Round((sData.Present + sData.Late) / sTotal * 100, 1) : 0;
-                        }
-                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">@sRate%</span>
+                <div class="tk-banner-content">
+                    <h2 class="tk-banner-title">Xin chào, Admin!</h2>
+                    <p class="tk-banner-subtitle">Chúc bạn một ngày làm việc hiệu quả tại Trường ABC.</p>
+
+                    <div class="tk-banner-stats">
+                        <div class="tk-stat-pill">
+                            <span class="material-symbols-outlined tk-icon-lg">groups</span>
+                            <div class="tk-stat-info">
+                                <div class="tk-stat-number">@MorningPresentStudents.ToString("N0")</div>
+                                <div class="tk-stat-label">Học sinh đi học</div>
+                            </div>
+                        </div>
+                        <div class="tk-stat-pill">
+                            <span class="material-symbols-outlined tk-icon-lg">person</span>
+                            <div class="tk-stat-info">
+                                <div class="tk-stat-number">@TotalTeachers.ToString("N0")</div>
+                                <div class="tk-stat-label">Đi trễ</div>
+                            </div>
+                        </div>
+                        <div class="tk-stat-pill">
+                            <span class="material-symbols-outlined tk-icon-lg">person_off</span>
+                            <div class="tk-stat-info">
+                                <div class="tk-stat-number">@MorningAbsentTeachers.ToString("N0")</div>
+                                <div class="tk-stat-label">Nghỉ</div>
+                            </div>
+                        </div>
+                        <div class="tk-stat-pill">
+                            <span class="material-symbols-outlined tk-icon-lg">block</span>
+                            <div class="tk-stat-info">
+                                <div class="tk-stat-number">2</div>
+                                <div class="tk-stat-label">Nghỉ không phép</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="chart-legend-compact">
-                    <div class="legend-item" title="Có mặt">
-                        <span class="legend-dot" style="background: #22c55e;"></span>
-                        <span class="legend-text"><b>@sData.Present</b></span>
-                    </div>
-                    <div class="legend-item" title="Đi trễ">
-                        <span class="legend-dot" style="background: #eab308;"></span>
-                        <span class="legend-text"><b>@sData.Late</b></span>
-                    </div>
-                    <div class="legend-item" title="Vắng">
-                        <span class="legend-dot" style="background: #ef4444;"></span>
-                        <span class="legend-text"><b>@sData.Absent</b></span>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="std-card home-chart-card">
-            <div class="card-header">
-                <div class="card-title" style="font-size: 1rem;">
-                    <div class="bar-indicator" style="background: #f97316;"></div>
-                    Điểm danh giáo viên
-                </div>
-                <div class="session-tabs">
-                    <span class="@(TeacherSession == "AM" ? "active" : "")" @onclick='() => ChangeTeacherSession("AM")'>Sáng</span>
-                    <span class="@(TeacherSession == "PM" ? "active" : "")" @onclick='() => ChangeTeacherSession("PM")'>Chiều</span>
+                <div class="tk-banner-illustration">
+                    <img src="./images/banner-corner.png" alt="Students Illustration" class="tk-banner-img" />
                 </div>
             </div>
 
-            <div class="home-chart-body flex-center" style="flex-direction: column;">
-                <div class="chart-wrapper">
-                    <canvas id="teacherAttendanceChart" style="width: 180px; height: 180px;"></canvas>
-                    <div class="chart-center">
-                        @{
-                            var tData = TeacherSession == "AM" ? TeacherDataAM : TeacherDataPM;
-                            double tTotal = tData.Present + tData.Late + tData.Absent;
-                            double tRate = tTotal > 0 ? Math.Round((tData.Present + tData.Late) / tTotal * 100, 1) : 0;
-                        }
-                        <span class="c-main" style="font-size: 2.5rem; font-weight: 900; color: #1e293b;">@tRate%</span>
-                    </div>
+            @* KHỐI THÔNG BÁO (Bên Phải) *@
+            <div class="tk-card tk-grid-col-right tk-card-flex">
+                <div class="tk-card-header tk-border-bottom">
+                    <h3 class="tk-section-title tk-text-md">
+                        <span class="material-symbols-outlined tk-text-red">notifications_active</span> Thông báo mới
+                    </h3>
+                    <a class="tk-link-blue">Xem tất cả</a>
                 </div>
-                <div class="chart-legend-compact">
-                    <div class="legend-item" title="Có mặt">
-                        <span class="legend-dot" style="background: #22c55e;"></span>
-                        <span class="legend-text"><b>@tData.Present</b></span>
+                <div class="tk-notification-list">
+                    <div class="tk-notif-item">
+                        <div class="tk-notif-icon tk-bg-blue"><span class="material-symbols-outlined">mail</span></div>
+                        <div class="tk-notif-content">
+                            <p class="tk-notif-title">Thông báo lịch nghỉ lễ</p>
+                            <p class="tk-notif-time">Phòng hành chính • 2 giờ trước</p>
+                        </div>
                     </div>
-                    <div class="legend-item" title="Đi trễ">
-                        <span class="legend-dot" style="background: #eab308;"></span>
-                        <span class="legend-text"><b>@tData.Late</b></span>
+                    <div class="tk-notif-item">
+                        <div class="tk-notif-icon tk-bg-green"><span class="material-symbols-outlined">update</span></div>
+                        <div class="tk-notif-content">
+                            <p class="tk-notif-title">Cập nhật hệ thống v2.0</p>
+                            <p class="tk-notif-time">Ban kỹ thuật • Hôm qua</p>
+                        </div>
                     </div>
-                    <div class="legend-item" title="Vắng">
-                        <span class="legend-dot" style="background: #ef4444;"></span>
-                        <span class="legend-text"><b>@tData.Absent</b></span>
+                    <div class="tk-notif-item">
+                        <div class="tk-notif-icon tk-bg-orange"><span class="material-symbols-outlined">warning</span></div>
+                        <div class="tk-notif-content">
+                            <p class="tk-notif-title">Cảnh báo thời tiết xấu</p>
+                            <p class="tk-notif-time">BGH • Hôm qua</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="std-card home-list-card-small">
-            <div class="card-header">
-                <div class="card-title" style="font-size: 1rem;">
-                    <div class="bar-indicator" style="background: var(--c-green)"></div>
-                    Chi tiết khối
+            @* ================= HÀNG 2 ================= *@
+
+            @* 2. KHỐI ĐIỂM DANH (Bên Trái) *@
+            <div class="tk-card tk-attendance-section tk-grid-col-left tk-card-flex">
+                <div class="tk-card-header">
+                    <div>
+                        <h3 class="tk-section-title">
+                            <span class="tk-title-indicator"></span> Tình hình Điểm danh
+                        </h3>
+                        <p class="tk-section-subtitle">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new CultureInfo("vi-VN"))</p>
+                    </div>
+                    <div class="tk-header-actions">
+                        <button class="tk-btn-icon tk-btn-blue" @onclick="RefreshData" title="Làm mới số liệu ngẫu nhiên">
+                            <span class="material-symbols-outlined">sync</span>
+                        </button>
+                        <button class="tk-btn-icon tk-btn-blue" @onclick="OpenCalendarModal" title="Chọn ngày">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                        </button>
+                    </div>
                 </div>
-                @if (SelectedGrade != null)
-                {
-                    <button class="btn-icon" @onclick="BackToOverview"><span class="material-icons-round text-red">keyboard_return</span></button>
-                }
-            </div>
-            <div class="home-list-scroll-small">
-                @if (SelectedGrade == null)
-                {
-                    @foreach (var item in GradeStats)
-                    {
-                        <div class="progress-row-small" @onclick="() => SelectGrade(item)">
-                            <div class="grade-icon-small" style="background: @item.Color;">@item.ShortName</div>
-                            <div class="p-content-small">
-                                <div class="flex-between" style="gap: 8px; margin-bottom: 4px;"><span class="p-name-small">@item.Name</span><span class="p-val-small">@item.Present/@item.Total</span></div>
-                                <div class="p-bar-small">
-                                    <div class="p-fill" style="width: @Math.Round((double)item.Present / item.Total * 100)%; background: @item.Color; height: 100%;"></div>
+                <div class="tk-attendance-grid">
+                    @* Cột Buổi sáng *@
+                    <div class="tk-att-col">
+                        <div class="tk-bg-icon"><span class="material-symbols-outlined">wb_sunny</span></div>
+                        <div class="tk-att-content">
+                            <div class="tk-att-header">
+                                <div class="tk-icon-circle tk-icon-orange"><span class="material-symbols-outlined">wb_sunny</span></div>
+                                <div>
+                                    <h4 class="tk-att-title">Buổi Sáng</h4>
+                                    <span class="tk-badge tk-badge-green">Đã chốt sổ</span>
+                                </div>
+                            </div>
+
+                            <div class="tk-progress-group">
+                                <div class="tk-progress-header">
+                                    <div class="tk-progress-label"><span class="material-symbols-outlined">groups</span> Học sinh</div>
+                                    <div class="tk-progress-percent">@MorningStudentPercent%</div>
+                                </div>
+                                <div class="tk-progress-bar">
+                                    <div class="tk-progress-fill tk-fill-green" style="width: @GetCssWidth(MorningStudentPercent); transition: width 0.8s ease-in-out;"></div>
+                                </div>
+                                <div class="tk-progress-stats">
+                                    <span>Có mặt: <b>@MorningPresentStudents.ToString("N0")</b>/@TotalStudents.ToString("N0")</span>
+                                    <span>Vắng: <b class="tk-text-red">@MorningAbsentStudents.ToString("N0")</b></span>
+                                </div>
+                            </div>
+
+                            <div class="tk-progress-group">
+                                <div class="tk-progress-header">
+                                    <div class="tk-progress-label"><span class="material-symbols-outlined">person_apron</span> Giáo viên</div>
+                                    <div class="tk-progress-percent">@MorningTeacherPercent%</div>
+                                </div>
+                                <div class="tk-progress-bar">
+                                    <div class="tk-progress-fill tk-fill-blue" style="width: @GetCssWidth(MorningTeacherPercent); transition: width 0.8s ease-in-out;"></div>
+                                </div>
+                                <div class="tk-progress-stats">
+                                    <span>Có mặt: <b>@MorningPresentTeachers</b>/@TotalTeachers</span>
+                                    <span>Vắng: <b class="tk-text-red">@MorningAbsentTeachers</b></span>
                                 </div>
                             </div>
                         </div>
-                    }
-                }
-                else
-                {
-                    @foreach (var cls in DetailClasses)
-                    {
-                        <div class="progress-row-small cursor-default">
-                            <div class="grade-icon-small" style="background: #f1f5f9; color: #333; font-size: 0.6rem;">@cls.ClassName</div>
-                            <div class="p-content-small">
-                                <div class="flex-between" style="gap: 8px; margin-bottom: 4px;"><span class="p-name-small">Lớp @cls.ClassName</span><span class="p-val-small">@cls.Present/@cls.Total</span></div>
-                                <div class="p-bar-small">
-                                    <div class="p-fill" style="width: @Math.Round((double)cls.Present / cls.Total * 100)%; background: @SelectedGrade.Color; height: 100%;"></div>
+                    </div>
+
+                    @* Cột Buổi chiều *@
+                    <div class="tk-att-col @(IsAfternoonStarted ? "" : "tk-bg-gray")">
+                        <div class="tk-bg-icon"><span class="material-symbols-outlined">nights_stay</span></div>
+                        <div class="tk-att-content @(IsAfternoonStarted ? "" : "tk-opacity-70")">
+                            <div class="tk-att-header">
+                                <div class="tk-icon-circle tk-icon-indigo"><span class="material-symbols-outlined">partly_cloudy_day</span></div>
+                                <div>
+                                    <h4 class="tk-att-title">Buổi Chiều</h4>
+                                    @if (IsAfternoonStarted)
+                                    {
+                                        <span class="tk-badge tk-badge-green" style="background-color: var(--tk-primary-light); color: var(--tk-primary);">Đang diễn ra</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="tk-badge tk-badge-gray">Chưa bắt đầu</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="tk-progress-group">
+                                <div class="tk-progress-header">
+                                    <div class="tk-progress-label"><span class="material-symbols-outlined">groups</span> Học sinh</div>
+                                    <div class="tk-progress-percent @(IsAfternoonStarted ? "" : "tk-text-gray")">
+                                        @(IsAfternoonStarted ? $"{AfternoonStudentPercent}%" : "--%")
+                                    </div>
+                                </div>
+                                <div class="tk-progress-bar">
+                                    <div class="tk-progress-fill @(IsAfternoonStarted ? "tk-fill-green" : "tk-fill-gray")" style="width: @(IsAfternoonStarted? GetCssWidth(AfternoonStudentPercent) : "0%"); transition: width 0.8s ease-in-out;"></div>
+                                </div>
+                                <div class="tk-progress-stats @(IsAfternoonStarted ? "" : "tk-text-gray")">
+                                    @if (IsAfternoonStarted)
+                                    {
+                                        <span>Có mặt: <b>@AfternoonPresentStudents.ToString("N0")</b>/@TotalStudents.ToString("N0")</span>
+                                        <span>Vắng: <b class="tk-text-red">@AfternoonAbsentStudents.ToString("N0")</b></span>
+                                    }
+                                    else
+                                    {
+                                        <span>Dự kiến: <b>@TotalStudents.ToString("N0")</b></span>
+                                        <span>---</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="tk-progress-group">
+                                <div class="tk-progress-header">
+                                    <div class="tk-progress-label"><span class="material-symbols-outlined">person_apron</span> Giáo viên</div>
+                                    <div class="tk-progress-percent @(IsAfternoonStarted ? "" : "tk-text-gray")">
+                                        @(IsAfternoonStarted ? $"{AfternoonTeacherPercent}%" : "--%")
+                                    </div>
+                                </div>
+                                <div class="tk-progress-bar">
+                                    <div class="tk-progress-fill @(IsAfternoonStarted ? "tk-fill-blue" : "tk-fill-gray")" style="width: @(IsAfternoonStarted? GetCssWidth(AfternoonTeacherPercent) : "0%"); transition: width 0.8s ease-in-out;"></div>
+                                </div>
+                                <div class="tk-progress-stats @(IsAfternoonStarted ? "" : "tk-text-gray")">
+                                    @if (IsAfternoonStarted)
+                                    {
+                                        <span>Có mặt: <b>@AfternoonPresentTeachers</b>/@TotalTeachers</span>
+                                        <span>Vắng: <b class="tk-text-red">@AfternoonAbsentTeachers</b></span>
+                                    }
+                                    else
+                                    {
+                                        <span>Dự kiến: <b>@TotalTeachers</b></span>
+                                        <span>---</span>
+                                    }
                                 </div>
                             </div>
                         </div>
-                    }
-                }
+                    </div>
+                </div>
             </div>
+
+            @* PHÍM TẮT (Bên Phải) *@
+            <div class="tk-card tk-grid-col-right tk-card-flex">
+                <div class="tk-card-header tk-border-bottom">
+                    <h3 class="tk-section-title tk-text-md">
+                        <span class="material-symbols-outlined tk-text-blue" style="margin-right: 4px;">bolt</span> Phím tắt nhanh
+                    </h3>
+                </div>
+                <div class="tk-card-body tk-card-body-center" style="padding: 1rem;">
+                    <div class="tk-shortcuts-grid">
+                        <a class="tk-shortcut-item">
+                            <div class="tk-shortcut-icon tk-bg-blue"><span class="material-symbols-outlined">person_add</span></div>
+                            <span class="tk-shortcut-text">Thêm học sinh</span>
+                        </a>
+                        <a class="tk-shortcut-item">
+                            <div class="tk-shortcut-icon tk-bg-green"><span class="material-symbols-outlined">send</span></div>
+                            <span class="tk-shortcut-text">Gửi thông báo</span>
+                        </a>
+                        <a class="tk-shortcut-item">
+                            <div class="tk-shortcut-icon tk-bg-purple"><span class="material-symbols-outlined">calendar_month</span></div>
+                            <span class="tk-shortcut-text">Xem lịch học</span>
+                        </a>
+                        <a class="tk-shortcut-item">
+                            <div class="tk-shortcut-icon tk-bg-orange"><span class="material-symbols-outlined">restaurant_menu</span></div>
+                            <span class="tk-shortcut-text">Thực đơn</span>
+                        </a>
+                        <a class="tk-shortcut-item">
+                            <div class="tk-shortcut-icon tk-bg-red">
+                                <span class="material-symbols-outlined">
+                                    assignment
+                                </span>
+                            </div>
+                            <span class="tk-shortcut-text">Đơn nghỉ phép</span>
+                        </a>
+                        <a class="tk-shortcut-item">
+                            <div class="tk-shortcut-icon tk-bg-gray"><span class="material-symbols-outlined">more_horiz</span></div>
+                            <span class="tk-shortcut-text">Khác</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @* ================= HÀNG 3 ================= *@
+
+            @* KHỐI TIN TỨC SỞ GIÁO DỤC (Bên Trái) *@
+            <div class="tk-card tk-grid-col-full tk-card-flex">
+                <div class="tk-card-header tk-border-bottom">
+                    <h3 class="tk-section-title">
+                        <span class="tk-title-indicator"></span> Tin tức Sở Giáo dục & Đào tạo
+                    </h3>
+                    <a class="tk-link-blue">Xem tất cả</a>
+                </div>
+                <div class="tk-news-list">
+                    @* Card 1 *@
+                    <div class="tk-news-card">
+                        <div class="tk-news-image">
+                            <img src="https://picsum.photos/seed/school1/400/200" alt="Thumbnail" />
+                        </div>
+                        <div class="tk-news-info">
+                            <h4 class="tk-news-title">Hướng dẫn thực hiện nhiệm vụ giáo dục Tiểu học năm học 2026-2027</h4>
+                            <span class="tk-news-meta">Sở GD&ĐT • 05/03/2026</span>
+                        </div>
+                    </div>
+
+                    @* Card 2 *@
+                    <div class="tk-news-card">
+                        <div class="tk-news-image">
+                            <img src="https://picsum.photos/seed/school2/400/200" alt="Thumbnail" />
+                        </div>
+                        <div class="tk-news-info">
+                            <h4 class="tk-news-title">Kế hoạch tổ chức Hội thi Giáo viên dạy giỏi cấp Thành phố</h4>
+                            <span class="tk-news-meta">Sở GD&ĐT • 02/03/2026</span>
+                        </div>
+                    </div>
+
+                    @* Card 3 *@
+                    <div class="tk-news-card">
+                        <div class="tk-news-image">
+                            <img src="https://picsum.photos/seed/school3/400/200" alt="Thumbnail" />
+                        </div>
+                        <div class="tk-news-info">
+                            <h4 class="tk-news-title">Công văn về việc tăng cường công tác đảm bảo an toàn thực phẩm trong trường học</h4>
+                            <span class="tk-news-meta">Bộ GD&ĐT • 28/02/2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
-@if (IsCalendarOpen)
+@* =================== MODAL LỊCH ================= *@
+@if (IsCalendarModalOpen)
 {
-    <div class="modal-overlay show" @onclick="() => IsCalendarOpen = false">
-        <div class="modal-content" @onclick:stopPropagation>
-            <div class="flex-between mb-4"><h3 style="margin:0; font-weight:700;">Chọn ngày</h3><span class="material-icons-round cursor-pointer" @onclick="() => IsCalendarOpen = false">close</span></div>
-            <div class="flex-between mb-4">
-                <span class="material-icons-round cursor-pointer text-primary" @onclick="PrevMonth">chevron_left</span>
-                <span style="font-weight:700; color:var(--primary);">Tháng @CurrentDisplayDate.Month, @CurrentDisplayDate.Year</span>
-                <span class="material-icons-round cursor-pointer text-primary" @onclick="NextMonth">chevron_right</span>
+    <div class="tk-modal-backdrop" @onclick="CloseCalendarModal">
+        <div class="tk-modal-container" @onclick:stopPropagation="true">
+            <div class="tk-modal-header">
+                <h3 class="tk-modal-title">Chọn ngày</h3>
+                <button class="tk-modal-close" @onclick="CloseCalendarModal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
-            <div class="calendar-grid">
-                <div class="cal-head text-red" style="color:#ef4444;">CN</div><div class="cal-head">T2</div><div class="cal-head">T3</div><div class="cal-head">T4</div><div class="cal-head">T5</div><div class="cal-head">T6</div><div class="cal-head text-red" style="color:#ef4444;">T7</div>
-                @foreach (var d in CalendarDays)
-                {
-                    <div class="cal-cell @(d.Date == SelectedDate.Date ? "active" : "")" @onclick="() => OnDateSelect(d)">@d.Day</div>
-                }
+
+            <div class="tk-modal-body">
+                <div class="tk-calendar-card tk-calendar-in-modal">
+                    <div class="tk-calendar-header">
+                        <div class="tk-cal-nav-row">
+                            <h3 class="tk-cal-month">Tháng @CurrentDisplayDate.Month, @CurrentDisplayDate.Year</h3>
+                            <div class="tk-cal-actions">
+                                <button class="tk-cal-btn" @onclick="PrevMonth"><span class="material-symbols-outlined">chevron_left</span></button>
+                                <button class="tk-cal-btn" @onclick="NextMonth"><span class="material-symbols-outlined">chevron_right</span></button>
+                            </div>
+                        </div>
+                        <div class="tk-cal-grid tk-cal-weekdays">
+                            <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+                        </div>
+                        <div class="tk-cal-grid tk-cal-days">
+                            @foreach (var d in CalendarDays)
+                            {
+                                bool isCurrentMonth = d.Month == CurrentDisplayDate.Month;
+                                bool isSelected = d.Date == SelectedDate.Date;
+                                bool hasEvent = d.Day % 5 == 0 && isCurrentMonth;
+
+                                if (!isCurrentMonth)
+                                {
+                                    <span class="tk-cal-day tk-fade">@d.Day</span>
+                                }
+                                else if (isSelected)
+                                {
+                                    <span class="tk-cal-day tk-selected" @onclick="() => SelectDate(d)">@d.Day</span>
+                                }
+                                else
+                                {
+                                    <span class="tk-cal-day tk-normal" @onclick="() => SelectDate(d)">
+                                        @d.Day
+                                        @if (hasEvent)
+                                        {
+                                            <div class="tk-cal-dot"></div>
+                                        }
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 }
 
-
 @code {
-    // --- State ---
-    bool IsCalendarOpen = false;
-    DateTime SelectedDate = DateTime.Today;
-    DateTime CurrentDisplayDate = DateTime.Today;
-    List<DateTime> CalendarDays = new List<DateTime>();
+    // === DỮ LIỆU ĐỘNG CHO DASHBOARD ===
+    private int TotalStudents = 1500;
+    private int TotalTeachers = 84;
 
-    // Tách 2 biến session riêng biệt
-    string StudentSession = "AM";
-    string TeacherSession = "AM";
+    // Dữ liệu buổi sáng
+    private int MorningPresentStudents = 1325;
+    private int MorningAbsentStudents => TotalStudents - MorningPresentStudents;
+    private double MorningStudentPercent => TotalStudents == 0 ? 0 : Math.Round((double)MorningPresentStudents / TotalStudents * 100, 1);
 
-    // --- Data Models ---
-    class AttendanceData { public int Present { get; set; } public int Late { get; set; } public int Absent { get; set; } }
-    class GradeStat { public string Name { get; set; } public string ShortName { get; set; } public int Total { get; set; } public int Present { get; set; } public string Color { get; set; } }
-    class ClassStat { public string ClassName { get; set; } public int Total { get; set; } public int Present { get; set; } }
+    private int MorningPresentTeachers = 82;
+    private int MorningAbsentTeachers => TotalTeachers - MorningPresentTeachers;
+    private double MorningTeacherPercent => TotalTeachers == 0 ? 0 : Math.Round((double)MorningPresentTeachers / TotalTeachers * 100, 1);
 
-    // --- Mock Data ---
-    AttendanceData StudentDataAM = new() { Present = 1200, Late = 50, Absent = 134 };
-    AttendanceData StudentDataPM = new() { Present = 1150, Late = 80, Absent = 154 };
+    // Dữ liệu buổi chiều
+    private bool IsAfternoonStarted = false;
+    private int AfternoonPresentStudents = 0;
+    private int AfternoonAbsentStudents => TotalStudents - AfternoonPresentStudents;
+    private double AfternoonStudentPercent => TotalStudents == 0 ? 0 : Math.Round((double)AfternoonPresentStudents / TotalStudents * 100, 1);
 
-    AttendanceData TeacherDataAM = new() { Present = 70, Late = 4, Absent = 2 };
-    AttendanceData TeacherDataPM = new() { Present = 72, Late = 1, Absent = 3 };
+    private int AfternoonPresentTeachers = 0;
+    private int AfternoonAbsentTeachers => TotalTeachers - AfternoonPresentTeachers;
+    private double AfternoonTeacherPercent => TotalTeachers == 0 ? 0 : Math.Round((double)AfternoonPresentTeachers / TotalTeachers * 100, 1);
 
-    GradeStat? SelectedGrade = null;
-    List<ClassStat> DetailClasses = new List<ClassStat>();
+    // Trình trợ giúp chuyển % sang CSS an toàn 
+    private string GetCssWidth(double percent) => $"{percent.ToString("0.0", CultureInfo.InvariantCulture)}%";
 
-    List<GradeStat> GradeStats = new List<GradeStat> {
-        new GradeStat { Name="Khối 1", ShortName="K1", Total=350, Present=342, Color="#ef4444" },
-        new GradeStat { Name="Khối 2", ShortName="K2", Total=300, Present=285, Color="#f97316" },
-        new GradeStat { Name="Khối 3", ShortName="K3", Total=250, Present=248, Color="#eab308" },
-        new GradeStat { Name="Khối 4", ShortName="K4", Total=200, Present=195, Color="#22c55e" },
-        new GradeStat { Name="Khối 5", ShortName="K5", Total=284, Present=280, Color="#3b82f6" }
-    };
-
-    // --- Lifecycle ---
-    protected override void OnInitialized() { GenerateCalendar(); }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // Cập nhật số liệu để test UI hoạt động
+    private void RefreshData()
     {
-        if (firstRender)
-        {
-            await Task.Delay(500);
-            // Vẽ lần đầu cả 2 biểu đồ
-            await RenderStudentChart();
-            await RenderTeacherChart();
-        }
+        var rnd = new Random();
+
+        // Random số liệu sáng
+        MorningPresentStudents = rnd.Next(1000, TotalStudents);
+        MorningPresentTeachers = rnd.Next(60, TotalTeachers);
+
+        // Kích hoạt buổi chiều và random số liệu
+        IsAfternoonStarted = true;
+        AfternoonPresentStudents = rnd.Next(1000, TotalStudents);
+        AfternoonPresentTeachers = rnd.Next(60, TotalTeachers);
     }
 
-    // --- Logic Chuyển Tab Học Sinh ---
-    private async Task ChangeStudentSession(string session)
+    // === LOGIC LỊCH ===
+    private bool IsCalendarModalOpen = false;
+    private void OpenCalendarModal() => IsCalendarModalOpen = true;
+    private void CloseCalendarModal() => IsCalendarModalOpen = false;
+
+    private DateTime SelectedDate = DateTime.Today;
+    private DateTime CurrentDisplayDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private List<DateTime> CalendarDays = new List<DateTime>();
+
+    protected override void OnInitialized()
     {
-        if (StudentSession != session)
-        {
-            StudentSession = session;
-            await RenderStudentChart(); // Chỉ vẽ lại chart học sinh
-        }
+        GenerateCalendar();
     }
 
-    // --- Logic Chuyển Tab Giáo Viên ---
-    private async Task ChangeTeacherSession(string session)
-    {
-        if (TeacherSession != session)
-        {
-            TeacherSession = session;
-            await RenderTeacherChart(); // Chỉ vẽ lại chart giáo viên
-        }
-    }
-
-    // Hàm vẽ chart Học sinh
-    private async Task RenderStudentChart()
-    {
-        try
-        {
-            var sData = StudentSession == "AM" ? StudentDataAM : StudentDataPM;
-            await JS.InvokeVoidAsync("initializeChart", "studentAttendanceChart", sData.Present, sData.Late, sData.Absent);
-        }
-        catch { }
-    }
-
-    // Hàm vẽ chart Giáo viên
-    private async Task RenderTeacherChart()
-    {
-        try
-        {
-            var tData = TeacherSession == "AM" ? TeacherDataAM : TeacherDataPM;
-            await JS.InvokeVoidAsync("initializeChart", "teacherAttendanceChart", tData.Present, tData.Late, tData.Absent);
-        }
-        catch { }
-    }
-
-    // --- Calendar Logic ---
-    void GenerateCalendar()
+    private void GenerateCalendar()
     {
         CalendarDays.Clear();
-        var start = new DateTime(CurrentDisplayDate.Year, CurrentDisplayDate.Month, 1);
-        var offset = start.AddDays(-(int)start.DayOfWeek);
-        for (int i = 0; i < 42; i++) CalendarDays.Add(offset.AddDays(i));
-    }
-    void PrevMonth() { CurrentDisplayDate = CurrentDisplayDate.AddMonths(-1); GenerateCalendar(); }
-    void NextMonth() { CurrentDisplayDate = CurrentDisplayDate.AddMonths(1); GenerateCalendar(); }
-    async Task OnDateSelect(DateTime d)
-    {
-        SelectedDate = d;
-        if (d.Month != CurrentDisplayDate.Month) { CurrentDisplayDate = d; GenerateCalendar(); }
-        // Load lại cả 2 chart khi đổi ngày
-        await RenderStudentChart();
-        await RenderTeacherChart();
-        IsCalendarOpen = false;
+        var startOfMonth = new DateTime(CurrentDisplayDate.Year, CurrentDisplayDate.Month, 1);
+        int daysToSubtract = (int)startOfMonth.DayOfWeek;
+        var startDate = startOfMonth.AddDays(-daysToSubtract);
+
+        for (int i = 0; i < 42; i++)
+        {
+            CalendarDays.Add(startDate.AddDays(i));
+        }
     }
 
-    void SelectGrade(GradeStat g)
+    private void PrevMonth()
     {
-        SelectedGrade = g;
-        DetailClasses = Enumerable.Range(1, 8).Select(i => new ClassStat { ClassName = $"{g.ShortName.Replace("K", "")}A{i}", Total = 35, Present = 33 }).ToList();
+        CurrentDisplayDate = CurrentDisplayDate.AddMonths(-1);
+        GenerateCalendar();
     }
-    void BackToOverview() => SelectedGrade = null;
+
+    private void NextMonth()
+    {
+        CurrentDisplayDate = CurrentDisplayDate.AddMonths(1);
+        GenerateCalendar();
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        SelectedDate = date;
+    }
 }
+
+<style>
+    /* ==========================================================================
+               PURE CSS REFACTOR TỪ TAILWIND (DÀNH CHO TRANG TỔNG QUAN)
+               ========================================================================== */
+    :root {
+        --tk-primary: #1b6ec2;
+        --tk-primary-dark: #1565c0;
+        --tk-primary-light: #e3f2fd;
+        --tk-orange: #f97316;
+        --tk-orange-light: #fff7ed;
+        --tk-green: #22c55e;
+        --tk-green-light: #f0fdf4;
+        --tk-purple: #a855f7;
+        --tk-purple-light: #faf5ff;
+        --tk-red: #ef4444;
+        --tk-red-light: #fef2f2;
+        --tk-gray-50: #f9fafb;
+        --tk-gray-100: #f3f4f6;
+        --tk-gray-200: #e5e7eb;
+        --tk-gray-400: #9ca3af;
+        --tk-gray-500: #6b7280;
+        --tk-gray-800: #1f2937;
+        --tk-shadow-card: 0 2px 8px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.08);
+        --tk-shadow-hover: 0 10px 25px -5px rgba(0,0,0,0.1);
+        --tk-radius-lg: 1.5rem;
+        --tk-radius-md: 1rem;
+    }
+
+    /* Base Layout */
+    .tk-dashboard-wrapper {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f0f4f8;
+        min-height: auto;
+        padding: 1.5rem;
+        color: var(--tk-gray-800);
+        box-sizing: border-box;
+    }
+
+        .tk-dashboard-wrapper * {
+            box-sizing: border-box;
+        }
+
+    .tk-container {
+        max-width: auto;
+        margin: 0 auto;
+    }
+
+    .tk-grid-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @@media (min-width: 1024px) {
+        .tk-grid-layout {
+            grid-template-columns: repeat(12, 1fr);
+            align-items: stretch;
+        }
+
+        .tk-grid-col-left {
+            grid-column: span 8;
+        }
+
+        .tk-grid-col-right {
+            grid-column: span 4;
+        }
+
+        .tk-grid-col-full {
+            grid-column: span 12;
+        }
+    }
+
+    @@media (min-width: 1280px) {
+        .tk-grid-col-left {
+            grid-column: span 9;
+        }
+
+        .tk-grid-col-right {
+            grid-column: span 3;
+        }
+    }
+
+    .tk-card {
+        background-color: #ffffff;
+        border-radius: var(--tk-radius-lg);
+        box-shadow: var(--tk-shadow-card);
+        border: 1px solid var(--tk-gray-100);
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    /* Class hỗ trợ co giãn nội dung bên trong */
+    .tk-card-flex {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .tk-card-body-center {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* 1. Welcome Banner */
+    .tk-banner {
+        background: var(--tk-primary);
+        color: white;
+        padding: 1.5rem 2rem;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        border-radius: 10px;
+        align-items: center;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5);
+    }
+
+    .tk-blob {
+        position: absolute;
+        background: #ebf5ff21;
+        border-radius: 50%;
+        filter: blur(48px);
+    }
+
+    .tk-blob-1 {
+        width: 16rem;
+        height: 16rem;
+        top: -6rem;
+        left: -6rem;
+    }
+
+    .tk-blob-2 {
+        width: 20rem;
+        height: 20rem;
+        bottom: -6rem;
+        right: -3rem;
+    }
+
+    .tk-banner-content {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+    }
+
+    @@media (min-width: 768px) {
+        .tk-banner-content {
+            width: 75%;
+        }
+    }
+
+    .tk-banner-title {
+        font-size: 1.875rem;
+        font-weight: 900;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .tk-banner-subtitle {
+        font-size: 1rem;
+        color: #eff6ff;
+        opacity: 0.9;
+        margin: 0 0 1.5rem 0;
+    }
+
+    .tk-banner-stats {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .tk-stat-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tk-icon-lg {
+        font-size: 1.5rem;
+    }
+
+    .tk-stat-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .tk-stat-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 500;
+        opacity: 0.8;
+    }
+
+    .tk-banner-illustration {
+        position: absolute;
+        bottom: -5px;
+        right: 0.5rem;
+        z-index: 10;
+        display: none;
+        justify-content: flex-end;
+        align-items: flex-end;
+        height: 100%;
+    }
+
+    .tk-banner-img {
+        height: 120%;
+        max-height: 210px;
+        object-fit: contain;
+        transform: translateY(10px);
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    @@media (min-width: 768px) {
+        .tk-banner-illustration {
+            display: flex;
+        }
+
+        .tk-banner-content {
+            width: 70%;
+        }
+    }
+
+    /* 2. Section Headers */
+    .tk-card-header {
+        padding: 1rem;
+        border-bottom: 1px solid var(--tk-gray-50);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .tk-border-bottom {
+        border-bottom: 1px solid var(--tk-gray-50);
+    }
+
+    .tk-section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--tk-gray-800);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .tk-text-md {
+        font-size: 1rem !important;
+    }
+
+    .tk-title-indicator {
+        width: 6px;
+        height: 24px;
+        background-color: var(--tk-primary);
+        border-radius: 9999px;
+    }
+
+    .tk-section-subtitle {
+        font-size: 0.875rem;
+        color: var(--tk-gray-500);
+        margin: 0.25rem 0 0 1.25rem;
+    }
+
+    .tk-header-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .tk-btn-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+        .tk-btn-icon span {
+            transition: transform 0.2s;
+        }
+
+        .tk-btn-icon:hover span {
+            transform: scale(1.1);
+        }
+
+    .tk-btn-blue {
+        background-color: var(--tk-primary-light);
+        color: var(--tk-primary);
+    }
+
+        .tk-btn-blue:hover {
+            background-color: #dbeafe;
+        }
+
+    .tk-link-blue {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--tk-primary);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .tk-link-blue:hover {
+            text-decoration: underline;
+        }
+
+    /* 3. Attendance Section */
+    .tk-attendance-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        flex: 1;
+    }
+
+    @@media (min-width: 768px) {
+        .tk-attendance-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .tk-att-col:first-child {
+            border-right: 1px solid var(--tk-gray-100);
+        }
+    }
+
+    .tk-att-col {
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tk-bg-gray {
+        background-color: rgba(249, 250, 251, 0.5);
+    }
+
+    .tk-opacity-70 {
+        opacity: 0.7;
+    }
+
+    .tk-bg-icon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 1rem;
+        opacity: 0.05;
+    }
+
+        .tk-bg-icon span {
+            font-size: 8rem;
+            color: inherit;
+        }
+
+    .tk-att-col:nth-child(1) .tk-bg-icon span {
+        color: var(--tk-orange);
+    }
+
+    .tk-att-col:nth-child(2) .tk-bg-icon span {
+        color: #6366f1;
+    }
+
+    .tk-att-content {
+        position: relative;
+        z-index: 10;
+    }
+
+    .tk-att-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tk-icon-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tk-icon-orange {
+        background-color: var(--tk-orange-light);
+        color: var(--tk-orange);
+    }
+
+    .tk-icon-indigo {
+        background-color: #e0e7ff;
+        color: #6366f1;
+    }
+
+    .tk-att-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--tk-gray-800);
+        margin: 0;
+    }
+
+    .tk-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        border: 1px solid transparent;
+    }
+
+    .tk-badge-green {
+        background-color: var(--tk-green-light);
+        color: var(--tk-green);
+        border-color: #dcfce7;
+    }
+
+    .tk-badge-gray {
+        background-color: var(--tk-gray-200);
+        color: var(--tk-gray-500);
+        border-color: #d1d5db;
+    }
+
+    .tk-progress-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .tk-progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 0.5rem;
+    }
+
+    .tk-progress-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--tk-gray-500);
+    }
+
+        .tk-progress-label span {
+            font-size: 1rem;
+            color: var(--tk-gray-400);
+        }
+
+    .tk-progress-percent {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--tk-gray-800);
+    }
+
+    .tk-progress-bar {
+        width: 100%;
+        height: 0.625rem;
+        background-color: var(--tk-gray-100);
+        border-radius: 9999px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .tk-progress-fill {
+        height: 100%;
+        border-radius: 9999px;
+    }
+
+    .tk-fill-green {
+        background: linear-gradient(to right, #5ca175, #0a7330);
+    }
+
+    .tk-fill-blue {
+        background: linear-gradient(to right, #4c7bb5, #1343ac);
+    }
+
+    .tk-fill-gray {
+        background-color: var(--tk-gray-200);
+    }
+
+    .tk-progress-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--tk-gray-500);
+    }
+
+        .tk-progress-stats b {
+            color: var(--tk-gray-800);
+        }
+
+    .tk-text-red {
+        color: var(--tk-red) !important;
+    }
+
+    .tk-text-gray {
+        color: var(--tk-gray-400) !important;
+    }
+
+        .tk-text-gray b {
+            color: var(--tk-gray-500) !important;
+        }
+
+    .tk-text-blue {
+        color: var(--tk-primary) !important;
+    }
+
+    /* 4. Tin tức */
+    .tk-news-list {
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @@media (min-width: 1024px) {
+        .tk-news-list {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .tk-news-card {
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        border: 1px solid var(--tk-gray-200);
+        border-radius: var(--tk-radius-md);
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .tk-news-card:hover {
+            box-shadow: var(--tk-shadow-hover);
+            transform: translateY(-4px);
+            border-color: rgba(30, 136, 229, 0.3);
+        }
+
+    .tk-news-image {
+        width: 100%;
+        height: 160px;
+        background-color: var(--tk-gray-100);
+        overflow: hidden;
+    }
+
+        .tk-news-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+    .tk-news-card:hover .tk-news-image img {
+        transform: scale(1.05);
+    }
+
+    .tk-news-info {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .tk-news-title {
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.5;
+        margin: 0 0 1rem 0;
+        color: var(--tk-gray-800);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .tk-news-meta {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--tk-gray-500);
+        margin-top: auto;
+    }
+
+    /* 5. Shortcuts */
+    .tk-shortcuts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    @@media (min-width: 1400px) {
+        .tk-shortcuts-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .tk-shortcut-item {
+        background: white;
+        border-radius: var(--tk-radius-md);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+        border: 1px solid var(--tk-gray-100);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+        .tk-shortcut-item:hover {
+            border-color: rgba(30, 136, 229, 0.5);
+            box-shadow: var(--tk-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+    .tk-shortcut-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+    }
+
+    .tk-shortcut-item:hover .tk-shortcut-icon {
+        transform: scale(1.1);
+    }
+
+    .tk-bg-blue {
+        background-color: var(--tk-primary-light);
+        color: var(--tk-primary);
+    }
+
+    .tk-bg-green {
+        background-color: #d1fae5;
+        color: #059669;
+    }
+
+    .tk-bg-purple {
+        background-color: var(--tk-purple-light);
+        color: var(--tk-purple);
+    }
+
+    .tk-bg-orange {
+        background-color: var(--tk-orange-light);
+        color: var(--tk-orange);
+    }
+
+    .tk-bg-red {
+        background-color: var(--tk-red-light);
+        color: var(--tk-red);
+    }
+
+    .tk-bg-gray {
+        background-color: var(--tk-gray-50);
+        color: var(--tk-gray-500);
+    }
+
+    .tk-shortcut-text {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--tk-gray-500);
+        transition: color 0.2s;
+    }
+
+    .tk-shortcut-item:hover .tk-shortcut-text {
+        color: var(--tk-primary);
+    }
+
+    /* 6. Notifications */
+    .tk-notification-list {
+        padding: 0.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tk-notif-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .tk-notif-item:hover {
+            background-color: var(--tk-gray-50);
+        }
+
+    .tk-notif-icon {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .tk-notif-icon span {
+            font-size: 1rem;
+        }
+
+    .tk-notif-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--tk-gray-800);
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .tk-notif-time {
+        font-size: 0.75rem;
+        color: var(--tk-gray-500);
+        margin: 0.25rem 0 0 0;
+    }
+
+    /* ==== MODAL LỊCH CSS ==== */
+    .tk-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(31, 41, 55, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .tk-modal-container {
+        background-color: white;
+        border-radius: var(--tk-radius-lg);
+        width: 90%;
+        max-width: 420px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .tk-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: white;
+        border-bottom: 1px solid var(--tk-gray-100);
+    }
+
+    .tk-modal-title {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--tk-gray-800);
+    }
+
+    .tk-modal-close {
+        background: none;
+        border: none;
+        color: var(--tk-gray-400);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+        .tk-modal-close:hover {
+            background-color: var(--tk-gray-100);
+            color: var(--tk-red);
+        }
+
+    .tk-modal-body {
+        padding: 0;
+    }
+
+    .tk-calendar-in-modal {
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 0 var(--tk-radius-lg) var(--tk-radius-lg) !important;
+        margin-bottom: 0 !important;
+    }
+
+    .tk-calendar-header {
+        background-color: var(--tk-primary);
+        color: white;
+        padding: 1rem;
+    }
+
+    .tk-cal-nav-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .tk-cal-month {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .tk-cal-actions {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .tk-cal-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .tk-cal-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+    .tk-cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        text-align: center;
+    }
+
+    .tk-cal-weekdays {
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0.8;
+        margin-bottom: 0.5rem;
+    }
+
+    .tk-cal-days {
+        gap: 0.5rem 0;
+        font-size: 0.875rem;
+    }
+
+    .tk-cal-day {
+        padding: 0.25rem 0;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        position: relative;
+    }
+
+        .tk-cal-day:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+    .tk-fade {
+        color: rgba(255, 255, 255, 0.3);
+        pointer-events: none;
+    }
+
+    .tk-selected {
+        background-color: white;
+        color: var(--tk-primary);
+        font-weight: 900;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+        .tk-selected:hover {
+            background-color: white;
+        }
+
+    .tk-cal-dot {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        background-color: #facc15;
+        border-radius: 50%;
+    }
+    /* =========================================
+           HIỆU ỨNG BONG BÓNG TRÔI NỔI CHO BANNER
+           ========================================= */
+    .tk-banner-bg-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 10px;
+        overflow: hidden; /* Chặn bong bóng tràn ra ngoài */
+        z-index: 1; /* Nằm dưới chữ và ảnh nhân vật */
+        pointer-events: none; /* Không cản trở click chuột */
+    }
+
+    .tk-bubble {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%);
+        backdrop-filter: blur(2px);
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        animation: floatBubble ease-in-out infinite; 
+    }
+
+    .tk-bubble-1 {
+        width: 80px;
+        height: 80px;
+        top: -20px;
+        left: -10px;
+        animation-duration: 6s;
+    }
+
+    .tk-bubble-2 {
+        width: 35px;
+        height: 35px;
+        top: 50px;
+        left: 80px;
+        animation-duration: 4.5s;
+        animation-delay: 1s;
+    }
+
+    .tk-bubble-3 {
+        width: 100px;
+        height: 100px;
+        bottom: -30px;
+        right: -20px;
+        animation-duration: 7s;
+        animation-delay: 0.5s;
+    }
+
+    .tk-bubble-4 {
+        width: 70px;
+        height: 70px;
+        bottom: 120px;
+        right: 100px;
+        animation-duration: 5s;
+        animation-delay: 2s;
+    }
+
+    .tk-bubble-5 {
+        width: 25px;
+        height: 25px;
+        top: 20%;
+        right: 40%;
+        animation-duration: 4s;
+        animation-delay: 1.5s;
+    }
+
+    .tk-bubble-6 {
+        width: 65px;
+        height: 65px;
+        top: 17%;
+        right: 44%;
+        animation-duration: 5s;
+        animation-delay: 1.5s;
+    }
+
+    .tk-bubble-7 {
+        width: 100px;
+        height: 100px;
+        top: 50%;
+        right: 60%;
+        animation-duration: 5s;
+        animation-delay: 1.5s;
+    }
+
+    @@keyframes floatBubble {
+        0%
+
+    {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(5px, -15px) scale(1.05);
+    }
+
+    66% {
+        transform: translate(-5px, -5px) scale(0.95);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+</style>

@@ -1,0 +1,295 @@
+﻿@page "/school/security"
+@rendermode InteractiveServer
+
+<PageTitle>Vai trò & Phân quyền</PageTitle>
+
+<div class="sec-container animate-fade-in">
+    <div class="sec-role-list">
+        <div class="sec-header flex-between">
+            <h3 class="sec-title">Nhóm quyền</h3>
+            <button class="sec-btn-icon" title="Thêm nhóm mới"><span class="material-icons-round">add_circle</span></button>
+        </div>
+        <div class="sec-list-body">
+            @foreach (var role in Roles)
+            {
+                <div class="sec-role-item @(SelectedRoleId == role.Id ? "active" : "")" @onclick="() => SelectRole(role.Id)">
+                    <div class="sec-role-info">
+                        <span class="fw-bold">@role.Name</span>
+                        <span class="sec-role-desc">@role.MemberCount thành viên</span>
+                    </div>
+                    <span class="material-icons-round" style="color: #cbd5e1; font-size: 18px;">chevron_right</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="sec-perm-matrix">
+        <div class="sec-header flex-between">
+            <div>
+                <h3 class="sec-title" style="color: var(--primary);">Chi tiết quyền: @Roles.First(r => r.Id == SelectedRoleId).Name</h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Tích chọn để cấp quyền cho nhóm này</span>
+            </div>
+            <div>
+                @if (ShowSavedMessage)
+                {
+                    <span style="color: green; margin-right: 10px; font-weight: bold; font-size:0.9rem;">Đã lưu!</span>
+                }
+                <button class="sec-btn sec-btn-primary" @onclick="SavePermissions"><span class="material-icons-round">save</span> Lưu phân quyền</button>
+            </div>
+        </div>
+        <div class="sec-matrix-body">
+            <table class="sec-table">
+                <thead>
+                    <tr>
+                        <th>Tên Module chức năng</th>
+                        <th style="text-align:center;">Xem</th>
+                        <th style="text-align:center;">Thêm</th>
+                        <th style="text-align:center;">Sửa</th>
+                        <th style="text-align:center;">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" class="sec-group-row">Học Sinh & Lớp Học</td></tr>
+                    <tr>
+                        <td>Quản lý danh sách Lớp</td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Class_View" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Class_Add" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Class_Edit" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Class_Del" /></td>
+                    </tr>
+                    <tr>
+                        <td>Điểm danh Học sinh</td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.StdAtt_View" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.StdAtt_Add" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.StdAtt_Edit" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.StdAtt_Del" /></td>
+                    </tr>
+
+                    <tr><td colspan="5" class="sec-group-row">Nhân Sự & Giáo Viên</td></tr>
+                    <tr>
+                        <td>Quản lý danh sách Giáo viên</td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Teacher_View" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Teacher_Add" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Teacher_Edit" /></td>
+                        <td style="text-align:center;"><input type="checkbox" @bind="CurrentPerms.Teacher_Del" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    class Role { public int Id { get; set; } public string Name { get; set; } = ""; public int MemberCount { get; set; } }
+    List<Role> Roles = new();
+
+    // Class chứa Trạng thái Checkbox (Permission Matrix)
+    class PermMatrix
+    {
+        public bool Class_View { get; set; }
+        public bool Class_Add { get; set; }
+        public bool Class_Edit { get; set; }
+        public bool Class_Del { get; set; }
+        public bool StdAtt_View { get; set; }
+        public bool StdAtt_Add { get; set; }
+        public bool StdAtt_Edit { get; set; }
+        public bool StdAtt_Del { get; set; }
+        public bool Teacher_View { get; set; }
+        public bool Teacher_Add { get; set; }
+        public bool Teacher_Edit { get; set; }
+        public bool Teacher_Del { get; set; }
+    }
+
+    Dictionary<int, PermMatrix> MatrixData = new();
+
+    int SelectedRoleId = 1;
+    PermMatrix CurrentPerms => MatrixData.ContainsKey(SelectedRoleId) ? MatrixData[SelectedRoleId] : new PermMatrix();
+    bool ShowSavedMessage = false;
+
+    protected override void OnInitialized()
+    {
+        Roles = new List<Role> {
+            new Role { Id = 1, Name = "Ban Giám Hiệu", MemberCount = 3 },
+            new Role { Id = 2, Name = "Giáo viên", MemberCount = 76 },
+            new Role { Id = 3, Name = "Nhân viên văn phòng", MemberCount = 2 }
+        };
+
+        // Mock data BGH (Full quyền)
+        MatrixData[1] = new PermMatrix { Class_View = true, Class_Add = true, Class_Edit = true, Class_Del = true, StdAtt_View = true, StdAtt_Add = true, StdAtt_Edit = true, StdAtt_Del = true, Teacher_View = true, Teacher_Add = true, Teacher_Edit = true, Teacher_Del = true };
+        // Mock data Giáo Viên (Chỉ có quyền xem và điểm danh)
+        MatrixData[2] = new PermMatrix { Class_View = true, Class_Add = false, Class_Edit = false, Class_Del = false, StdAtt_View = true, StdAtt_Add = true, StdAtt_Edit = true, StdAtt_Del = false, Teacher_View = true, Teacher_Add = false, Teacher_Edit = false, Teacher_Del = false };
+        // Mock data NVVP (Không được xóa)
+        MatrixData[3] = new PermMatrix { Class_View = true, Class_Add = true, Class_Edit = true, Class_Del = false, StdAtt_View = true, StdAtt_Add = true, StdAtt_Edit = true, StdAtt_Del = false, Teacher_View = true, Teacher_Add = true, Teacher_Edit = true, Teacher_Del = false };
+    }
+
+    private void SelectRole(int id) { SelectedRoleId = id; ShowSavedMessage = false; }
+
+    private async Task SavePermissions()
+    {
+        ShowSavedMessage = true;
+        await Task.Delay(2000);
+        ShowSavedMessage = false;
+    }
+}
+
+<style>
+    /* Prefix: sec- */
+    .sec-container {
+        display: flex;
+        height: calc(100vh - 100px);
+        background: #ffffff;
+        margin: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        flex-direction: row; !important
+        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .sec-role-list {
+        width: 300px;
+        background: #f8fafc;
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+
+    .sec-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        background: white;
+    }
+
+    .sec-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .sec-list-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .sec-role-item {
+        padding: 12px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+        .sec-role-item:hover {
+            border-color: var(--primary);
+        }
+
+        .sec-role-item.active {
+            border-color: var(--primary);
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+    .sec-role-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sec-role-desc {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+    .sec-perm-matrix {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        min-width: 0;
+    }
+
+    .sec-matrix-body {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .sec-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .sec-table th {
+            background: #fdfdfd;
+            padding: 12px 1.5rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .sec-table td {
+            padding: 12px 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .sec-table tr:hover td {
+            background: #f8fafc;
+        }
+
+    .sec-group-row {
+        background: #f1f5f9 !important;
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 0.9rem;
+        padding: 8px 1.5rem !important;
+    }
+
+    .sec-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .sec-btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .sec-btn-icon {
+        background: none;
+        border: none;
+        color: var(--primary);
+        cursor: pointer;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Custom Checkbox */
+    input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+</style>

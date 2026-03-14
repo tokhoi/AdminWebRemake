@@ -1,0 +1,455 @@
+﻿@page "/score"
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý Nhập điểm - TitKul</PageTitle>
+
+<div class="hub-wrapper animate-fade-in">
+    <div class="hub-content">
+
+        @* === THANH CÔNG CỤ CHỌN CẤP HỌC (DEMO) === *@
+        <div class="hub-toolbar">
+            <div class="toolbar-info">
+                <h2 class="m-0 flex-align-center gap-2">
+                    <span class="material-icons-round" style="color: #1b6ec2; font-size: 28px;">create</span>
+                    Quản lý Điểm & Đánh giá
+                </h2>
+                <p class="text-muted">Lựa chọn các chức năng nhập liệu và cấu hình điểm số</p>
+            </div>
+            <div class="toolbar-filter">
+                <label>Góc nhìn cấp học (Demo):</label>
+                <select class="hub-select" @bind="CurrentLevel">
+                    <option value="02">Cấp Tiểu học</option>
+                    <option value="03">Cấp THCS</option>
+                    <option value="04">Cấp THPT</option>
+                </select>
+            </div>
+        </div>
+
+        @* ====== CHỨC NĂNG NHẬP LIỆU (THAY ĐỔI THEO CẤP HỌC) ====== *@
+        <div class="hub-category">
+            <h2 class="category-title"><span class="material-icons-round">border_color</span> Chức năng Nhập liệu</h2>
+            <div class="hub-grid-vertical">
+
+                @if (CurrentLevel == "02")
+                {
+                    @* VIEW DÀNH CHO TIỂU HỌC *@
+                    <div class="hub-v-card" @onclick='() => NavigateTo("/learning/ratingsubject")'>
+                        <div class="v-card-icon" style="background: #eff6ff; color: #1b6ec2;">
+                            <span class="material-icons-round">menu_book</span>
+                        </div>
+                        <div class="v-card-body">
+                            <h3>Đánh giá định kỳ</h3>
+                            <p>Nhập điểm và nhận xét định kỳ các môn học theo quy định của Bộ Giáo dục.</p>
+                        </div>
+                        <div class="v-card-footer">
+                            <span>Mở phân hệ</span>
+                            <span class="material-icons-round arrow">arrow_forward</span>
+                        </div>
+                    </div>
+
+                    <div class="hub-v-card" @onclick='() => NavigateTo("/learning/ratingtalent")'>
+                        <div class="v-card-icon" style="background: #eff6ff; color: #1b6ec2;">
+                            <span class="material-icons-round">stars</span>
+                        </div>
+                        <div class="v-card-body">
+                            <h3>Năng lực, Phẩm chất</h3>
+                            <p>Nhập mức đạt được và nhận xét về Năng lực, Phẩm chất của từng học sinh.</p>
+                        </div>
+                        <div class="v-card-footer">
+                            <span>Mở phân hệ</span>
+                            <span class="material-icons-round arrow">arrow_forward</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @* VIEW DÀNH CHO THCS & THPT *@
+                    <div class="hub-v-card" @onclick='() => NavigateTo("/learning/pointInput")'>
+                        <div class="v-card-icon" style="background: #eff6ff; color: #1b6ec2;">
+                            <span class="material-icons-round">format_list_numbered</span>
+                        </div>
+                        <div class="v-card-body">
+                            <h3>Sổ điểm môn học</h3>
+                            <p>Nhập điểm thường xuyên, giữa kỳ, cuối kỳ cho các môn học đang giảng dạy.</p>
+                        </div>
+                        <div class="v-card-footer">
+                            <span>Mở phân hệ</span>
+                            <span class="material-icons-round arrow">arrow_forward</span>
+                        </div>
+                    </div>
+                }
+
+                @* CHUYÊN CẦN (CHUNG CHO CÁC CẤP) *@
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/nhap-diem/ket-qua-ren-luyen")'>
+                    <div class="v-card-icon" style="background: #eff6ff; color: #1b6ec2;">
+                        <span class="material-icons-round">emoji_events</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Kết quả rèn luyện</h3>
+                        <p>Đánh giá kết quả rèn luyện, hạnh kiểm của học sinh trong từng học kỳ.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/chuyen-can")'>
+                        <div class="v-card-icon" style="background: #eff6ff; color: #1b6ec2;">
+                        <span class="material-icons-round">fact_check</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Nhập chuyên cần</h3>
+                        <p>Quản lý số ngày nghỉ phép, không phép của học sinh trong tháng/kỳ.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        @* ====== BÁO CÁO & TỔNG KẾT ====== *@
+        <div class="hub-category">
+            <h2 class="category-title"><span class="material-icons-round">assessment</span> Báo cáo & Tổng kết</h2>
+            <div class="hub-grid-vertical">
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/finalsummary")'>
+                    <div class="v-card-icon" style="background: #eff6ff; color: #1b6ec2;">
+                        <span class="material-icons-round">functions</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Tính điểm tổng kết</h3>
+                        <p>Xử lý chạy điểm trung bình, đánh giá và xếp loại học sinh toàn trường.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/khoaso")'>
+                    <div class="v-card-icon" style="background: #eff6ff; color: #2563eb;">
+                        <span class="material-icons-round">summarize</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Khóa sổ điểm</h3>
+                        <p>Xem và xuất file bảng điểm tổng quát của toàn trường hoặc từng lớp.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        @* ====== CẤU HÌNH NHẬP ĐIỂM ====== *@
+        <div class="hub-category">
+            <h2 class="category-title"><span class="material-icons-round">settings</span> Cấu hình hệ thống</h2>
+            <div class="hub-grid-vertical">
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/gradelock")'>
+                    <div class="v-card-icon" style="background: #f1f5f9; color: #334155;">
+                        <span class="material-icons-round">lock</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Quản lý khóa điểm</h3>
+                        <p>Đóng/Mở sổ điểm theo từng giai đoạn, ngăn chặn chỉnh sửa điểm trái phép.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/period")'>
+                    <div class="v-card-icon" style="background: #f1f5f9; color: #334155;">
+                        <span class="material-icons-round">date_range</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Quản lý đợt nhập</h3>
+                        <p>Thiết lập thời gian cho phép giáo viên nhập điểm lên hệ thống.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/cot-diem")'>
+                    <div class="v-card-icon" style="background: #f1f5f9; color: #334155;">
+                        <span class="material-icons-round">view_week</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Cấu hình cột điểm</h3>
+                        <p>Định nghĩa và quản lý số lượng các cột điểm theo Thông tư quy định.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+                <div class="hub-v-card" @onclick='() => NavigateTo("/learning/lop-mon")'>
+                    <div class="v-card-icon" style="background: #f1f5f9; color: #334155;">
+                        <span class="material-icons-round">cast_for_education</span>
+                    </div>
+                    <div class="v-card-body">
+                        <h3>Cấu hình lớp môn</h3>
+                        <p>Gắn kết môn học tương ứng với từng lớp để giáo viên bộ môn có thể nhập.</p>
+                    </div>
+                    <div class="v-card-footer">
+                        <span>Mở phân hệ</span>
+                        <span class="material-icons-round arrow">arrow_forward</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+@code {
+    private string CurrentLevel { get; set; } = "02"; 
+
+    private void NavigateTo(string url)
+    {
+        NavManager.NavigateTo(url);
+    }
+}
+
+<style>
+    /* Tổng thể */
+    .hub-wrapper {
+        min-height: calc(100vh - 60px);
+        background: #f4f7f9;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* === TOOLBAR (Của trang Nhập điểm) === */
+    .hub-toolbar {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        border: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .toolbar-info h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .toolbar-info p {
+        margin: 0.25rem 0 0 0;
+        color: #64748b;
+        font-size: 0.95rem;
+    }
+
+    .toolbar-filter {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f8fafc;
+        padding: 8px 16px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+
+        .toolbar-filter label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+    .hub-select {
+        border: 1px solid #cbd5e1;
+        background: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        color: #1b6ec2;
+        outline: none;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .hub-select:hover {
+            border-color: #93c5fd;
+        }
+
+        .hub-select:focus {
+            box-shadow: 0 0 0 3px rgba(27,110,194,0.1);
+        }
+
+    /* === CONTENT & CATEGORIES === */
+    .hub-content {
+        margin: 0 auto;
+        padding: 2rem;
+        width: 100%;
+    }
+
+    .hub-category {
+        margin-bottom: 3.5rem;
+    }
+
+    .category-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 0.75rem;
+    }
+
+        .category-title span {
+            color: #1b6ec2;
+            background: #e0f2fe;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 20px;
+        }
+
+    /* === GRID CARD DỌC (VERTICAL) === */
+    .hub-grid-vertical {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .hub-v-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+        height: 100%;
+    }
+
+        .hub-v-card:hover {
+            border-color: #1b6ec2;
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px -5px rgba(27, 110, 194, 0.12);
+        }
+
+    .v-card-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 1.5rem 1.5rem 0 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+        .v-card-icon span {
+            font-size: 32px;
+        }
+
+    .hub-v-card:hover .v-card-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .v-card-body {
+        padding: 1.25rem 1.5rem;
+        flex: 1;
+    }
+
+        .v-card-body h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e293b;
+            transition: color 0.2s;
+        }
+
+    .hub-v-card:hover .v-card-body h3 {
+        color: #1b6ec2;
+    }
+
+    .v-card-body p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    /* Action Strip ở đáy Card */
+    .v-card-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+
+    .hub-v-card:hover .v-card-footer {
+        background: #1b6ec2;
+        color: white;
+        border-top-color: #1b6ec2;
+    }
+
+    .v-card-footer .arrow {
+        transform: translateX(-10px);
+        opacity: 0.5;
+        transition: all 0.3s ease;
+    }
+
+    .hub-v-card:hover .v-card-footer .arrow {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hub-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.25rem;
+        }
+
+        .toolbar-filter {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .hub-content {
+            padding: 1.5rem 1rem;
+        }
+    }
+</style>

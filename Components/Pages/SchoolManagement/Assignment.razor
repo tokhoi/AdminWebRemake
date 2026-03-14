@@ -163,9 +163,9 @@
 
     class ClassData { public string Id { get; set; } = ""; public string Grade { get; set; } = ""; public string Name { get; set; } = ""; public int Count { get; set; } public string TeacherId { get; set; } = ""; public string Note { get; set; } = ""; }
     class SubjectData { public int Id { get; set; } public string Name { get; set; } = ""; public int PeriodCount { get; set; } public string AssignedTeacherId { get; set; } = ""; }
-    class Teacher { public string Id { get; set; } = ""; public string Name { get; set; } = ""; }
+    class Teacher { public int Id { get; set; } public string Name { get; set; } = ""; }
 
-    List<Teacher> teacherList = new() { new Teacher { Id = "GV01", Name = "Nguyễn Thúy Hằng" }, new Teacher { Id = "GV02", Name = "Trần Minh Tuấn" } };
+    List<Teacher> teacherList = new();
     List<ClassData> classes = new();
     List<SubjectData> subjects = new();
 
@@ -179,6 +179,8 @@
         for (int i = 1; i <= 30; i++) classes.Add(new ClassData { Id = i.ToString(), Grade = (i % 3 + 10).ToString(), Name = $"1{i % 3}A{i}", Count = 45 });
         string[] subs = { "Toán", "Lý", "Hóa", "Văn", "Anh", "Sử", "Địa" };
         for (int i = 0; i < subs.Length; i++) subjects.Add(new SubjectData { Id = i + 1, Name = subs[i], PeriodCount = 3 });
+
+        for (int i = 1; i < 10; i++) teacherList.Add(new Teacher { Id = i, Name = $"Nguyễn Giáo Viên {i}" });
     }
 
     void ChangeTab(int tab) { activeTab = tab; currentPage = 1; }

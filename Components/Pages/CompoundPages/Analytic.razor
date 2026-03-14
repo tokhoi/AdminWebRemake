@@ -1,0 +1,511 @@
+﻿@page "/analytic"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<PageTitle>Thống kê số liệu - TitKul</PageTitle>
+
+<div class="tk-ana-wrapper">
+    <div class="tk-ana-container">
+
+        @* Toolbar *@
+        <div class="tk-ana-card tk-ana-toolbar">
+            <h2 class="tk-ana-page-title m-0">Thống kê số liệu toàn trường</h2>
+            <div class="tk-ana-kpi-grid">
+                <div class="tk-ana-card tk-stat-box tk-border-blue">
+                    <div class="tk-stat-top">
+                        <div class="tk-stat-icon tk-bg-blue"><span class="material-symbols-outlined">school</span></div>
+                        <div class="tk-stat-text-right">
+                            <p class="tk-stat-lbl">Tổng Học sinh</p>
+                            <h3 class="tk-stat-val">1,245</h3>
+                        </div>
+                    </div>
+                    <div class="tk-stat-bot">
+                        <span class="tk-trend tk-text-blue"><span class="material-symbols-outlined tk-text-sm">trending_up</span> +12</span>
+                        <span class="tk-text-muted">so với tháng trước</span>
+                    </div>
+                </div>
+
+                <div class="tk-ana-card tk-stat-box tk-border-blue">
+                    <div class="tk-stat-top">
+                        <div class="tk-stat-icon tk-bg-blue"><span class="material-symbols-outlined">person_4</span></div>
+                        <div class="tk-stat-text-right">
+                            <p class="tk-stat-lbl">Tổng Giáo viên</p>
+                            <h3 class="tk-stat-val">84</h3>
+                        </div>
+                    </div>
+                    <div class="tk-stat-bot">
+                        <span class="tk-trend tk-text-blue"><span class="material-symbols-outlined tk-text-sm">check_circle</span> Đạt</span>
+                        <span class="tk-text-muted">Đủ chỉ tiêu định biên</span>
+                    </div>
+                </div>
+
+                <div class="tk-ana-card tk-stat-box tk-border-blue">
+                    <div class="tk-stat-top">
+                        <div class="tk-stat-icon tk-bg-blue"><span class="material-symbols-outlined">family_restroom</span></div>
+                        <div class="tk-stat-text-right">
+                            <p class="tk-stat-lbl">TK Phụ huynh</p>
+                            <h3 class="tk-stat-val">2,100</h3>
+                        </div>
+                    </div>
+                    <div class="tk-stat-bot">
+                        <span class="tk-text-muted">Tài khoản đã kích hoạt app</span>
+                    </div>
+                </div>
+
+                <div class="tk-ana-card tk-stat-box tk-border-blue">
+                    <div class="tk-stat-top">
+                        <div class="tk-stat-icon tk-bg-blue"><span class="material-symbols-outlined">chat</span></div>
+                        <div class="tk-stat-text-right">
+                            <p class="tk-stat-lbl">Liên kết Zalo OA</p>
+                            <h3 class="tk-stat-val">95%</h3>
+                        </div>
+                    </div>
+                    <div class="tk-stat-bot" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                        <div class="tk-progress-bar"><div class="tk-progress-fill tk-loading-blue" style="width: 95%"></div></div>
+                        <span class="tk-text-muted" style="font-size: 0.75rem;">Mục tiêu: 100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* 4 Thẻ KPI *@
+        
+
+        @* Lưới 2 Biểu đồ *@
+        <div class="tk-ana-charts-grid">
+            <div class="tk-ana-card">
+                <div class="tk-ana-card-header">
+                    <h3 class="tk-ana-section-title"><span class="tk-title-indicator"></span> Chuyên cần Học sinh (Tháng này)</h3>
+                </div>
+                <div class="tk-ana-card-body">
+                    <canvas id="attendanceBarChart" height="260"></canvas>
+                </div>
+            </div>
+
+            <div class="tk-ana-card">
+                <div class="tk-ana-card-header">
+                    <h3 class="tk-ana-section-title"><span class="tk-title-indicator" style="background:#1b6ec2;"></span> Xếp loại học lực</h3>
+                </div>
+                <div class="tk-ana-card-body flex-center">
+                    <div style="position: relative; width: 240px; height: 240px; margin: 0 auto;">
+                        <canvas id="gradePieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Bảng chi tiết có viền rõ ràng *@
+        <div class="tk-ana-card">
+            <div class="tk-ana-card-header">
+                <h3 class="tk-ana-section-title"><span class="tk-title-indicator" style="background:#1b6ec2;"></span> Chi tiết Sĩ số theo Khối</h3>
+            </div>
+            <div class="tk-ana-table-container">
+                <table class="tk-ana-table">
+                    <thead>
+                        <tr>
+                            <th>Khối học</th>
+                            <th class="tk-text-center">Số lớp</th>
+                            <th class="tk-text-center">Tổng sĩ số</th>
+                            <th class="tk-text-center">Điểm danh hôm nay</th>
+                            <th class="tk-text-center">Tỷ lệ chuyên cần</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ClassData)
+                        {
+                            <tr>
+                                <td class="tk-font-bold">@item.Khoi</td>
+                                <td class="tk-text-center">@item.SoLop</td>
+                                <td class="tk-text-center">@item.SiSo</td>
+                                <td class="tk-text-center"><b>@item.CoMat</b> / @item.SiSo</td>
+                                <td class="tk-text-center">
+                                    <span class="tk-ana-badge @(item.TyLe >= 95 ? "badge-blue" : "badge-orange")">@item.TyLe%</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* VARIABLES & RESET */
+    .tk-ana-wrapper {
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        background-color: #f1f5f9;
+        min-height: 100vh;
+        padding: 1.5rem;
+        color: #1e293b;
+        box-sizing: border-box;
+    }
+
+        .tk-ana-wrapper * {
+            box-sizing: border-box;
+        }
+
+    .tk-ana-container {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .m-0 {
+        margin: 0;
+    }
+
+    /* COLORS */
+
+    .tk-text-blue {
+        color: #1b6ec2 !important;
+    }
+
+    .tk-text-muted {
+        color: #64748b !important;
+    }
+
+    .tk-bg-blue {
+        background: #dbeafe !important;
+        color: #1b6ec2 !important;
+    }
+
+    .tk-font-bold {
+        font-weight: 700;
+    }
+
+    .tk-text-center {
+        text-align: center;
+    }
+
+    .tk-text-sm {
+        font-size: 1rem;
+    }
+
+    /* CARDS */
+    .tk-ana-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+
+    .tk-ana-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .tk-ana-card-body {
+        padding: 1.5rem;
+    }
+
+    /* TOOLBAR */
+    .tk-ana-toolbar {
+        padding: 1rem 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .tk-ana-page-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .tk-ana-filter-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .tk-ana-select {
+        border: 1px solid #cbd5e1;
+        padding: 8px 14px;
+        border-radius: 8px;
+        outline: none;
+        background: #fff;
+        font-weight: 600;
+        color: #334155;
+        transition: 0.2s;
+    }
+
+        .tk-ana-select:hover {
+            border-color: #94a3b8;
+        }
+
+    .tk-ana-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .tk-title-indicator {
+        width: 5px;
+        height: 20px;
+        background-color: #1b6ec2;
+        border-radius: 4px;
+    }
+
+    /* KPI CARDS */
+    .tk-ana-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tk-stat-box {
+        padding: 1.25rem;
+        border-top: 4px solid transparent;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+        .tk-stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+    .tk-border-blue {
+        border-top-color: #1b6ec2;
+    }
+
+    .tk-stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .tk-stat-text-right {
+        text-align: right;
+    }
+
+    .tk-stat-lbl {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        margin: 0 0 5px 0;
+        text-transform: uppercase;
+    }
+
+    .tk-stat-val {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .tk-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .tk-stat-bot {
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 0.75rem;
+    }
+
+    .tk-trend {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 700;
+    }
+
+    /* Progress bar */
+    .tk-progress-bar {
+        width: 100%;
+        height: 8px;
+        background-color: #e2e8f0;
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+
+    .tk-progress-fill {
+        height: 100%;
+        border-radius: 9999px;
+        transition: width 1s ease-in-out;
+    }
+
+    .tk-loading-blue{
+        background-color: #1b6ec2;
+    }
+
+    /* CHARTS */
+    .tk-ana-charts-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @@media(min-width: 1024px) {
+        .tk-ana-charts-grid {
+            grid-template-columns: 2fr 1fr;
+        }
+    }
+
+    /* TABLE */
+    .tk-ana-table-container {
+        overflow-x: auto;
+        padding: 0.5rem;
+    }
+
+    .tk-ana-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+        .tk-ana-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .tk-ana-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .tk-ana-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .tk-ana-table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+    .tk-ana-badge {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid transparent;
+    }
+
+    .badge-blue {
+        background-color: #d8ebff;
+        color: #1b6ec2;
+        border-color: #1b6ec2;
+    }
+
+    .badge-orange {
+        background-color: #ffedd5;
+        color: #9a3412;
+        border-color: #fed7aa;
+    }
+</style>
+
+<script>
+    window.renderAnaCharts = () => {
+        // 1. Biểu đồ cột (Chuyên cần)
+        if (window.myBarChart) window.myBarChart.destroy();
+        const ctxBar = document.getElementById('attendanceBarChart');
+        if (ctxBar) {
+            window.myBarChart = new Chart(ctxBar.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Khối 1', 'Khối 2', 'Khối 3', 'Khối 4', 'Khối 5'],
+                    datasets: [
+                        { label: 'Có mặt', data: [342, 285, 248, 195, 280], backgroundColor: '#1b6ec2', borderRadius: 4, barPercentage: 0.6 },
+                        { label: 'Vắng', data: [8, 15, 2, 5, 4], backgroundColor: '#b52b2b', borderRadius: 4, barPercentage: 0.6 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } } }
+                }
+            });
+        }
+
+        // 2. Biểu đồ tròn (Xếp loại)
+        if (window.myPieChart) window.myPieChart.destroy();
+        const ctxPie = document.getElementById('gradePieChart');
+        if (ctxPie) {
+            window.myPieChart = new Chart(ctxPie.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hoàn thành Tốt', 'Hoàn thành', 'Chưa hoàn thành'],
+                    datasets: [{
+                        data: [65, 30, 5],
+                        backgroundColor: ['#1b6ec2', '#da7f3f', '#b52b2b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } }
+                }
+            });
+        }
+    };
+</script>
+
+@code {
+    class ClassDataModel { public string Khoi { get; set; } public int SoLop { get; set; } public int SiSo { get; set; } public int CoMat { get; set; } public double TyLe { get; set; } }
+
+    private List<ClassDataModel> ClassData = new List<ClassDataModel>
+    {
+        new ClassDataModel { Khoi = "Khối 1", SoLop = 8, SiSo = 350, CoMat = 342, TyLe = 97.7 },
+        new ClassDataModel { Khoi = "Khối 2", SoLop = 7, SiSo = 300, CoMat = 285, TyLe = 95.0 },
+        new ClassDataModel { Khoi = "Khối 3", SoLop = 6, SiSo = 250, CoMat = 248, TyLe = 99.2 },
+        new ClassDataModel { Khoi = "Khối 4", SoLop = 5, SiSo = 200, CoMat = 195, TyLe = 97.5 },
+        new ClassDataModel { Khoi = "Khối 5", SoLop = 7, SiSo = 284, CoMat = 280, TyLe = 98.5 }
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(200);
+            await JS.InvokeVoidAsync("renderAnaCharts");
+        }
+    }
+}

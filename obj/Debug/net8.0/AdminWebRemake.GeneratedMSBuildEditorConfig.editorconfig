@@ -1,5 +1,7 @@
 is_global = true
 build_property.TargetFramework = net8.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v8.0
 build_property.TargetPlatformMinVersion = 
 build_property.UsingMicrosoftNETSdkWeb = true
 build_property.ProjectTypeGuids = 
@@ -28,12 +30,96 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbkxheW91dC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/1_ModuleHub.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXDFfTW9kdWxlSHViLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/1_ScoreManagementModule.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXDFfU2NvcmVNYW5hZ2VtZW50TW9kdWxlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/AcademicManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXEFjYWRlbWljTWFuYWdlbWVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/Analytic.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXEFuYWx5dGljLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/BanTru.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXEJhblRydS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/DailyActivitiy.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXERhaWx5QWN0aXZpdGl5LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/NotificationManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXE5vdGlmaWNhdGlvbk1hbmFnZW1lbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/ReviewInfoSem_Subj.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXFJldmlld0luZm9TZW1fU3Viai5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/Security.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXFNlY3VyaXR5LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/Setting.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXFNldHRpbmcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/StaffList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXFN0YWZmTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/StudentList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXFN0dWRlbnRMaXN0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/CompoundPages/Sync.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb21wb3VuZFBhZ2VzXFN5bmMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/Counter.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb3VudGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/Error.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFcnJvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/Attendance.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xBdHRlbmRhbmNlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/AttendanceStats.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xBdHRlbmRhbmNlU3RhdHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xIb21lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/TeacherAttendance.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xUZWFjaGVyQXR0ZW5kYW5jZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/Notification/AssignmentNotice.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xOb3RpZmljYXRpb25cQXNzaWdubWVudE5vdGljZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/Notification/GeneralNotice.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xOb3RpZmljYXRpb25cR2VuZXJhbE5vdGljZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/Notification/MenuNotice.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xOb3RpZmljYXRpb25cTWVudU5vdGljZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/PN_QuanLyBanTru/QLBT_QuanLyHocSinhBanTru.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xQTl9RdWFuTHlCYW5UcnVcUUxCVF9RdWFuTHlIb2NTaW5oQmFuVHJ1LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/Assignment.razor]
@@ -52,16 +138,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XEdyYWRlcy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/Info.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XEluZm8ucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/LeavesRequest.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XExlYXZlc1JlcXVlc3QucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/Permission.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XFBlcm1pc3Npb24ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/Roles.razor]
@@ -72,16 +150,108 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XFN0dWRlbnRQYXJlbnRzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/Students.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XFN0dWRlbnRzLnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/TeacherList.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XFRlYWNoZXJMaXN0LnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SchoolManagement/TimeConfig.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTY2hvb2xNYW5hZ2VtZW50XFRpbWVDb25maWcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_BanDaiDienChaMeHocSinh.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9CYW5EYWlEaWVuQ2hhTWVIb2NTaW5oLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_HienTuongNhacNho.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9IaWVuVHVvbmdOaGFjTmhvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_HieuTruongNhanXet.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9IaWV1VHJ1b25nTmhhblhldC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_HocSinh.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9Ib2NTaW5oLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_Homeroom.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9Ib21lcm9vbS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_Index.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9JbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_KeHoachChuNhiem.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9LZUhvYWNoQ2h1TmhpZW0ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_KeHoachGiaoDuc.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9LZUhvYWNoR2lhb0R1Yy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_KeHoachThang.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9LZUhvYWNoVGhhbmcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_QuanLyHocSinhTheoTo.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9RdWFuTHlIb2NTaW5oVGhlb1RvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_SoDoLopHoc.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9Tb0RvTG9wSG9jLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/SoChuNhiem/SCN_TienBo.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTb0NodU5oaWVtXFNDTl9UaWVuQm8ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/Diem_QuanLyKhoaSoDiem.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcRGllbV9RdWFuTHlLaG9hU29EaWVtLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/Diem_QuanLyMonHocTheoLop.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcRGllbV9RdWFuTHlNb25Ib2NUaGVvTG9wLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/High_2nd_School/GradeLockManager.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcSGlnaF8ybmRfU2Nob29sXEdyYWRlTG9ja01hbmFnZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/High_2nd_School/PeriodManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcSGlnaF8ybmRfU2Nob29sXFBlcmlvZE1hbmFnZW1lbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/High_2nd_School/PointInput.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcSGlnaF8ybmRfU2Nob29sXFBvaW50SW5wdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/High_2nd_School/Summary.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcSGlnaF8ybmRfU2Nob29sXFN1bW1hcnkucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/NhapKetQuaChuyenCan.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcTmhhcEtldFF1YUNodXllbkNhbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/PrimarySchool/DGDK_MonHoc_HoatDong_C1_Index.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcUHJpbWFyeVNjaG9vbFxER0RLX01vbkhvY19Ib2F0RG9uZ19DMV9JbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/PrimarySchool/DGDK_MonHoc_HoatDong_CKView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcUHJpbWFyeVNjaG9vbFxER0RLX01vbkhvY19Ib2F0RG9uZ19DS1ZpZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/PrimarySchool/DGDK_MonHoc_HoatDong_GKView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcUHJpbWFyeVNjaG9vbFxER0RLX01vbkhvY19Ib2F0RG9uZ19HS1ZpZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/PrimarySchool/DGDK_NangLuc_PhamChat_C1_Index.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcUHJpbWFyeVNjaG9vbFxER0RLX05hbmdMdWNfUGhhbUNoYXRfQzFfSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/PrimarySchool/DGDK_NangLuc_PhamChat_CKView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcUHJpbWFyeVNjaG9vbFxER0RLX05hbmdMdWNfUGhhbUNoYXRfQ0tWaWV3LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/StudyManagement/PrimarySchool/DGDK_NangLuc_PhamChat_GKView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTdHVkeU1hbmFnZW1lbnRcUHJpbWFyeVNjaG9vbFxER0RLX05hbmdMdWNfUGhhbUNoYXRfR0tWaWV3LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/TrainManagement/Schedule.razor]
@@ -107,19 +277,3 @@ build_metadata.AdditionalFiles.CssScope =
 [D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-paumxavrvm
-
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/Attendance.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xBdHRlbmRhbmNlLnJhem9y
-build_metadata.AdditionalFiles.CssScope = b-3cwlrirvw3
-
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/AttendanceStats.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xBdHRlbmRhbmNlU3RhdHMucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = b-q89h6ev4j8
-
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/Home.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xIb21lLnJhem9y
-build_metadata.AdditionalFiles.CssScope = b-pz2avyi7qu
-
-[D:/STUDY/VS CSharp/Some Demo PAge/AdminWebRemake/AdminWebRemake/Components/Pages/HomeView/TeacherAttendance.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lVmlld1xUZWFjaGVyQXR0ZW5kYW5jZS5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = b-yfo3ddnkls

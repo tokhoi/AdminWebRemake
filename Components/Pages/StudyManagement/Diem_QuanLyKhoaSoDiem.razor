@@ -1,0 +1,577 @@
+﻿@page "/learning/khoaso"
+@inject IJSRuntime JS
+
+<div class="dashboard-container">
+    @* --- HEADER --- *@
+    <div class=\"page-title\">
+        <div class="icon-title" style="background:#6f42c1">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h4>TRẠNG THÁI NHẬP ĐIỂM & KHÓA SỔ</h4>
+
+        <div class="ms-auto d-flex gap-2 align-items-center">
+            <div class="year-selector">
+                <i class="fa-solid fa-calendar-alt me-2 text-muted"></i>
+                <select class="form-select-sm" @bind="selectedNamHoc">
+                    <option value="2023-2024">2023-2024</option>
+                    <option value="2024-2025">2024-2025</option>
+                </select>
+            </div>
+
+            <div class="semester-selector">
+                <i class="fa-solid fa-graduation-cap me-2 text-muted"></i>
+                <select class="form-select-sm" @bind="selectedHocKy">
+                    <option value="1">Học kỳ 1</option>
+                    <option value="2">Học kỳ 2</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    @* --- FILTER BAR --- *@
+    <div class="filter-bar">
+        <div class="d-flex flex-wrap gap-3 align-items-end">
+            <div class="filter-group">
+                <label>Khối</label>
+                <select class="form-select" @bind="filters.Khoi" @bind:after="OnKhoiChanged">
+                    <option value="">-- Tất cả khối --</option>
+                    @foreach (var khoi in listKhoi)
+                    {
+                        <option value="@khoi">Khối @khoi</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Lớp học</label>
+                <select class="form-select" @bind="filters.Lop">
+                    <option value="">-- Tất cả lớp --</option>
+                    @foreach (var lop in listLop.Where(l => string.IsNullOrEmpty(filters.Khoi) || l.Khoi == filters.Khoi))
+                    {
+                        <option value="@lop.Id">@lop.TenLop</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Môn học</label>
+                <select class="form-select" @bind="filters.MonHoc">
+                    <option value="">-- Tất cả môn --</option>
+                    @foreach (var mon in listMon)
+                    {
+                        <option value="@mon">@mon</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Kỳ đánh giá</label>
+                <select class="form-select" @bind="filters.KyDanhGia">
+                    <option value="1">Giữa kỳ</option>
+                    <option value="2">Cuối kỳ</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 ms-auto mt-3 mt-md-0">
+            <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                <i class="fa-solid fa-rotate-right me-2"></i>Làm mới
+            </button>
+            <button class="btn btn-primary" @onclick="LoadData">
+                <i class="fa-solid fa-filter me-2"></i>Lọc dữ liệu
+            </button>
+            <button class="btn btn-danger" @onclick="ShowLockAllModal">
+                <i class="fa-solid fa-lock me-2"></i>Khóa tất cả
+            </button>
+        </div>
+    </div>
+
+    @* --- DATA TABLE --- *@
+    <div class="table-container">
+        @if (isLoading)
+        {
+            <div class="loading-state">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="mt-2 text-muted">Đang tải dữ liệu khóa sổ...</p>
+            </div>
+        }
+        else if (!filteredData.Any())
+        {
+            <div class="empty-state">
+                <i class="fa-solid fa-shield-blank mb-3"></i>
+                <h5>Không có dữ liệu</h5>
+                <p class="text-muted">Vui lòng điều chỉnh bộ lọc để xem danh sách</p>
+            </div>
+        }
+        else
+        {
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th width="50" class="text-center">STT</th>
+                        <th width="120">Lớp</th>
+                        <th width="200">Giáo viên CN</th>
+                        <th width="150">Môn học</th>
+                        <th width="120" class="text-center">Kỳ ĐG</th>
+                        <th width="150" class="text-center">Trạng thái</th>
+                        <th>Người thao tác</th>
+                        <th width="150" class="text-center">Thời gian</th>
+                        <th width="100" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int stt = 1;
+                        var groupedData = filteredData.GroupBy(x => x.TenLop).ToList();
+                        foreach (var group in groupedData)
+                        {
+                            var firstRow = group.First();
+                            int rowSpan = group.Count();
+                            bool isFirst = true;
+
+                            foreach (var item in group)
+                            {
+                                <tr>
+                                    @if (isFirst)
+                                    {
+                                        <td rowspan="@rowSpan" class="text-center align-middle font-weight-bold border-end">@(stt++)</td>
+                                        <td rowspan="@rowSpan" class="align-middle border-end">
+                                            <span class="badge bg-light text-dark border">@item.TenLop</span>
+                                        </td>
+                                        <td rowspan="@rowSpan" class="align-middle border-end">@item.GVCN</td>
+                                    }
+
+                                    <td>@item.MonHoc</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info text-dark">@(item.KyDanhGia == 1 ? "Giữa kỳ" : "Cuối kỳ")</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.IsLocked)
+                                        {
+                                            <span class="status-badge locked"><i class="fa-solid fa-lock me-1"></i>Đã khóa</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge unlocked"><i class="fa-solid fa-unlock me-1"></i>Đang mở</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted small">@(string.IsNullOrEmpty(item.NguoiThaoTac) ? "-" : item.NguoiThaoTac)</td>
+                                    <td class="text-center text-muted small">
+                                        @(item.NgayThaoTac.HasValue? item.NgayThaoTac.Value.ToString("dd/MM/yyyy HH:mm") : "-")
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-flex justify-content-center m-0">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   checked="@item.IsLocked"
+                                                   @onchange="@(e => ToggleLockStatus(item, (bool)(e.Value ?? false)))"
+                                                   title="@(item.IsLocked ? "Mở khóa sổ" : "Khóa sổ điểm")" />
+                                        </div>
+                                    </td>
+                                </tr>
+                                isFirst = false;
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@* Modal Xác nhận Khóa tất cả *@
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fa-solid fa-triangle-exclamation me-2"></i>Xác nhận Khóa sổ điểm</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => showModal = false"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-lock text-danger" style="font-size: 48px; opacity: 0.8"></i>
+                    </div>
+                    <h5 class="mb-3">Bạn có chắc chắn muốn khóa tất cả?</h5>
+                    <p class="text-muted mb-0">Thao tác này sẽ khóa <strong>toàn bộ sổ điểm</strong> của các lớp và môn học theo bộ lọc hiện tại. Giáo viên sẽ không thể nhập hoặc sửa điểm nữa.</p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showModal = false">Hủy bỏ</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmKhoaTatCa">
+                        <i class="fa-solid fa-check me-2"></i>Đồng ý khóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    /* ... (BẠN GIỮ NGUYÊN CSS GỐC TRONG NÀY VÌ KHÔNG ẢNH HƯỞNG GÌ) ... */
+    :root {
+        --primary-color: #1b6ec2;
+        --bg-color: #f8f9fa;
+        --border-color: #e9ecef;
+    }
+
+    .dashboard-container {
+        padding: 20px;
+        background-color: var(--bg-color);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        background: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .icon-title {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 15px;
+    }
+
+    .page-title h4 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.2rem;
+    }
+
+    .filter-bar {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 150px;
+    }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+    .table-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 20px;
+        overflow-x: auto;
+    }
+
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 0;
+    }
+
+        .custom-table thead th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            padding: 12px 15px;
+            border-bottom: 2px solid #dee2e6;
+            border-top: none;
+        }
+
+        .custom-table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+    }
+
+        .status-badge.locked {
+            background-color: #fdecea;
+            color: #dc3545;
+            border: 1px solid #fad2d6;
+        }
+
+        .status-badge.unlocked {
+            background-color: #e8f5e9;
+            color: #28a745;
+            border: 1px solid #c8e6c9;
+        }
+
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+
+        .form-check-input:checked {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+    .empty-state, .loading-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6c757d;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+        }
+</style>
+
+<script>
+    window.showToastMessage = function (message, type) {
+        // Tạo container nếu chưa có
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+            document.body.appendChild(container);
+        }
+
+        // Tạo toast element
+        const toast = document.createElement('div');
+        const bgColors = { 'success': '#d4edda', 'error': '#f8d7da', 'warning': '#fff3cd', 'info': '#d1ecf1' };
+        const textColors = { 'success': '#155724', 'error': '#721c24', 'warning': '#856404', 'info': '#0c5460' };
+        const borderColors = { 'success': '#c3e6cb', 'error': '#f5c6cb', 'warning': '#ffeeba', 'info': '#bee5eb' };
+
+        toast.style.cssText = `
+            background-color: ${bgColors[type] || bgColors.info};
+            color: ${textColors[type] || textColors.info};
+            border: 1px solid ${borderColors[type] || borderColors.info};
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            pointer-events: auto;
+            animation: slideIn 0.3s ease forwards;
+        `;
+
+        const icons = { 'success': 'fa-check-circle', 'error': 'fa-times-circle', 'warning': 'fa-exclamation-triangle', 'info': 'fa-info-circle' };
+        toast.innerHTML = `
+            <i class="fa-solid ${icons[type] || icons.info}" style="font-size: 16px;"></i>
+            <span style="flex: 1">${message}</span>
+            <i class="fa-solid fa-times" style="cursor: pointer; opacity: 0.7;"></i>
+        `;
+
+        toast.querySelector('.fa-times').addEventListener('click', () => toast.remove());
+        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+        container.appendChild(toast);
+    };
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    `;
+    document.head.appendChild(style);
+</script>
+
+@code {
+    // --- MODELS ---
+    public class LopHocMock
+    {
+        public string Id { get; set; }
+        public string TenLop { get; set; }
+        public string Khoi { get; set; }
+        public string GVCN { get; set; }
+    }
+
+    public class KhoaSoModel
+    {
+        public string LopId { get; set; }
+        public string TenLop { get; set; }
+        public string GVCN { get; set; }
+        public string MonHoc { get; set; }
+        public int KyDanhGia { get; set; }
+        public bool IsLocked { get; set; }
+        public string NguoiThaoTac { get; set; }
+        public DateTime? NgayThaoTac { get; set; }
+    }
+
+    public class FilterState
+    {
+        public string Khoi { get; set; } = "";
+        public string Lop { get; set; } = "";
+        public string MonHoc { get; set; } = "";
+        public int KyDanhGia { get; set; } = 1;
+    }
+
+    // --- STATE ---
+    private string selectedNamHoc = "2023-2024";
+    private int selectedHocKy = 1;
+    private FilterState filters = new FilterState();
+    private bool isLoading = false;
+    private bool showModal = false;
+
+    // --- MOCK DATA ---
+    private List<string> listKhoi = new() { "1", "2", "3", "4", "5" };
+    private List<string> listMon = new() { "Toán", "Tiếng Việt", "Tự nhiên Xã hội", "Đạo đức", "Tiếng Anh" };
+    private List<LopHocMock> listLop = new();
+    private List<KhoaSoModel> allData = new();
+    private List<KhoaSoModel> filteredData = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        InitMockData();
+        await LoadData();
+    }
+
+    private void InitMockData()
+    {
+        // Tạo danh sách lớp ảo
+        foreach (var k in listKhoi)
+        {
+            listLop.Add(new LopHocMock { Id = $"L{k}1", TenLop = $"{k}A1", Khoi = k, GVCN = $"Nguyễn Thị A - {k}A1" });
+            listLop.Add(new LopHocMock { Id = $"L{k}2", TenLop = $"{k}A2", Khoi = k, GVCN = $"Trần Văn B - {k}A2" });
+        }
+
+        // Tạo dữ liệu khóa sổ ảo
+        var rand = new Random();
+        foreach (var lop in listLop)
+        {
+            foreach (var mon in listMon)
+            {
+                bool isLocked = rand.Next(0, 2) == 1;
+                allData.Add(new KhoaSoModel
+                {
+                    LopId = lop.Id,
+                    TenLop = lop.TenLop,
+                    GVCN = lop.GVCN,
+                    MonHoc = mon,
+                    KyDanhGia = 1, // GK
+                    IsLocked = isLocked,
+                    NguoiThaoTac = isLocked ? "Admin" : "",
+                    NgayThaoTac = isLocked ? DateTime.Now.AddDays(-rand.Next(1, 10)) : null
+                });
+
+                isLocked = rand.Next(0, 2) == 1;
+                allData.Add(new KhoaSoModel
+                {
+                    LopId = lop.Id,
+                    TenLop = lop.TenLop,
+                    GVCN = lop.GVCN,
+                    MonHoc = mon,
+                    KyDanhGia = 2, // CK
+                    IsLocked = isLocked,
+                    NguoiThaoTac = isLocked ? "Admin" : "",
+                    NgayThaoTac = isLocked ? DateTime.Now.AddDays(-rand.Next(1, 10)) : null
+                });
+            }
+        }
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+        await Task.Delay(500); // Giả lập loading
+
+        filteredData = allData.Where(x =>
+            (string.IsNullOrEmpty(filters.Lop) ? (string.IsNullOrEmpty(filters.Khoi) || x.TenLop.StartsWith(filters.Khoi)) : x.LopId == filters.Lop) &&
+            (string.IsNullOrEmpty(filters.MonHoc) || x.MonHoc == filters.MonHoc) &&
+            x.KyDanhGia == filters.KyDanhGia
+        ).OrderBy(x => x.TenLop).ThenBy(x => x.MonHoc).ToList();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void OnKhoiChanged()
+    {
+        filters.Lop = "";
+        _ = LoadData();
+    }
+
+    private void ResetFilters()
+    {
+        filters = new FilterState();
+        _ = LoadData();
+    }
+
+    private async Task ToggleLockStatus(KhoaSoModel item, bool isLock)
+    {
+        item.IsLocked = isLock;
+        item.NguoiThaoTac = isLock ? "Admin Demo" : "";
+        item.NgayThaoTac = isLock ? DateTime.Now : null;
+
+        string statusText = isLock ? "Khóa sổ" : "Mở khóa";
+        await JS.InvokeVoidAsync("showToastMessage", $"Đã {statusText} môn {item.MonHoc} lớp {item.TenLop} thành công!", "success");
+    }
+
+    private void ShowLockAllModal()
+    {
+        if (!filteredData.Any())
+        {
+            JS.InvokeVoidAsync("showToastMessage", "Không có dữ liệu để khóa!", "warning");
+            return;
+        }
+        showModal = true;
+    }
+
+    private async Task ConfirmKhoaTatCa()
+    {
+        showModal = false;
+        isLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(500); // Giả lập call API
+
+        int count = 0;
+        foreach (var item in filteredData)
+        {
+            if (!item.IsLocked)
+            {
+                item.IsLocked = true;
+                item.NguoiThaoTac = "Admin Demo";
+                item.NgayThaoTac = DateTime.Now;
+                count++;
+            }
+        }
+
+        isLoading = false;
+        StateHasChanged();
+        await JS.InvokeVoidAsync("showToastMessage", $"Đã khóa thành công {count} bản ghi!", "success");
+    }
+}

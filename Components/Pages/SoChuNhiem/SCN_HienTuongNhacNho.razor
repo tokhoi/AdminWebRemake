@@ -1,0 +1,186 @@
+﻿<div class="scn-child-container animate-fade-in">
+    <h2 class="page-title" style="margin-bottom: 1.5rem;">Hiện tượng & Nhắc nhở Kỷ luật</h2>
+
+    <div class="form-card">
+        <h3 class="card-title">Ghi nhận vi phạm mới</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Học sinh vi phạm</label>
+                <select class="input-control"><option>-- Chọn học sinh --</option><option>Nguyễn Văn A</option></select>
+            </div>
+            <div class="form-group">
+                <label>Ngày vi phạm</label>
+                <input type="date" class="input-control" value="2026-03-10" />
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Lý do vi phạm / Nhắc nhở</label>
+                <input type="text" class="input-control" placeholder="Ví dụ: Đi học trễ, không đồng phục..." />
+            </div>
+        </div>
+        <div style="text-align: right; margin-top: 1rem;">
+            <button class="btn-primary" @onclick="ShowToast"><span class="material-icons-round">add</span> Lưu ghi nhận</button>
+        </div>
+    </div>
+
+    <h3 class="card-title" style="margin: 1.5rem 0 1rem 0;">Lịch sử nhắc nhở</h3>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">Ngày</th>
+                    <th>Học sinh</th>
+                    <th>Nội dung vi phạm</th>
+                    <th style="text-align: center;">Hình thức</th>
+                    <th style="text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-muted">08/03/2026</td>
+                    <td style="font-weight: 600;">Lê Trần C</td>
+                    <td>Sử dụng điện thoại trong giờ học</td>
+                    <td style="text-align: center;"><span class="tag tag-red">Tịch thu ĐT</span></td>
+                    <td style="text-align: center;"><button class="icon-btn"><span class="material-icons-round">delete</span></button></td>
+                </tr>
+                <tr>
+                    <td class="text-muted">05/03/2026</td>
+                    <td style="font-weight: 600;">Nguyễn Văn A</td>
+                    <td>Không thuộc bài cũ</td>
+                    <td style="text-align: center;"><span class="tag tag-warning">Nhắc nhở</span></td>
+                    <td style="text-align: center;"><button class="icon-btn"><span class="material-icons-round">delete</span></button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private void ShowToast()
+    {
+        // Trong dự án thực tế chỗ này sẽ gọi Toastr/SweetAlert
+    }
+}
+
+<style>
+    .scn-child-container {
+        padding: 0.5rem;
+    }
+
+    .page-title {
+        font-size: 1.15rem;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0 0 1rem 0;
+    }
+
+    .form-card {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+    }
+
+    .input-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+    }
+
+        .input-control:focus {
+            border-color: #1b6ec2;
+        }
+
+    .btn-primary {
+        background: #1b6ec2;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .table-wrapper {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .data-table th {
+            background: #fdfdfd;
+            padding: 12px 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 12px 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+    .text-muted {
+        color: var(--text-muted);
+    }
+
+    .tag {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .tag-red {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .tag-warning {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .icon-btn {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+    }
+
+        .icon-btn:hover {
+            color: #ef4444;
+        }
+</style>   

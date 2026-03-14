@@ -1,0 +1,939 @@
+﻿@* ĐÃ BỎ HẾT CÁC USING VÀ INJECT KHÔNG CẦN THIẾT ĐỂ CHẠY ĐỘC LẬP *@
+@using System.Text.RegularExpressions
+
+@if (!string.IsNullOrEmpty(toastMessage))
+{
+    <div class="toast-message alert @toastClass show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+        <div class="d-flex justify-content-between align-items-center">
+            <span>@toastMessage</span>
+            <button type="button" class="btn-close" @onclick="ClearToast"></button>
+        </div>
+    </div>
+}
+
+<div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+    @if (IsLoading)
+    {
+        <div style="padding: 20px; text-align: center; color: #666; margin: auto;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...
+        </div>
+    }
+    else if (string.IsNullOrEmpty(SelectedLop))
+    {
+        <div class="empty-state" style="padding: 40px 20px; text-align: center; color: #666; margin: auto;">
+            <i class="fa-solid fa-school-circle-exclamation mb-3" style="font-size: 48px; color: #1b6ec2; opacity: 0.5;"></i>
+            <h5 class="fw-bold">Chưa chọn lớp</h5>
+            <p>Vui lòng chọn lớp từ bộ lọc để xem dữ liệu đánh giá giữa kỳ.</p>
+        </div>
+    }
+    else
+    {
+        <div class="class-info-bar">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <span>
+                    <i class="fa-solid fa-list me-1"></i> KẾT QUẢ ĐÁNH GIÁ GIỮA KỲ
+                    @if (IsMonTiengViet)
+                    {
+                        <span class="badge-mini" style="background:#198754; color:white; border:none; margin-left:5px;">Môn Tiếng Việt</span>
+                    }
+                    else if (IsMonToan)
+                    {
+
+                        <span class="badge-mini" style="background:#0dcaf0; color:white; border:none; margin-left:5px;">Môn Toán</span>
+                    }
+                </span>
+                <span class="text-muted fw-bold">Thời điểm đánh giá: Giữa học kỳ @GetTenHocKy()</span>
+            </div>
+        </div>
+
+        @if (isKhoaSoDiem)
+        {
+            <div class="alert-box info mb-2" style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404;">
+                <i class="fa-solid fa-lock me-2"></i>
+                <div>
+                    <strong>Sổ điểm đã được khóa</strong> - Chỉ có thể xem, không thể chỉnh sửa dữ liệu.
+                    @if (currentSession.Role == "Administrator")
+                    {
+                        <span class="ms-2">(Bạn có quyền Administrator để mở khóa)</span>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="filter-bar" style="margin-bottom: 5px;">
+            <div class="actions-group">
+                <button class="btn-excel" @onclick="ShowDownloadModal" disabled="@isDownloading">
+                    <i class="fa-solid fa-download me-1"></i>
+                    @if (isDownloading)
+                    {
+                        <i class="fa-solid fa-spinner fa-spin me-1"></i>
+                    }
+                    Tải file mẫu
+                </button>
+                <button class="btn-custom btn-primary" @onclick="ShowUploadModal" disabled="@isKhoaSoDiem">
+                    <i class="fa-solid fa-upload me-1"></i> Tải lên file điểm
+                </button>
+                <button class="btn-custom" @onclick="ShowPrintModal" style="background: #17a2b8; color: white;">
+                    <i class="fa-solid fa-print me-1"></i> In phiếu đánh giá
+                </button>
+            </div>
+
+            <div class="actions-group ms-auto">
+                @if (currentSession.Role == "Administrator")
+                {
+                    <div class="d-flex align-items-center me-3 pe-3" style="border-right: 1px solid #ddd;">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="khoaSoDiemSwitch" checked="@isKhoaSoDiem" @onchange="OnKhoaSoDiemChanged" style="cursor: pointer;" />
+                            <label class="form-check-label mb-0 ms-1 fw-bold" for="khoaSoDiemSwitch" style="font-size: 13px; cursor: pointer;">Khóa sổ điểm</label>
+                        </div>
+
+                    </div>
+                    <button class="btn-custom" @onclick="ShowConfirmNopDiemModal" disabled="@isNopDiemLoading" style="background: #ffc107; color: #000;">
+                        <i class="fa-solid fa-paper-plane me-1"></i>
+                        @if (isNopDiemLoading)
+                        {
+                            <i class="fa-solid fa-spinner fa-spin me-1"></i>
+                        }
+                        Nộp điểm lên Sở
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="filter-bar @(isKhoaSoDiem ? "readonly-mode" : "")" style="background: #f8f9fa; margin-bottom: 10px;">
+            <div class="group">
+                <span class="me-2 fw-semibold">Áp dụng mức đạt được cho tất cả:</span>
+                <button class="btn-custom btn-save" @onclick='() => ConfirmBulkAction("T")' disabled="@isKhoaSoDiem"><i class="fa-solid fa-check me-1"></i> T</button>
+                <button class="btn-custom" style="background: #ffc107; color: #000;" @onclick='() => ConfirmBulkAction("H")' disabled="@isKhoaSoDiem"><i class="fa-solid fa-minus me-1"></i> H</button>
+                <button class="btn-custom" style="background: #dc3545; color: white;" @onclick='() => ConfirmBulkAction("C")' disabled="@isKhoaSoDiem"><i class="fa-solid fa-times me-1"></i> C</button>
+                <button class="btn-custom" style="background: #6c757d; color: white;" @onclick='() => ConfirmBulkAction("")' disabled="@isKhoaSoDiem"><i class="fa-solid fa-trash me-1"></i> Xóa</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="excel-table">
+                <thead>
+                    @if (IsMonTiengViet && IsKhoi)
+                    {
+                        <tr>
+                            <th rowspan="2" class="sticky-col col-stt z-corner text-center">STT</th>
+                            <th rowspan="2" class="sticky-col col-name z-corner text-left">Họ tên</th>
+                            <th rowspan="2" class="sticky-col col-dob z-corner text-center">Ngày sinh</th>
+                            <th rowspan="2" class="text-center" style="min-width: 110px;">Mức đạt được</th>
+                            <th rowspan="2" class="text-center" style="min-width: 90px;">Điểm KTĐK</th>
+                            <th colspan="3" class="th-group text-center">ĐỌC</th>
+                            <th rowspan="2" class="th-group text-center" style="min-width: 90px;">VIẾT</th>
+                            <th rowspan="2" class="text-center" style="min-width: 120px;">Mã nhận xét</th>
+                            <th rowspan="2" class="text-center" style="min-width: 250px;">Nhận xét điểm mạnh và các mặt cần rèn luyện</th>
+                        </tr>
+                        <tr>
+                            <th class="sub-th text-center" style="min-width: 90px;">Đọc thành tiếng</th>
+                            <th class="sub-th text-center" style="min-width: 90px;">Đọc thầm</th>
+                            <th class="sub-th text-center" style="min-width: 90px;">Đọc hiểu</th>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <th class="sticky-col col-stt z-corner text-center">STT</th>
+                            <th class="sticky-col col-name z-corner text-left">Họ tên</th>
+                            <th class="sticky-col col-dob z-corner text-center">Ngày sinh</th>
+                            <th class="text-center" style="min-width: 110px;">Mức đạt được</th>
+                            @if (IsMonToan && IsKhoi)
+                            {
+                                <th class="text-center" style="min-width: 90px;">Điểm KTĐK</th>
+                            }
+                            <th class="text-center" style="min-width: 120px;">Mã nhận xét</th>
+                            <th class="text-center" style="min-width: 250px;">Nhận xét điểm mạnh và các mặt cần rèn luyện</th>
+                        </tr>
+                    }
+                </thead>
+                <tbody>
+                    @if (hocSinhList.Any())
+                    {
+                        var stt = 1;
+                        @foreach (var hs in hocSinhList)
+                        {
+                            var currentMucDatDuoc = GetMucDatDuoc(hs.MaHsSo);
+                            var currentMaNhanXet = GetMaNhanXet(hs.MaHsSo);
+                            var currentNhanXet = GetNhanXet(hs.MaHsSo);
+                            var currentDiemKTDK = GetDiemKTDK(hs.MaHsSo);
+                            var currentDiemTvDocThanhTieng = GetDiemTvDocThanhTieng(hs.MaHsSo);
+                            var currentDiemTvDocTham = GetDiemTvDocTham(hs.MaHsSo);
+                            var currentDiemTvDoc = GetDiemTvDoc(hs.MaHsSo);
+                            var currentDiemTvViet = GetDiemTvViet(hs.MaHsSo);
+
+                            <tr>
+                                <td class="sticky-col col-stt text-center fw-bold">@stt</td>
+                                <td class="sticky-col col-name font-name text-left">@hs.HoTen</td>
+                                <td class="sticky-col col-dob text-center">
+                                    @(hs.NgaySinh.HasValue? hs.NgaySinh.Value.ToString("dd/MM/yyyy") : "---")
+                                </td>
+
+                                <td class="td-inp">
+                                    @if (isKhoaSoDiem)
+                                    {
+                                        <div class="seamless-input d-flex align-items-center justify-content-center bg-gray">
+                                            <span class="badge-mini @GetMucDatDuocBadgeClass(currentMucDatDuoc)">@currentMucDatDuoc</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <select class="seamless-select text-center" value="@currentMucDatDuoc" disabled="@isKhoaSoDiem" @onchange="(e) => OnMucDatDuocChanged(hs.MaHsSo, e.Value?.ToString())">
+                                            <option value="" class="option-placeholder"></option>
+                                            <option value="T">T</option>
+                                            <option value="H">H</option>
+                                            <option value="C">C</option>
+                                        </select>
+                                    }
+                                </td>
+
+                                @if (IsMonTiengViet && IsKhoi)
+                                {
+                                    <td class="td-inp">
+                                        @if (isKhoaSoDiem)
+                                        {
+                                            <div class="seamless-input text-center bg-gray">@currentDiemKTDK</div>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="seamless-input text-center" value="@currentDiemKTDK" placeholder="0-10" disabled="@isKhoaSoDiem" @onchange="(e) => OnDiemKTDKChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                        }
+                                    </td>
+                                    <td class="td-inp">
+                                        @if (isKhoaSoDiem)
+                                        {
+                                            <div class="seamless-input text-center bg-gray">@currentDiemTvDocThanhTieng</div>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="seamless-input text-center" value="@currentDiemTvDocThanhTieng" placeholder="0-10" disabled="@isKhoaSoDiem" @onchange="(e) => OnDiemTvDocThanhTiengChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                        }
+                                    </td>
+                                    <td class="td-inp">
+                                        @if (isKhoaSoDiem)
+                                        {
+                                            <div class="seamless-input text-center bg-gray">@currentDiemTvDocTham</div>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="seamless-input text-center" value="@currentDiemTvDocTham" placeholder="0-10" disabled="@isKhoaSoDiem" @onchange="(e) => OnDiemTvDocThamChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                        }
+                                    </td>
+                                    <td class="td-inp">
+                                        @if (isKhoaSoDiem)
+                                        {
+                                            <div class="seamless-input text-center bg-gray">@currentDiemTvDoc</div>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="seamless-input text-center" value="@currentDiemTvDoc" placeholder="0-10" disabled="@isKhoaSoDiem" @onchange="(e) => OnDiemTvDocChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                        }
+                                    </td>
+                                    <td class="td-inp">
+                                        @if (isKhoaSoDiem)
+                                        {
+                                            <div class="seamless-input text-center bg-gray">@currentDiemTvViet</div>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="seamless-input text-center" value="@currentDiemTvViet" placeholder="0-10" disabled="@isKhoaSoDiem" @onchange="(e) => OnDiemTvVietChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                        }
+                                    </td>
+                                }
+                                else if (IsMonToan && IsKhoi)
+                                {
+                                    <td class="td-inp">
+                                        @if (isKhoaSoDiem)
+                                        {
+                                            <div class="seamless-input text-center bg-gray">@currentDiemKTDK</div>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="seamless-input text-center" value="@currentDiemKTDK" placeholder="0-10" disabled="@isKhoaSoDiem" @onchange="(e) => OnDiemKTDKChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                        }
+                                    </td>
+                                }
+
+                                <td class="td-inp">
+                                    @if (isKhoaSoDiem)
+                                    {
+                                        <div class="seamless-input text-center bg-gray">@currentMaNhanXet</div>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="seamless-input text-center" value="@currentMaNhanXet" disabled="@isKhoaSoDiem" @onchange="(e) => OnMaNhanXetChanged(hs.MaHsSo, e.Value?.ToString())" />
+                                    }
+                                </td>
+                                <td class="td-inp" style="padding: 0;">
+                                    @if (isKhoaSoDiem)
+                                    {
+                                        <div class="seamless-input text-left bg-gray" style="padding-top: 8px;">@currentNhanXet</div>
+                                    }
+                                    else
+                                    {
+                                        <textarea class="note-input" disabled="@isKhoaSoDiem" @oninput="(e) => OnNhanXetChanged(hs.MaHsSo, e.Value?.ToString())">@currentNhanXet</textarea>
+                                    }
+                                </td>
+                            </tr>
+                            stt++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center py-5">
+                                <div style="color: #666;">
+                                    <i class="fa-solid fa-users mb-2" style="font-size: 32px; color: #ccc;"></i>
+                                    <p class="mb-0">Không có học sinh nào trong lớp này</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (showDownloadModal)
+{
+    <div class="modal-backdrop-custom show" @onclick="CloseDownloadModal">
+        <div class="modal-content-custom" @onclick:stopPropagation>
+            <div class="modal-header-custom">
+                <h5 class="modal-title-custom"><i class="fas fa-download me-2"></i>Tải file mẫu Excel</h5>
+                <button class="btn-close-custom" @onclick="CloseDownloadModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body-custom">
+                <div class="alert-box info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <div>Tải về file Excel mẫu để nhập điểm đánh giá giữa kỳ</div>
+                </div>
+            </div>
+            <div class="modal-footer-custom">
+                <button class="btn-custom btn-secondary-custom" @onclick="CloseDownloadModal">Hủy</button>
+                <button class="btn-custom btn-success" @onclick="CloseDownloadModal">Tải file mẫu</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showUploadModal)
+{
+    <div class="modal-backdrop-custom show" @onclick="CloseUploadModal">
+        <div class="modal-content-custom" @onclick:stopPropagation>
+            <div class="modal-header-custom">
+                <h5 class="modal-title-custom"><i class="fas fa-upload me-2 text-primary"></i>Tải lên file điểm</h5>
+                <button class="btn-close-custom" @onclick="CloseUploadModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body-custom">
+                <div class="upload-zone">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h6>Click để chọn file Excel</h6>
+                    <p class="text-muted mb-0">Chỉ chấp nhận file .xlsx, .xls</p>
+                </div>
+            </div>
+            <div class="modal-footer-custom">
+                <button class="btn-custom btn-secondary-custom" @onclick="CloseUploadModal">Hủy</button>
+                <button class="btn-custom btn-primary" @onclick="CloseUploadModal">Xác nhận tải lên</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showConfirmModal)
+{
+    <div class="modal-backdrop-custom show" @onclick="CancelBulkAction">
+        <div class="modal-content-custom" @onclick:stopPropagation style="width: 400px;">
+            <div class="modal-header-custom">
+                <h5 class="modal-title-custom">Xác nhận hành động</h5>
+                <button class="btn-close-custom" @onclick="CancelBulkAction"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body-custom text-center">
+                <p>Bạn có chắc chắn muốn áp dụng mức <strong>@bulkActionToApply</strong> cho tất cả học sinh không?</p>
+            </div>
+            <div class="modal-footer-custom justify-content-center">
+                <button class="btn-custom btn-secondary-custom" @onclick="CancelBulkAction">Hủy</button>
+                <button class="btn-custom btn-primary" @onclick="ApplyConfirmedBulkAction">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showPrintModal)
+{
+    <div class="modal-backdrop-custom show" @onclick="ClosePrintModal">
+        <div class="modal-content-custom" @onclick:stopPropagation style="width: 800px; max-width: 95%;">
+            <div class="modal-header-custom">
+                <h5 class="modal-title-custom"><i class="fas fa-print me-2"></i>Chọn học sinh để in phiếu</h5>
+                <button class="btn-close-custom" @onclick="ClosePrintModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body-custom">
+                <p>Danh sách học sinh sẽ hiển thị ở đây để bạn chọn in...</p>
+            </div>
+            <div class="modal-footer-custom">
+                <button class="btn-custom btn-secondary-custom" @onclick="ClosePrintModal">Đóng</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showNopDiemModal)
+{
+    <div class="modal-backdrop-custom show" @onclick="CloseNopDiemModal">
+        <div class="modal-content-custom" @onclick:stopPropagation>
+            <div class="modal-header-custom">
+                <h5 class="modal-title-custom"><i class="fas fa-paper-plane me-2"></i>Nộp điểm lên Sở</h5>
+                <button class="btn-close-custom" @onclick="CloseNopDiemModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body-custom">
+                <div class="alert-box info mb-3">Bạn chuẩn bị nộp bảng điểm này lên sở. Hành động này không thể hoàn tác.</div>
+            </div>
+            <div class="modal-footer-custom">
+                <button class="btn-custom btn-secondary-custom" @onclick="CloseNopDiemModal">Hủy</button>
+                <button class="btn-custom" style="background: #ffc107; color: #000;" @onclick="CloseNopDiemModal">Xác nhận nộp</button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    /* CSS CƠ BẢN GIỐNG THCS_NHAPDIEM */
+    .class-info-bar {
+        background: #eef7ff;
+        padding: 8px 12px;
+        border: 1px solid #b3d7ff;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #005b9f;
+        font-weight: 600;
+    }
+
+    .filter-bar {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        flex-shrink: 0;
+    }
+
+    .group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .actions-group {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .ms-auto {
+        margin-left: auto;
+    }
+
+    .btn-custom {
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+        .btn-custom:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+    .btn-primary {
+        background: #1b6ec2;
+        color: white;
+    }
+
+    .btn-save {
+        background: #198754;
+        color: white;
+    }
+
+    .btn-excel {
+        background: #0091ff;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+    }
+
+    .badge-mini {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        font-weight: 600;
+    }
+
+    .alert-box.info {
+        background: #e7f5ff;
+        border: 1px solid #b3d7ff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        color: #004085;
+        font-size: 13px;
+    }
+
+    /* TABLE CSS */
+    .table-container {
+        flex: 1;
+        overflow: auto;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        position: relative;
+    }
+
+    .excel-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 100%;
+        width: max-content;
+    }
+
+        .excel-table th, .excel-table td {
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            padding: 0;
+            font-size: 13px;
+            vertical-align: middle;
+            height: 36px;
+        }
+
+        .excel-table th {
+            padding: 6px;
+        }
+
+        .excel-table thead th {
+            background: #005b9f;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-color: #4da3e2;
+        }
+
+    .th-group {
+        background: #004b87 !important;
+    }
+
+    .sub-th {
+        top: 34px;
+        background: #2a92df !important;
+        z-index: 10;
+    }
+
+    .bg-gray {
+        background: #f8f9fa !important;
+        color: #495057 !important;
+    }
+
+    .sticky-col {
+        position: sticky;
+        background: white;
+        z-index: 5;
+    }
+
+    .col-stt {
+        left: 0;
+        width: 40px;
+    }
+
+    .col-name {
+        left: 40px;
+        width: 220px;
+        border-right: 2px solid #bbb !important;
+        padding-left: 10px !important;
+    }
+
+    .col-dob {
+        left: 260px;
+        width: 100px;
+        border-right: 2px solid #bbb !important;
+    }
+
+    .z-corner {
+        z-index: 20 !important;
+        background: #005b9f !important;
+        border-color: #4da3e2 !important;
+    }
+
+    .td-inp {
+        background: #fff;
+        position: relative;
+        padding: 0;
+    }
+
+    .seamless-input {
+        width: 100%;
+        height: 100%;
+        min-height: 36px;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        color: #333;
+        line-height: 36px;
+    }
+
+        .seamless-input:focus {
+            background: #e6f7ff;
+            box-shadow: inset 0 0 0 2px #0091ff;
+        }
+
+    .seamless-select {
+        width: 100%;
+        height: 100%;
+        min-height: 36px;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-weight: 600;
+        cursor: pointer;
+        -webkit-appearance: none;
+        color: #333;
+        text-align-last: center;
+    }
+
+        .seamless-select:focus {
+            background: #e6f7ff;
+            box-shadow: inset 0 0 0 2px #0091ff;
+        }
+
+    .option-placeholder {
+        color: #aaa;
+    }
+
+    .note-input {
+        width: 100%;
+        height: 100%;
+        min-height: 36px;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 8px;
+        font-size: 13px;
+        resize: vertical;
+        display: block;
+        font-family: inherit;
+    }
+
+        .note-input:focus {
+            background: #e6f7ff;
+            box-shadow: inset 0 0 0 2px #0091ff;
+        }
+
+    .input-invalid {
+        background-color: #fdecea;
+        box-shadow: inset 0 0 0 1px #dc3545;
+    }
+
+    .muc-H {
+        color: #155724;
+        background-color: #d4edda;
+    }
+
+    .muc-T {
+        color: #856404;
+        background-color: #fff3cd;
+    }
+
+    .muc-C {
+        color: #721c24;
+        background-color: #f8d7da;
+    }
+
+    /* MODALS CUSTOM UI */
+    .modal-backdrop-custom {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content-custom {
+        background: white;
+        border-radius: 8px;
+        width: 500px;
+        max-width: 90%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        animation: slideDown 0.3s ease;
+    }
+
+    .modal-header-custom {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eaeaea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .modal-header-custom h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+
+    .btn-close-custom {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #999;
+        cursor: pointer;
+    }
+
+        .btn-close-custom:hover {
+            color: #dc3545;
+        }
+
+    .modal-body-custom {
+        padding: 20px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .modal-footer-custom {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #eaeaea;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .btn-secondary-custom {
+        background: #6c757d;
+        color: white;
+    }
+
+    .upload-zone {
+        border: 2px dashed #b3d7ff;
+        border-radius: 8px;
+        padding: 30px 20px;
+        text-align: center;
+        background: #fdfdfe;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .upload-zone:hover {
+            background: #f0f7ff;
+            border-color: #1b6ec2;
+        }
+
+    .upload-icon {
+        font-size: 40px;
+        color: #0091ff;
+        margin-bottom: 15px;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+@code {
+    // --- PARAMETERS GIAO DIỆN ---
+    [Parameter] public string SelectedNamHoc { get; set; } = "2023-2024";
+    [Parameter] public string SelectedKhoi { get; set; } = "Khối 4";
+    [Parameter] public string SelectedLop { get; set; } = "4A1";
+    [Parameter] public string SelectedMonHoc { get; set; } = "02"; // 02 giả lập là Tiếng Việt
+    [Parameter] public string SelectedHocKy { get; set; } = "1";
+    [Parameter] public bool IsLoading { get; set; } = false;
+
+    // --- MOCK MODELS (Giả lập để không cần thư viện database) ---
+    public class HocSinhDTO
+    {
+        public string MaHsSo { get; set; } = "";
+        public string HoTen { get; set; } = "";
+        public DateTime? NgaySinh { get; set; }
+        public string MaBo { get; set; } = "";
+    }
+
+    public class M_DanhGiaDinhKyDTO
+    {
+        public string MaHocSinhSo { get; set; } = "";
+        public string DgtxGk { get; set; } = "";
+        public string DiemGk { get; set; } = "";
+        public string DiemTvDocThanhTiengGk { get; set; } = "";
+        public string DiemTvDocThamGk { get; set; } = "";
+        public string DiemTvDocGk { get; set; } = "";
+        public string DiemTvVietGk { get; set; } = "";
+        public string MaNhanXetGk { get; set; } = "";
+        public string NhanXetGk { get; set; } = "";
+    }
+
+    public class UserSession
+    {
+        public string Role { get; set; } = "Administrator";
+    }
+
+    // --- BIẾN STATE (Variables) ---
+    private List<HocSinhDTO> hocSinhList = new();
+    private Dictionary<string, M_DanhGiaDinhKyDTO> danhGiaCache = new();
+    private UserSession currentSession = new UserSession();
+
+    private bool isKhoaSoDiem = false;
+    private bool isDownloading = false;
+    private bool isNopDiemLoading = false;
+
+    private bool showDownloadModal = false;
+    private bool showUploadModal = false;
+    private bool showConfirmModal = false;
+    private bool showPrintModal = false;
+    private bool showNopDiemModal = false;
+
+    private string toastMessage = "";
+    private string toastClass = "";
+    private string bulkActionToApply = "";
+
+    // Giả lập logic môn học
+    private bool IsMonTiengViet => SelectedMonHoc == "02";
+    private bool IsMonToan => SelectedMonHoc == "01";
+    private bool IsKhoi => SelectedKhoi == "Khối 4" || SelectedKhoi == "Khối 5";
+
+    // --- KHỞI TẠO DỮ LIỆU MẪU ---
+    protected override void OnInitialized()
+    {
+        InitMockData();
+    }
+
+    private void InitMockData()
+    {
+        hocSinhList = new List<HocSinhDTO>
+        {
+            new HocSinhDTO { MaHsSo = "HS01", HoTen = "Nguyễn Hữu A", NgaySinh = new DateTime(2014, 5, 12), MaBo = "B01" },
+            new HocSinhDTO { MaHsSo = "HS02", HoTen = "Trần Lê B", NgaySinh = new DateTime(2014, 8, 20), MaBo = "B02" },
+            new HocSinhDTO { MaHsSo = "HS03", HoTen = "Lê Hoàng C", NgaySinh = new DateTime(2014, 1, 5), MaBo = "B03" }
+        };
+
+        danhGiaCache["HS01"] = new M_DanhGiaDinhKyDTO { DgtxGk = "T", DiemGk = "9", NhanXetGk = "Học tốt" };
+        danhGiaCache["HS02"] = new M_DanhGiaDinhKyDTO { DgtxGk = "H", DiemGk = "7", NhanXetGk = "Cần cố gắng" };
+    }
+
+    // --- LOGIC HỖ TRỢ BINDING HTML ---
+    private string GetTenHocKy() => SelectedHocKy;
+
+    private string GetMucDatDuoc(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].DgtxGk : "";
+    private string GetDiemKTDK(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].DiemGk : "";
+    private string GetMaNhanXet(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].MaNhanXetGk : "";
+    private string GetNhanXet(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].NhanXetGk : "";
+
+    private string GetDiemTvDocThanhTieng(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].DiemTvDocThanhTiengGk : "";
+    private string GetDiemTvDocTham(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].DiemTvDocThamGk : "";
+    private string GetDiemTvDoc(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].DiemTvDocGk : "";
+    private string GetDiemTvViet(string maHs) => danhGiaCache.ContainsKey(maHs) ? danhGiaCache[maHs].DiemTvVietGk : "";
+
+    private string GetMucDatDuocBadgeClass(string muc)
+    {
+        return muc switch { "T" => "muc-T", "H" => "muc-H", "C" => "muc-C", _ => "" };
+    }
+
+    // --- SỰ KIỆN ONCHANGE TRÊN Ô NHẬP ---
+    private void OnKhoaSoDiemChanged(ChangeEventArgs e) => isKhoaSoDiem = (bool)(e.Value ?? false);
+
+    private void OnMucDatDuocChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].DgtxGk = val ?? ""; }
+    private void OnDiemKTDKChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].DiemGk = val ?? ""; }
+    private void OnDiemTvDocThanhTiengChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].DiemTvDocThanhTiengGk = val ?? ""; }
+    private void OnDiemTvDocThamChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].DiemTvDocThamGk = val ?? ""; }
+    private void OnDiemTvDocChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].DiemTvDocGk = val ?? ""; }
+    private void OnDiemTvVietChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].DiemTvVietGk = val ?? ""; }
+    private void OnMaNhanXetChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].MaNhanXetGk = val ?? ""; }
+    private void OnNhanXetChanged(string maHs, string? val) { EnsureCache(maHs); danhGiaCache[maHs].NhanXetGk = val ?? ""; }
+
+    private void EnsureCache(string maHs)
+    {
+        if (!danhGiaCache.ContainsKey(maHs)) danhGiaCache[maHs] = new M_DanhGiaDinhKyDTO { MaHocSinhSo = maHs };
+    }
+
+    // --- MODALS SỰ KIỆN ---
+    private void ClearToast() => toastMessage = "";
+    private void ShowToast(string msg, string type) { toastMessage = msg; toastClass = $"alert-{type}"; }
+
+    private void ShowDownloadModal() => showDownloadModal = true;
+    private void CloseDownloadModal() => showDownloadModal = false;
+
+    private void ShowUploadModal() => showUploadModal = true;
+    private void CloseUploadModal() => showUploadModal = false;
+
+    private void ShowPrintModal() => showPrintModal = true;
+    private void ClosePrintModal() => showPrintModal = false;
+
+    private void ShowConfirmNopDiemModal() => showNopDiemModal = true;
+    private void CloseNopDiemModal() => showNopDiemModal = false;
+
+    private void ConfirmBulkAction(string act) { bulkActionToApply = act; showConfirmModal = true; }
+    private void CancelBulkAction() { showConfirmModal = false; bulkActionToApply = ""; }
+
+    private void ApplyConfirmedBulkAction()
+    {
+        foreach (var hs in hocSinhList)
+        {
+            EnsureCache(hs.MaHsSo);
+            danhGiaCache[hs.MaHsSo].DgtxGk = bulkActionToApply;
+        }
+        showConfirmModal = false;
+        ShowToast($"Đã áp dụng mức {bulkActionToApply} cho toàn lớp.", "success");
+    }
+}

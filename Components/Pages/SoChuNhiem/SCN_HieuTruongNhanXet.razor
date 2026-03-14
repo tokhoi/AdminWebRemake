@@ -1,0 +1,134 @@
+﻿<div class="scn-child-container animate-fade-in">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Hiệu Trưởng / Khối Trưởng Nhận Xét</h2>
+        <button class="btn-primary" @onclick="SubmitReview"><span class="material-icons-round">check_circle</span> Phê duyệt Sổ</button>
+    </div>
+
+    <div class="review-header-card">
+        <div class="review-status @(IsApproved ? "status-approved" : "status-pending")">
+            <span class="material-icons-round" style="font-size: 32px;">@(IsApproved ? "verified" : "hourglass_empty")</span>
+            <div>
+                <div style="font-weight: 700; font-size: 1.1rem;">@(IsApproved ? "Đã Phê Duyệt" : "Đang chờ nhận xét")</div>
+                <div style="font-size: 0.85rem; opacity: 0.8;">Sổ chủ nhiệm Lớp 10A1 - Tháng 3/2026</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="review-body-card">
+        <div class="form-group">
+            <label>Nội dung nhận xét & đánh giá của Ban Giám Hiệu</label>
+            <textarea class="input-textarea" placeholder="Nhập những nhận xét, góp ý cho Giáo viên chủ nhiệm tại đây..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 2rem; margin-top: 1.5rem;">
+            <div class="form-group" style="flex: 1;">
+                <label>Xếp loại Sổ Chủ Nhiệm</label>
+                <select class="input-control">
+                    <option>Tốt</option>
+                    <option>Khá</option>
+                    <option>Đạt</option>
+                    <option>Cần bổ sung</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Người nhận xét</label>
+                <input type="text" class="input-control" value="Trần Hiệu Trưởng" disabled style="background: #f1f5f9;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsApproved = false;
+
+    private async Task SubmitReview()
+    {
+        // Chuyển trạng thái sang đã duyệt
+        IsApproved = true;
+        await Task.Delay(1);
+    }
+}
+
+<style>
+    .scn-child-container {
+        padding: 0.5rem;
+    }
+
+    .btn-primary {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+        .btn-primary:hover {
+            filter: brightness(0.9);
+        }
+
+    .review-header-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .review-status {
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: white;
+        transition: 0.3s;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .review-body-card {
+        background: white;
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+
+    .input-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+    }
+
+    .input-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+        height: 150px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+        .input-control:focus, .input-textarea:focus {
+            border-color: #1b6ec2;
+        }
+</style>

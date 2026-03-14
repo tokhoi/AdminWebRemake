@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "FC0rbvmIQ7A=",
+  "dgSpecHash": "H9g64snnHzE=",
   "success": true,
   "projectFilePath": "D:\\STUDY\\VS CSharp\\Some Demo PAge\\AdminWebRemake\\AdminWebRemake\\AdminWebRemake.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Tô Khôi\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\Tô Khôi\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\Tô Khôi\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.24\\microsoft.aspnetcore.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\Tô Khôi\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.24\\microsoft.netcore.app.host.win-x64.8.0.24.nupkg.sha512"
+  ],
   "logs": []
 }

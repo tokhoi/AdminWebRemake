@@ -1,0 +1,286 @@
+﻿@page "/learning/finalsummary"
+@rendermode InteractiveServer
+
+<div class="st-page-wrapper">
+    @* --- HEADER --- *@
+    <div class="st-page-header">
+        <div class="st-title-icon" style="background:#0ea5e9">
+            <span class="material-icons-round">summarize</span>
+        </div>
+        <h4>TỔNG HỢP SỔ ĐIỂM</h4>
+        <div class="st-ms-auto">
+            <button class="st-btn st-btn-success">
+                <span class="material-icons-round">file_download</span> Xuất Báo Cáo
+            </button>
+        </div>
+    </div>
+
+    @* --- FILTER BAR --- *@
+    <div class="st-filter-toolbar">
+        <div class="st-filter-group">
+            <label>Năm học:</label>
+            <select class="st-form-control st-form-select-sm"><option>2025-2026</option></select>
+        </div>
+        <div class="st-filter-group">
+            <label>Khối:</label>
+            <select class="st-form-control st-form-select-sm" @bind="SelectedGrade" @after="OnGradeChanged">
+                <option value="10">Khối 10</option>
+                <option value="11">Khối 11</option>
+                <option value="12">Khối 12</option>
+            </select>
+        </div>
+        <div class="st-filter-group">
+            <label>Lớp:</label>
+            <select class="st-form-control st-form-select-sm" @bind="SelectedClass" @after="LoadStudents">
+                @foreach (var c in AvailableClasses)
+                {
+                    <option value="@c">@c</option>
+                }
+            </select>
+        </div>
+
+        <div class="st-filter-group st-search-group" style="flex:1;">
+            <div style="position:relative; width:100%">
+                <span class="material-icons-round" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:18px">search</span>
+                <input class="st-form-control" style="padding-left:34px;" placeholder="Nhập tên hoặc mã học sinh..." @bind="SearchTerm" @bind:event="oninput" />
+            </div>
+        </div>
+    </div>
+
+    @* --- STUDENT LIST --- *@
+    <div class="st-panel">
+        <table class="st-table">
+            <thead>
+                <tr>
+                    <th class="st-text-center" style="width: 60px;">STT</th>
+                    <th>Mã HS</th>
+                    <th>Họ và Tên</th>
+                    <th>Ngày Sinh</th>
+                    <th class="st-text-center">Giới Tính</th>
+                    <th class="st-text-center">Hạnh Kiểm</th>
+                    <th class="st-text-center">Học Lực</th>
+                    <th class="st-text-center">TB Năm</th>
+                    <th class="st-text-center" style="width: 100px;">Chi Tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (FilteredStudents.Any())
+                {
+                    @foreach (var s in FilteredStudents)
+                    {
+                        <tr>
+                            <td class="st-text-center">@s.Stt</td>
+                            <td>
+                                <span class="st-badge st-bg-light" style="font-family:monospace; border:1px solid #ddd">@s.Code</span>
+                            </td>
+                            <td class="st-fw-bold st-text-dark">@s.Name</td>
+                            <td>@s.Dob.ToString("dd/MM/yyyy")</td>
+                            <td class="st-text-center">@s.Gender</td>
+                            <td class="st-text-center"><span class="st-badge st-bg-success">Tốt</span></td>
+                            <td class="st-text-center"><span class="st-badge st-bg-success">Giỏi</span></td>
+                            <td class="st-text-center st-fw-bold st-text-primary" style="font-size:1.1em">@s.AvgYear</td>
+                            <td class="st-text-center">
+                                <button class="st-btn-icon" @onclick="() => ViewTranscript(s)" title="Xem bảng điểm">
+                                    <span class="material-icons-round st-text-primary">visibility</span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="st-text-center" style="padding:40px;">
+                            <div class="st-d-flex st-flex-col st-align-center st-gap-2 st-text-muted">
+                                <span class="material-icons-round" style="font-size:48px; opacity:0.3">search_off</span>
+                                <span>Không tìm thấy học sinh nào</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @* Pagination Footer *@
+        <div class="st-modal-footer" style="background:white; border-top:1px solid #eee; justify-content:space-between; border-radius:0 0 8px 8px;">
+            <span class="st-text-muted" style="font-size:13px">Hiển thị @FilteredStudents.Count() học sinh</span>
+            <div class="st-d-flex st-gap-2">
+                <button class="st-btn-icon"><span class="material-icons-round">chevron_left</span></button>
+                <button class="st-btn st-btn-primary" style="padding:4px 10px">1</button>
+                <button class="st-btn st-btn-outline" style="padding:4px 10px">2</button>
+                <button class="st-btn-icon"><span class="material-icons-round">chevron_right</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* --- MODAL: BẢNG ĐIỂM CHI TIẾT --- *@
+@if (IsModalOpen && ViewingStudent != null)
+{
+    <div class="st-modal-backdrop" @onclick="CloseModal">
+        <div class="st-modal-content" style="width: 750px; max-width: 95%;" @onclick:stopPropagation>
+            <div class="st-modal-header">
+                <div class="st-d-flex st-align-center st-gap-2">
+                    <span class="material-icons-round">school</span>
+                    <h5 style="color:white; margin:0">BẢNG ĐIỂM CÁ NHÂN</h5>
+                </div>
+                <button class="st-close-btn" @onclick="CloseModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <div class="st-modal-body">
+                <div class="st-info-card">
+                    <div class="st-avatar-box">
+                        <span class="material-icons-round" style="font-size:48px">person</span>
+                    </div>
+                    <div class="st-info-content">
+                        <h3 class="st-student-name">@ViewingStudent.Name</h3>
+                        <div class="st-info-grid">
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#0ea5e9">badge</span> Mã HS: <b class="st-text-dark">@ViewingStudent.Code</b></div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#f59e0b">class</span> Lớp: <b class="st-text-dark">@SelectedClass</b></div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#ec4899">cake</span> Ngày sinh: @ViewingStudent.Dob.ToString("dd/MM/yyyy")</div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#8b5cf6">wc</span> Giới tính: @ViewingStudent.Gender</div>
+                        </div>
+                    </div>
+                    <div class="st-score-box">
+                        <div style="font-size:0.8rem; color:#888; text-transform:uppercase; font-weight:600; margin-bottom:5px;">Điểm Trung Bình</div>
+                        <div class="st-score-val">@ViewingStudent.AvgYear</div>
+                    </div>
+                </div>
+
+                <div style="border:1px solid #eee; border-radius:6px; overflow:hidden">
+                    <table class="st-table">
+                        <thead style="background:#f1f5f9">
+                            <tr>
+                                <th>Môn Học</th>
+                                <th class="st-text-center">Miệng</th>
+                                <th class="st-text-center">15 Phút</th>
+                                <th class="st-text-center">1 Tiết</th>
+                                <th class="st-text-center">Thi HK</th>
+                                <th class="st-text-center" style="background:#e0f2fe; color:var(--st-primary)">TB Môn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sub in StudentTranscript)
+                            {
+                                <tr>
+                                    <td class="st-fw-bold" style="color:#334155">@sub.SubjectName</td>
+                                    <td class="st-text-center">@sub.ScoreOral</td>
+                                    <td class="st-text-center">@sub.Score15</td>
+                                    <td class="st-text-center">@sub.Score45</td>
+                                    <td class="st-text-center st-fw-bold">@sub.ScoreExam</td>
+                                    <td class="st-text-center st-fw-bold st-text-primary" style="background:#f0f9ff">@sub.Average</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="st-modal-footer">
+                <button class="st-btn st-btn-outline" @onclick="CloseModal">Đóng</button>
+                <button class="st-btn st-btn-primary">
+                    <span class="material-icons-round">print</span> In Phiếu Điểm
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // --- MODELS ---
+    public class StudentInfo
+    {
+        public int Stt { get; set; }
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public DateTime Dob { get; set; }
+        public string Gender { get; set; } = "Nam";
+        public string AvgYear { get; set; } = "0.0";
+    }
+
+    public class TranscriptItem
+    {
+        public string SubjectName { get; set; } = "";
+        public string ScoreOral { get; set; } = "";
+        public string Score15 { get; set; } = "";
+        public string Score45 { get; set; } = "";
+        public string ScoreExam { get; set; } = "";
+        public string Average { get; set; } = "";
+    }
+
+    // --- STATE ---
+    string SelectedGrade = "10";
+    string SelectedClass = "10A1";
+    string SearchTerm = "";
+    List<string> AvailableClasses = new() { "10A1", "10A2", "10A3" };
+    List<StudentInfo> Students = new();
+
+    // Modal State
+    bool IsModalOpen = false;
+    StudentInfo? ViewingStudent;
+    List<TranscriptItem> StudentTranscript = new();
+
+    // Filter Logic
+    IEnumerable<StudentInfo> FilteredStudents =>
+        Students.Where(s => string.IsNullOrEmpty(SearchTerm) ||
+                            s.Name.ToLower().Contains(SearchTerm.ToLower()) ||
+                            s.Code.ToLower().Contains(SearchTerm.ToLower()));
+
+    protected override void OnInitialized()
+    {
+        LoadStudents();
+    }
+
+    void OnGradeChanged()
+    {
+        AvailableClasses = new List<string> { $"{SelectedGrade}A1", $"{SelectedGrade}A2", $"{SelectedGrade}A3" };
+        SelectedClass = AvailableClasses[0];
+        LoadStudents();
+    }
+
+    void LoadStudents()
+    {
+        Students.Clear();
+        var rnd = new Random();
+        for (int i = 1; i <= 15; i++)
+        {
+            double avg = Math.Round(6.0 + (rnd.NextDouble() * 3.5), 1);
+            Students.Add(new StudentInfo
+            {
+                Stt = i,
+                Code = $"HS{DateTime.Now.Year}{i:000}",
+                Name = GetRandomName(),
+                Dob = new DateTime(2008, 1, 1).AddDays(rnd.Next(1, 365)),
+                Gender = i % 3 == 0 ? "Nữ" : "Nam",
+                AvgYear = avg.ToString("0.0")
+            });
+        }
+    }
+
+    void ViewTranscript(StudentInfo s)
+    {
+        ViewingStudent = s;
+        StudentTranscript = new List<TranscriptItem> {
+            new() { SubjectName="Toán", ScoreOral="8, 9", Score15="8.5", Score45="8.0", ScoreExam="9.0", Average="8.6" },
+            new() { SubjectName="Ngữ Văn", ScoreOral="7, 8", Score15="7.5", Score45="7.0", ScoreExam="7.5", Average="7.4" },
+            new() { SubjectName="Tiếng Anh", ScoreOral="9, 9", Score15="9.5", Score45="9.0", ScoreExam="8.5", Average="9.0" },
+            new() { SubjectName="Vật Lý", ScoreOral="8, 8", Score15="8.0", Score45="8.5", ScoreExam="8.0", Average="8.2" },
+            new() { SubjectName="Hóa Học", ScoreOral="9, 8", Score15="9.0", Score45="8.5", ScoreExam="9.0", Average="8.8" },
+            new() { SubjectName="Lịch Sử", ScoreOral="9, 10", Score15="9.5", Score45="9.0", ScoreExam="9.5", Average="9.3" },
+        };
+        IsModalOpen = true;
+    }
+
+    void CloseModal() => IsModalOpen = false;
+
+    string GetRandomName()
+    {
+        var ho = new[] { "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ", "Võ" };
+        var dem = new[] { "Văn", "Thị", "Minh", "Hữu", "Thanh", "Đức", "Ngọc" };
+        var ten = new[] { "Minh", "Hùng", "Lan", "Hương", "Tuấn", "Kiệt", "Trang", "Vy", "Khánh", "Bảo" };
+        var rnd = new Random();
+        return $"{ho[rnd.Next(ho.Length)]} {dem[rnd.Next(dem.Length)]} {ten[rnd.Next(ten.Length)]}";
+    }
+}

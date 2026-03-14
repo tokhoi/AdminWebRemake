@@ -1,0 +1,172 @@
+﻿@page "/learning/ratingtalent"
+
+<div class="point-page">
+    <div class="page-title">
+        <div class="icon-title"><i class="fa-solid fa-user-graduate"></i></div>
+        <h4>ĐÁNH GIÁ ĐỊNH KỲ NĂNG LỰC PHẨM CHẤT</h4>
+    </div>
+
+    @* --- BỘ LỌC CỐ ĐỊNH --- *@
+    <div class="filter-bar">
+        <div class="group">
+            <label>Năm học:</label>
+            <select class="select-highlight" @bind="SelectedNamHoc">
+                <option value="2025-2026">2025-2026</option>
+                <option value="2024-2025">2024-2025</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Học kỳ:</label>
+            <select class="select-highlight" @bind="SelectedHocKy">
+                <option value="1">Học kỳ 1</option>
+                <option value="2">Học kỳ 2</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Khối:</label>
+            <select class="select-highlight" @bind="SelectedKhoi">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <option value="Khối @i">Khối @i</option>
+                }
+            </select>
+        </div>
+        <div class="group">
+            <label>Lớp:</label>
+            <select class="select-highlight" @bind="SelectedLop">
+                <option value="1/1">1/1</option>
+                <option value="4A1">4A1</option>
+            </select>
+        </div>
+        <div class="actions-group" style="display:flex; gap:0.75rem">
+            <button class="btn-custom @(CurrentView == "GK" ? "btn-primary" : "btn-outline")" @onclick='() => SwitchView("GK")'>Giữa kỳ (GK)</button>
+            <button class="btn-custom @(CurrentView == "CK" ? "btn-primary" : "btn-outline") ms-2" @onclick='() => SwitchView("CK")'>Cuối kỳ (CK)</button>
+        </div>
+        <div class="actions-group ms-auto">
+            <button class="btn-custom btn-primary" @onclick="LoadData"><i class="fa-solid fa-search me-1"></i> Tìm kiếm</button>
+        </div>
+    </div>
+
+    @* --- VÙNG NỘI DUNG --- *@
+    <div class="content-area-wrapper">
+        @if (CurrentView == "GK")
+        {
+            <DGDK_NangLuc_PhamChat_GKView SelectedNamHoc="@SelectedNamHoc" SelectedKhoi="@SelectedKhoi" SelectedLop="@SelectedLop" SelectedHocKy="@SelectedHocKy" IsLoading="@isLoading" />
+        }
+        else
+        {
+            <DGDK_NangLuc_PhamChat_CKView SelectedNamHoc="@SelectedNamHoc" SelectedKhoi="@SelectedKhoi" SelectedLop="@SelectedLop" SelectedHocKy="@SelectedHocKy" IsLoading="@isLoading" />
+        }
+    </div>
+</div>
+
+@code {
+    private bool isLoading = false;
+    private string SelectedNamHoc = "2025-2026";
+    private string SelectedHocKy = "1";
+    private string SelectedKhoi = "Khối 1";
+    private string SelectedLop = "1/1";
+    private string CurrentView = "GK";
+
+    private async Task LoadData() { isLoading = true; await Task.Delay(300); isLoading = false; }
+    private void SwitchView(string v) => CurrentView = v;
+}
+
+<style>
+    .point-page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding: 10px;
+        background: #f5f7fa;
+        overflow: visible;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        color: #1e3c72;
+        flex-shrink: 0;
+    }
+
+    .icon-title {
+        width: 32px;
+        height: 32px;
+        background: #1e3c72;
+        color: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filter-bar {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        flex-shrink: 0;
+    }
+
+    .group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: #444;
+    }
+    .sub-filter {
+        background: transparent;
+        border: none;
+        padding: 0 0 8px 0;
+    }
+
+    .content-area-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .select-highlight {
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        min-width: 100px;
+    }
+
+    .btn-custom {
+        padding: 5px 15px;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-primary {
+        background: #1e3c72;
+        color: white;
+    }
+
+    .btn-outline {
+        border: 1px solid #1e3c72;
+        color: #1e3c72;
+        background: white;
+    }
+
+    .ms-auto {
+        margin-left: auto;
+    }
+</style>

@@ -1,0 +1,169 @@
+﻿<div class="scn-child-container animate-fade-in">
+    <div class="toolbar flex-between">
+        <div>
+            <h2 class="page-title">Quản lý học sinh theo Tổ</h2>
+            <span class="text-muted">Tổng số: 4 Tổ - 40 Học sinh</span>
+        </div>
+        <button class="btn-outline"><span class="material-icons-round">shuffle</span> Sắp xếp ngẫu nhiên</button>
+    </div>
+
+    <div class="team-grid">
+        @for (int t = 1; t <= 4; t++)
+        {
+            <div class="team-card">
+                <div class="team-header">
+                    <h3 style="margin: 0; color: #1b6ec2;">Tổ @t</h3>
+                    <span class="tag tag-gray">10 HS</span>
+                </div>
+                <div class="team-list">
+                    <div class="team-member" style="background: #fffbeb; border-color: #fde68a;">
+                        <span class="material-icons-round" style="color: #f59e0b;">star</span>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 0.9rem;">Nguyễn Văn Tổ Trưởng @t</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Tổ trưởng</div>
+                        </div>
+                    </div>
+                    @for (int hs = 1; hs <= 4; hs++)
+                    {
+                        <div class="team-member">
+                            <div class="avatar-sm"></div>
+                            <div style="font-size: 0.9rem;">Thành viên @t.@hs</div>
+                        </div>
+                    }
+                    <button class="add-member-btn"><span class="material-icons-round">add</span> Thêm học sinh vào tổ</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .scn-child-container {
+        padding: 0.5rem;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .toolbar {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .page-title {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.15rem;
+        color: var(--text-main);
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .btn-outline {
+        background: white;
+        color: var(--text-main);
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .team-card {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .team-header {
+        padding: 1rem;
+        background: white;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tag {
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .tag-gray {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .team-list {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .team-member:hover {
+            border-color: #1b6ec2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transform: translateX(2px);
+        }
+
+    .avatar-sm {
+        width: 28px;
+        height: 28px;
+        background: #e2e8f0;
+        border-radius: 50%;
+    }
+
+    .add-member-btn {
+        background: transparent;
+        border: 1px dashed #cbd5e1;
+        color: #64748b;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        margin-top: 0.5rem;
+        transition: 0.2s;
+    }
+
+        .add-member-btn:hover {
+            border-color: #1b6ec2;
+            color: #1b6ec2;
+            background: #eff6ff;
+        }
+</style>

@@ -1,0 +1,727 @@
+﻿@page "/bantru"
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý học sinh bán trú - TitKul</PageTitle>
+
+<div class="tk-wrapper">
+    <div class="tk-container">
+
+        @* HEADER *@
+        <div class="tk-card tk-p-4 tk-mb-4 flex-between">
+            <h2 class="tk-page-title m-0 flex-align-center gap-2">
+                <span class="material-symbols-outlined tk-text-blue" style="font-size: 28px;">restaurant_menu</span>
+                Quản lý học sinh bán trú
+            </h2>
+            <div class="tk-actions">
+                <button class="tk-btn tk-btn-outline-blue" @onclick="ReloadData">
+                    <span class="material-symbols-outlined">sync</span> Đồng bộ
+                </button>
+                <button class="tk-btn tk-btn-blue" @onclick="SaveAllSelected" disabled="@(!SelectedStudents.Any())">
+                    <span class="material-symbols-outlined">save</span> Lưu tất cả (@SelectedStudents.Count)
+                </button>
+            </div>
+        </div>
+
+        @* BỘ LỌC *@
+        <div class="tk-card tk-p-4 tk-mb-4 tk-filter-bar">
+            <div class="tk-form-group">
+                <label class="tk-label">Năm học</label>
+                <select class="tk-select" @bind="FilterNamHoc" @bind:after="ResetPage">
+                    <option value="2025-2026">2025-2026</option>
+                    <option value="2024-2025">2024-2025</option>
+                </select>
+            </div>
+
+            <div class="tk-form-group">
+                <label class="tk-label">Lớp</label>
+                <select class="tk-select" @bind="FilterLop" @bind:after="ResetPage">
+                    <option value="">-- Tất Cả --</option>
+                    @foreach (var l in MockClasses)
+                    {
+                        <option value="@l">@l</option>
+                    }
+                </select>
+            </div>
+
+            <div class="tk-form-group">
+                <label class="tk-label">Hình thức học</label>
+                <select class="tk-select" @bind="FilterHinhThuc" @bind:after="ResetPage">
+                    <option value="0">Tất cả</option>
+                    <option value="2">Bán trú</option>
+                    <option value="1">Bình thường</option>
+                </select>
+            </div>
+
+            <div class="tk-form-group flex-fill">
+                <label class="tk-label">Tìm kiếm</label>
+                <div class="tk-search-wrapper">
+                    <span class="material-symbols-outlined tk-search-icon">search</span>
+                    <input class="tk-input-search" placeholder="Nhập tên học sinh hoặc mã định danh..."
+                           @bind="SearchTerm" @bind:event="oninput" />
+                </div>
+            </div>
+        </div>
+
+        @* BẢNG DỮ LIỆU *@
+        <div class="tk-card">
+            <div class="tk-table-responsive">
+                <table class="tk-table">
+                    <thead>
+                        <tr>
+                            <th class="tk-text-center" style="width: 50px;">
+                                <input type="checkbox" class="tk-checkbox" checked="@IsSelectAll" @onchange="ToggleSelectAll" />
+                            </th>
+                            <th class="tk-text-center" style="width: 60px;">STT</th>
+                            <th style="width: 100px;">Lớp</th>
+                            <th>Họ và Tên / Mã định danh</th>
+                            <th class="tk-text-center" style="width: 120px;">Ngày sinh</th>
+                            <th class="tk-text-center" style="width: 100px;">Giới tính</th>
+                            <th style="width: 180px;">Hình thức học tập</th>
+                            <th class="tk-text-center" style="width: 100px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (isLoading)
+                        {
+                            <tr><td colspan="8" class="tk-text-center p-4">Đang tải dữ liệu...</td></tr>
+                        }
+                        else if (PagedList.Any())
+                        {
+                            int stt = (CurrentPage - 1) * PageSize + 1;
+                            foreach (var item in PagedList)
+                            {
+                                <tr class="@(item.IsChecked ? "tk-row-selected" : "")">
+                                    <td class="tk-text-center">
+                                        <input type="checkbox" class="tk-checkbox" @bind="item.IsChecked" />
+                                    </td>
+                                    <td class="tk-text-center tk-text-muted">@(stt++)</td>
+                                    <td><span class="tk-badge tk-badge-gray">@item.TenLop</span></td>
+                                    <td>
+                                        <div class="tk-font-bold tk-text-dark">@item.HoTen</div>
+                                        <div class="tk-text-xs tk-text-muted">@item.MaHsSo</div>
+                                    </td>
+                                    <td class="tk-text-center">@item.NgaySinh.ToString("dd/MM/yyyy")</td>
+                                    <td class="tk-text-center">@item.Phai</td>
+                                    <td>
+                                        <select class="tk-select-sm @(item.IdHinhThucHocTap == 2 ? "tk-select-bantru" : "")" @bind="item.IdHinhThucHocTap">
+                                            <option value="2">Bán trú</option>
+                                            <option value="1">Bình thường</option>
+                                            <option value="0">-- Chưa chọn --</option>
+                                        </select>
+                                    </td>
+                                    <td class="tk-text-center">
+                                        <button class="tk-btn-icon tk-btn-icon-blue" @onclick="() => SaveStudent(item)" title="Lưu">
+                                            <span class="material-symbols-outlined">save</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="tk-text-center tk-p-6">
+                                    <span class="material-symbols-outlined tk-text-gray-300" style="font-size: 48px;">inbox</span>
+                                    <p class="tk-text-muted mt-2">Không tìm thấy học sinh nào phù hợp</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* PHÂN TRANG *@
+            @if (FilteredList.Count > 0)
+            {
+                <div class="tk-pagination-bar">
+                    <span class="tk-text-sm tk-text-muted">
+                        Hiển thị <b>@PagedList.Count</b> trên tổng số <b>@FilteredList.Count</b> học sinh
+                    </span>
+                    <div class="tk-pagination-controls">
+                        <button class="tk-page-btn" disabled="@(CurrentPage == 1)" @onclick="() => ChangePage(CurrentPage - 1)">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+
+                        @for (int i = 1; i <= TotalPages; i++)
+                        {
+                            var p = i;
+                            if (p == 1 || p == TotalPages || Math.Abs(p - CurrentPage) <= 1)
+                            {
+                                <button class="tk-page-btn @(CurrentPage == p ? "active" : "")" @onclick="() => ChangePage(p)">@p</button>
+                            }
+                            else if (p == CurrentPage - 2 || p == CurrentPage + 2)
+                            {
+                                <span class="tk-page-dots">...</span>
+                            }
+                        }
+
+                        <button class="tk-page-btn" disabled="@(CurrentPage == TotalPages)" @onclick="() => ChangePage(CurrentPage + 1)">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@* TOAST THÔNG BÁO *@
+@if (showToast)
+{
+    <div class="tk-toast @toastClass">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>@toastMessage</span>
+    </div>
+}
+
+<style>
+    /* VARIABLES & RESET */
+    .tk-wrapper {
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        background-color: #f1f5f9;
+        min-height: 100vh;
+        padding: 1.5rem;
+        color: #1e293b;
+        box-sizing: border-box;
+    }
+
+        .tk-wrapper * {
+            box-sizing: border-box;
+        }
+
+    .tk-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .flex-align-center {
+        display: flex;
+        align-items: center;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+
+    .m-0 {
+        margin: 0;
+    }
+
+    .mt-2 {
+        margin-top: 0.5rem;
+    }
+
+    .tk-p-4 {
+        padding: 1.5rem;
+    }
+
+    .tk-p-6 {
+        padding: 3rem;
+    }
+
+    .tk-mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    /* COLORS & TYPOGRAPHY */
+    .tk-text-blue {
+        color: #1e88e5 !important;
+    }
+
+    .tk-text-muted {
+        color: #64748b !important;
+    }
+
+    .tk-text-gray-300 {
+        color: #cbd5e1 !important;
+    }
+
+    .tk-text-dark {
+        color: #0f172a;
+    }
+
+    .tk-font-bold {
+        font-weight: 700;
+    }
+
+    .tk-text-center {
+        text-align: center;
+    }
+
+    .tk-text-xs {
+        font-size: 0.8rem;
+    }
+
+    .tk-text-sm {
+        font-size: 0.9rem;
+    }
+
+    /* CARD */
+    .tk-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .tk-page-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* BUTTONS */
+    .tk-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .tk-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.9rem;
+        border: none;
+    }
+
+        .tk-btn span {
+            font-size: 18px;
+        }
+
+        .tk-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+    .tk-btn-blue {
+        background: #1e88e5;
+        color: white;
+    }
+
+        .tk-btn-blue:hover:not(:disabled) {
+            background: #1565c0;
+            box-shadow: 0 4px 10px rgba(30,136,229,0.3);
+        }
+
+    .tk-btn-outline-blue {
+        background: #1b6ec2;
+        color: #fff;
+        border: 1px solid #1b6ec2;
+    }
+
+        .tk-btn-outline-blue:hover {
+            background: #3f91da;
+            border-color: #1b6ec2;
+        }
+
+    .tk-btn-icon {
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .tk-btn-icon-blue {
+        color: #1b6ec2;
+    }
+
+        .tk-btn-icon-blue:hover {
+            background: #80aae5;
+        }
+
+    /* FILTERS */
+    .tk-filter-bar {
+        display: flex;
+        gap: 1.25rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .tk-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        min-width: 150px;
+    }
+
+    .flex-fill {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .tk-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .tk-select {
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        color: #334155;
+        outline: none;
+        background: #fff;
+        transition: 0.2s;
+    }
+
+        .tk-select:focus {
+            border-color: #1e88e5;
+            box-shadow: 0 0 0 3px rgba(30,136,229,0.1);
+        }
+
+    .tk-search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .tk-search-icon {
+        position: absolute;
+        left: 12px;
+        color: #94a3b8;
+        font-size: 20px;
+    }
+
+    .tk-input-search {
+        width: 100%;
+        padding: 8px 12px 8px 36px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        transition: 0.2s;
+    }
+
+        .tk-input-search:focus {
+            border-color: #1e88e5;
+            box-shadow: 0 0 0 3px rgba(30,136,229,0.1);
+        }
+
+    /* TABLE */
+    .tk-table-responsive {
+        overflow-x: auto;
+    }
+
+    .tk-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+        .tk-table th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tk-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .tk-table tbody tr {
+            transition: background 0.2s;
+        }
+
+            .tk-table tbody tr:hover {
+                background: #f8fafc;
+            }
+
+    .tk-row-selected {
+        background: #eff6ff !important;
+    }
+
+    /* SELECT BÊN TRONG BẢNG */
+    .tk-select-sm {
+        padding: 4px 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        outline: none;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .tk-select-bantru {
+        background-color: #fff;
+        color: #1b6ec2;
+        border: solid 1px #1b6ec2;
+    }
+
+    /* CHECKBOX & BADGES */
+    .tk-checkbox {
+        width: 18px;
+        height: 18px;
+        accent-color: #1e88e5;
+        cursor: pointer;
+    }
+
+    .tk-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .tk-badge-gray {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+    }
+
+    /* PAGINATION */
+    .tk-pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .tk-pagination-controls {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+
+    .tk-page-btn {
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: #475569;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+
+        .tk-page-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+
+        .tk-page-btn.active {
+            background: #1e88e5;
+            color: white;
+            border-color: #1e88e5;
+        }
+
+        .tk-page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .tk-page-dots {
+        padding: 0 4px;
+        color: #94a3b8;
+    }
+
+    /* TOAST */
+    .tk-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: white;
+        z-index: 10000;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    .tk-toast-success {
+        background-color: #10b981;
+    }
+
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+@code {
+    // --- MOCK MODELS ---
+    public class StudentVM
+    {
+        public bool IsChecked { get; set; } = false;
+        public string MaHsSo { get; set; } = "";
+        public string HoTen { get; set; } = "";
+        public string TenLop { get; set; } = "";
+        public DateTime NgaySinh { get; set; }
+        public string Phai { get; set; } = "Nam";
+        public int IdHinhThucHocTap { get; set; } = 1;
+    }
+
+    // --- STATE ---
+    private List<StudentVM> AllStudents = new();
+    private List<string> MockClasses = new() { "1A1", "1A2", "2A1", "3A1", "4A1", "5A1" };
+    private bool isLoading = false;
+
+    // Filters
+    private string FilterNamHoc { get; set; } = "2025-2026";
+    private string FilterLop { get; set; } = "";
+    private int FilterHinhThuc { get; set; } = 0;
+
+    private string _searchTerm = "";
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set { _searchTerm = value; CurrentPage = 1; }
+    }
+
+    // Pagination
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 10;
+
+    // Computed Lists
+    private List<StudentVM> FilteredList => AllStudents
+        .Where(x =>
+            (string.IsNullOrEmpty(FilterLop) || x.TenLop == FilterLop) &&
+            (FilterHinhThuc == 0 || x.IdHinhThucHocTap == FilterHinhThuc) &&
+            (string.IsNullOrEmpty(SearchTerm) || x.HoTen.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || x.MaHsSo.Contains(SearchTerm))
+        ).ToList();
+
+    private List<StudentVM> PagedList => FilteredList.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)FilteredList.Count / PageSize));
+
+    // Checkbox Logic
+    private List<StudentVM> SelectedStudents => FilteredList.Where(x => x.IsChecked).ToList();
+    private bool IsSelectAll => PagedList.Any() && PagedList.All(x => x.IsChecked);
+
+    // Toast Logic
+    private bool showToast = false;
+    private string toastMessage = "";
+    private string toastClass = "tk-toast-success";
+
+    // --- INIT ---
+    protected override void OnInitialized()
+    {
+        GenerateMockData();
+    }
+
+    private void GenerateMockData()
+    {
+        AllStudents.Clear();
+        var random = new Random();
+        for (int i = 1; i <= 65; i++)
+        {
+            AllStudents.Add(new StudentVM
+            {
+                MaHsSo = $"HS{DateTime.Now.Year}{i:D4}",
+                HoTen = $"Nguyễn Văn Học Sinh {i}",
+                TenLop = MockClasses[random.Next(MockClasses.Count)],
+                NgaySinh = new DateTime(2016, random.Next(1, 13), random.Next(1, 28)),
+                Phai = i % 2 == 0 ? "Nữ" : "Nam",
+                IdHinhThucHocTap = random.Next(1, 3)
+            });
+        }
+    }
+
+    private async Task ReloadData()
+    {
+        isLoading = true;
+        await Task.Delay(500); 
+        GenerateMockData();
+        FilterLop = "";
+        FilterHinhThuc = 0;
+        SearchTerm = "";
+        CurrentPage = 1;
+        isLoading = false;
+    }
+
+    // --- LOGIC ---
+    private void ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool isChecked = (bool)(e.Value ?? false);
+        foreach (var item in PagedList)
+        {
+            item.IsChecked = isChecked;
+        }
+    }
+
+    private void ResetPage()
+    {
+        CurrentPage = 1;
+    }
+
+    private void ChangePage(int p)
+    {
+        if (p >= 1 && p <= TotalPages) CurrentPage = p;
+    }
+
+    private async Task SaveStudent(StudentVM item)
+    {
+        await ShowToastNoti($"Đã lưu hình thức học tập của {item.HoTen}");
+    }
+
+    private async Task SaveAllSelected()
+    {
+        int count = SelectedStudents.Count;
+        foreach (var item in SelectedStudents)
+        {
+            item.IsChecked = false; 
+        }
+        await ShowToastNoti($"Đã lưu thành công {count} học sinh!");
+    }
+
+    private async Task ShowToastNoti(string msg)
+    {
+        toastMessage = msg;
+        showToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        showToast = false;
+        StateHasChanged();
+    }
+}

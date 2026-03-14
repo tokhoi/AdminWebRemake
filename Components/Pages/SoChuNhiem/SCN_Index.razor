@@ -1,0 +1,717 @@
+﻿<div class="scn-child-container animate-fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="margin: 0; font-size: 1.25rem; color: var(--text-main);">Tổng quan Lớp 10A1</h2>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">Giáo viên chủ nhiệm: Nguyễn Văn A | Sĩ số: 45 HS</span>
+        </div>
+        <button class="btn-export" @onclick="OpenCustomizeModal">
+            <span class="material-icons-round">dashboard_customize</span> <span>Tùy chỉnh giao diện</span>
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card" style="border-left: 4px solid #1b6ec2;">
+            <div class="stat-icon" style="background: #eff6ff; color: #1b6ec2;"><span class="material-icons-round">groups</span></div>
+            <div>
+                <div class="stat-title">Đi học hôm nay</div>
+                <div class="stat-value" style="color: #1b6ec2;">42/45 <span class="stat-unit">HS</span></div>
+            </div>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #1b6ec2;">
+            <div class="stat-icon" style="background: #eff6ff; color: #1b6ec2;"><span class="material-icons-round">trending_up</span></div>
+            <div>
+                <div class="stat-title">Chuyên cần tuần</div>
+                <div class="stat-value" style="color: #1b6ec2;">98.5%</div>
+            </div>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #1b6ec2;">
+            <div class="stat-icon" style="background: #eff6ff; color: #1b6ec2;"><span class="material-icons-round">warning_amber</span></div>
+            <div>
+                <div class="stat-title">Nhắc nhở / Kỷ luật</div>
+                <div class="stat-value" style="color: #1b6ec2;">3 <span class="stat-unit">Lượt</span></div>
+            </div>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #1b6ec2;">
+            <div class="stat-icon" style="background: #eff6ff; color: #1b6ec2;"><span class="material-icons-round">assignment_late</span></div>
+            <div>
+                <div class="stat-title">Chưa đóng BHYT</div>
+                <div class="stat-value" style="color: #1b6ec2;">5 <span class="stat-unit">HS</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets">
+
+        <div class="widget-col-main">
+            @if (ShowAttentionWidget)
+            {
+                <div class="widget-card animate-fade-in">
+                    <div class="widget-header flex-between">
+                        <h3 class="widget-title"><span class="material-icons-round" style="color: #1b6ec2;">notifications_active</span> Học sinh cần chú ý hôm nay</h3>
+                        <a href="#" class="widget-link">Xem tất cả</a>
+                    </div>
+                    <div class="widget-body" style="padding: 0;">
+                        <table class="widget-table">
+                            <tbody>
+                                @foreach (var hs in AttentionStudents)
+                                {
+                                    <tr>
+                                        <td style="width: 50px;">
+                                            <div class="avatar-sm">@hs.Name.Substring(0, 1)</div>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: var(--text-main);">@hs.Name</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">Mã: @hs.Code</div>
+                                        </td>
+                                        <td>
+                                            @if (hs.IssueType == "Vắng mặt")
+                                            {
+                                                <span class="tag tag-red">Vắng không phép</span>
+                                            }
+                                            else if (hs.IssueType == "Đi trễ")
+                                            {
+
+                                                <span class="tag tag-warning">Đi trễ 15p</span>
+                                            }
+                                            else
+                                            {
+
+                                                <span class="tag tag-gray">Vi phạm nội quy</span>
+                                            }
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <button class="btn-action-sm">Liên hệ PH</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+            @if (ShowProgressWidget)
+            {
+                <div class="widget-card animate-fade-in">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><span class="material-icons-round" style="color: #1b6ec2;">flag</span> Thi đua tuần 20</h3>
+                    </div>
+                    <div class="widget-body">
+                        <div class="progress-item">
+                            <div class="flex-between" style="margin-bottom: 6px;">
+                                <span class="fw-bold" style="font-size: 0.9rem;">Học tập (Hoa điểm 10)</span>
+                                <span style="font-size: 0.85rem; color: #000; font-weight: bold;">Đạt 85% mục tiêu</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 85%; background: #1b6ec2;"></div></div>
+                        </div>
+                        <div class="progress-item mt-3">
+                            <div class="flex-between" style="margin-bottom: 6px;">
+                                <span class="fw-bold" style="font-size: 0.9rem;">Nề nếp & Kỷ luật</span>
+                                <span style="font-size: 0.85rem; color: #000; font-weight: bold;">Trừ 15 điểm</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 70%; background: #1b6ec2;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="widget-col-side">
+            @if (ShowEventsWidget)
+            {
+                <div class="widget-card animate-fade-in">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><span class="material-icons-round" style="color: #1b6ec2;">cake</span> Sự kiện sắp tới</h3>
+                    </div>
+                    <div class="widget-body">
+                        <div class="event-item">
+                            <div class="event-date">
+                                <span class="day">12</span><span class="month">Thg 3</span>
+                            </div>
+                            <div class="event-info">
+                                <div class="event-title">Sinh nhật Lê Văn C</div>
+                                <div class="event-desc">Học sinh tổ 2</div>
+                            </div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-date" style="background: #eff6ff; color: #1b6ec2;">
+                                <span class="day">15</span><span class="month">Thg 3</span>
+                            </div>
+                            <div class="event-info">
+                                <div class="event-title">Họp Hội đồng SP</div>
+                                <div class="event-desc">14:00 tại Hội trường A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (ShowTodoWidget)
+            {
+                <div class="widget-card animate-fade-in">
+                    <div class="widget-header">
+                        <h3 class="widget-title"><span class="material-icons-round" style="color: #1b6ec2;">task_alt</span> Công việc tuần này</h3>
+                    </div>
+                    <div class="widget-body">
+                        <label class="todo-item">
+                            <input type="checkbox" checked /> <span class="todo-text done">Cập nhật điểm 15 phút</span>
+                        </label>
+                        <label class="todo-item">
+                            <input type="checkbox" /> <span class="todo-text">Liên hệ PH em Lê Hữu Nghĩa</span>
+                        </label>
+                        <label class="todo-item">
+                            <input type="checkbox" /> <span class="todo-text">Nộp sổ chủ nhiệm tháng</span>
+                        </label>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@* ================= MODAL TÙY CHỈNH ================= *@
+@if (IsCustomizeModalOpen)
+{
+    <div class="modal-backdrop" @onclick="CloseCustomizeModal">
+        <div class="modal-content animate-slide-down" style="width: 400px;" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-icons-round" style="color: var(--primary);">dashboard_customize</span>
+                    Tùy chỉnh Dashboard
+                </h3>
+                <button class="icon-btn" @onclick="CloseCustomizeModal"><span class="material-icons-round">close</span></button>
+            </div>
+
+            <div class="modal-body" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--text-muted);">Bật/tắt các khối thông tin hiển thị trên màn hình chính của bạn.</p>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="material-icons-round" style="color: #ef4444;">notifications_active</span>
+                        <span class="fw-bold">Học sinh cần chú ý</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" @bind="ShowAttentionWidget">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="material-icons-round" style="color: #1b6ec2;">flag</span>
+                        <span class="fw-bold">Tiến độ thi đua</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" @bind="ShowProgressWidget">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="material-icons-round" style="color: #ec4899;">cake</span>
+                        <span class="fw-bold">Sự kiện & Sinh nhật</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" @bind="ShowEventsWidget">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <span class="material-icons-round" style="color: #8b5cf6;">task_alt</span>
+                        <span class="fw-bold">Nhắc việc nhanh</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" @bind="ShowTodoWidget">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid var(--border); text-align: right;">
+                <button class="btn-primary" @onclick="CloseCustomizeModal" style="background: #10b981;">Hoàn tất</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // State quản lý hiển thị các Widget
+    private bool ShowAttentionWidget = true;
+    private bool ShowProgressWidget = true;
+    private bool ShowEventsWidget = true;
+    private bool ShowTodoWidget = true;
+
+    // State Modal
+    private bool IsCustomizeModalOpen = false;
+    private void OpenCustomizeModal() => IsCustomizeModalOpen = true;
+    private void CloseCustomizeModal() => IsCustomizeModalOpen = false;
+
+    class AttentionStudent { public string Name { get; set; } = ""; public string Code { get; set; } = ""; public string IssueType { get; set; } = ""; }
+    List<AttentionStudent> AttentionStudents = new()
+    {
+        new AttentionStudent { Name = "Trần Thị B", Code = "HS015", IssueType = "Vắng mặt" },
+        new AttentionStudent { Name = "Lê Hữu Nghĩa", Code = "HS022", IssueType = "Đi trễ" },
+        new AttentionStudent { Name = "Nguyễn Hoàng Nam", Code = "HS008", IssueType = "Vi phạm" }
+    };
+}
+
+<style>
+    .scn-child-container {
+        padding: 0.5rem;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .stat-icon span {
+            font-size: 28px;
+        }
+
+    .stat-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .stat-unit {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .btn-export {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-main);
+        transition: 0.2s;
+    }
+
+        .btn-export:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: var(--primary);
+        }
+
+    /* Layout 2 cột cho Widget */
+    .dashboard-widgets {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    @@media (max-width: 1024px) {
+        .dashboard-widgets
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    .widget-col-main {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .widget-col-side {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .widget-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        display: inline-block; !important
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        overflow: hidden;
+    }
+
+    .widget-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: #fdfdfd;
+    }
+
+    .widget-title {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .widget-title span {
+            font-size: 18px;
+        }
+
+    .widget-link {
+        font-size: 0.85rem;
+        color: #1b6ec2;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .widget-body {
+        padding: 1.25rem;
+    }
+
+    /* Bảng trong Widget */
+    .widget-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .widget-table td {
+            padding: 12px 1.25rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .widget-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .widget-table tr:hover td {
+            background: #f8fafc;
+        }
+
+    .avatar-sm {
+        width: 36px;
+        height: 36px;
+        background: #e0f2fe;
+        color: #1d4ed8;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .btn-action-sm {
+        background: transparent;
+        border: 1px solid #cbd5e1;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-main);
+    }
+
+        .btn-action-sm:hover {
+            border-color: #1b6ec2;
+            color: #1b6ec2;
+            background: #eff6ff;
+        }
+
+    .tag {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .tag-red {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+
+    .tag-warning {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    .tag-gray {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    /* Progress bars */
+    .mt-3 {
+        margin-top: 1rem;
+    }
+
+    .progress-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 99px;
+    }
+
+    /* Sự kiện timeline */
+    .event-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+        .event-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+    .event-date {
+        width: 50px;
+        height: 50px;
+        background: #fdf2f8;
+        color: #db2777;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .event-date .day {
+            font-size: 1.1rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .event-date .month {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+    .event-title {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+
+    .event-desc {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* To do list */
+    .todo-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        cursor: pointer;
+    }
+
+        .todo-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #1b6ec2;
+        }
+
+    .todo-text {
+        font-size: 0.95rem;
+        color: var(--text-main);
+        transition: 0.2s;
+    }
+
+        .todo-text.done {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+    /* === MODAL TÙY CHỈNH & TOGGLE SWITCH === */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15,23,42,0.5);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .icon-btn {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+        .icon-btn:hover {
+            background: #f1f5f9;
+            color: #ef4444;
+        }
+
+    .btn-primary {
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        color: white;
+        transition: 0.2s;
+    }
+
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fdfdfd;
+    }
+
+    .toggle-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Toggle Switch CSS thuần */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        margin: 0;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+    input:checked + .slider {
+        background-color: #10b981;
+    }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+    .animate-slide-down {
+        animation: slideDown 0.2s ease-out forwards;
+    }
+    @@keyframes slideDown {
+        from
+
+    {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    }
+</style>

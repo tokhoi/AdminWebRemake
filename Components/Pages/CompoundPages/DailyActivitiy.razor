@@ -1,0 +1,1136 @@
+﻿@page "/daily-activity"
+@rendermode InteractiveServer
+
+<PageTitle>Hoạt động hàng ngày - TitKul</PageTitle>
+
+<div class="tk-da-wrapper">
+    <div class="tk-da-container">
+
+        @* Thanh công cụ (Filters) *@
+        <div class="tk-da-card tk-da-toolbar flex-between">
+            <h2 class="tk-da-page-title m-0">Bảng tin trường học</h2>
+        </div>
+
+        <div class="tk-da-layout">
+            @* CỘT TRÁI (BẢNG TIN) *@
+            <div class="tk-da-main">
+
+                @* KHUNG TẠO BÀI VIẾT (CÓ CHỨC NĂNG ĐĂNG ẢNH) *@
+                <div class="tk-da-card tk-da-creator">
+                    <div class="tk-da-creator-top">
+                        <div class="tk-da-avatar">A</div>
+                        <textarea class="tk-da-input" placeholder="Bạn muốn chia sẻ điều gì với trường hôm nay?" @bind="newPostContent" @bind:event="oninput"></textarea>
+                    </div>
+
+                    @* Preview Ảnh trước khi đăng *@
+                    @if (previewImages.Any())
+                    {
+                        <div class="tk-da-preview-container">
+                            @foreach (var img in previewImages)
+                            {
+                                <div class="tk-da-preview-item">
+                                    <img src="@img" alt="Preview" />
+                                    <button class="tk-da-preview-remove" @onclick="() => RemovePreviewImage(img)">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="tk-da-creator-bottom">
+                        <div class="tk-da-actions">
+                            @* Nút Tải ảnh lên dùng InputFile của Blazor *@
+                            <label for="image-upload" class="tk-da-btn-action tk-text-green" style="cursor: pointer;">
+                                <span class="material-symbols-outlined">image</span> Ảnh/Video
+                            </label>
+                            <InputFile id="image-upload" OnChange="HandleImageUpload" accept="image/*" multiple style="display: none;" />
+
+                            <div style="position: relative;">
+                                <button class="tk-da-btn-action tk-text-orange" @onclick="ToggleEmojiPicker">
+                                    <span class="material-symbols-outlined">mood</span> Cảm xúc
+                                </button>
+
+                                @if (showEmojiPicker)
+                                {
+                                    <div class="tk-da-emoji-picker">
+                                        @foreach (var emoji in popularEmojis)
+                                        {
+                                            <span class="tk-da-emoji-item" @onclick="() => InsertEmoji(emoji)">@emoji</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <button class="tk-da-btn-submit" @onclick="CreatePost" disabled="@(string.IsNullOrWhiteSpace(newPostContent) && !previewImages.Any())">
+                            Đăng bài
+                        </button>
+                    </div>
+                </div>
+
+                @* DANH SÁCH BÀI VIẾT *@
+                @foreach (var post in Posts)
+                {
+                    <div class="tk-da-card tk-da-post">
+                        <div class="tk-da-post-header">
+                            <div class="tk-da-post-author">
+                                <div class="tk-da-avatar tk-avatar-blue">@post.AuthorName.Substring(0, 1)</div>
+                                <div>
+                                    <h4 class="tk-da-author-name">@post.AuthorName</h4>
+                                    <p class="tk-da-post-time">@post.TimeAgo</p>
+                                </div>
+                            </div>
+                            <button class="tk-da-btn-icon tk-text-red" title="Xóa bài viết" @onclick="() => RequestDeletePost(post)">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+
+                        <div class="tk-da-post-body">
+                            <p>@post.Content</p>
+                            @if (post.Images.Any())
+                            {
+                                <div class="tk-da-images @(post.Images.Count > 1 ? "grid-2" : "")">
+                                    @foreach (var img in post.Images)
+                                    {
+                                        <img src="@img" alt="Post image" />
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="tk-da-post-stats flex-between">
+                            <span class="tk-da-stat-text">
+                                <span class="material-symbols-outlined tk-text-blue" style="font-size:16px; font-variation-settings: 'FILL' 1;">thumb_up</span>
+                                @post.Likes lượt thích
+                            </span>
+                            <span class="tk-da-stat-text cursor-pointer" @onclick="() => post.ShowComments = !post.ShowComments">
+                                @post.Comments.Count bình luận
+                            </span>
+                        </div>
+
+                        <div class="tk-da-post-actions">
+                            <button class="tk-da-action-btn @(post.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(post)">
+                                <span class="material-symbols-outlined">thumb_up</span> Thích
+                            </button>
+                            <button class="tk-da-action-btn" @onclick="() => post.ShowComments = !post.ShowComments">
+                                <span class="material-symbols-outlined">chat_bubble_outline</span> Bình luận
+                            </button>
+                        </div>
+
+                        @* Khu vực bình luận *@
+                        @if (post.ShowComments)
+                        {
+                            <div class="tk-da-comments-section">
+                                @foreach (var cmt in post.Comments)
+                                {
+                                    <div class="tk-da-comment-item">
+                                        <div class="tk-da-avatar-sm">@cmt.Author.Substring(0, 1)</div>
+                                        <div class="tk-da-comment-box">
+                                            <b>@cmt.Author</b>
+                                            <p>@cmt.Text</p>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="tk-da-comment-input-area">
+                                    <div class="tk-da-avatar-sm">A</div>
+                                    <div class="tk-da-input-wrapper">
+                                        <input type="text" placeholder="Viết bình luận..." @bind="post.NewCommentText" @onkeyup="@(e => HandleCommentSubmit(e, post))" />
+                                        <button class="tk-da-send-btn" @onclick="() => AddComment(post)"><span class="material-symbols-outlined">send</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            @* CỘT PHẢI (SIDEBAR) *@
+            <div class="tk-da-sidebar">
+                <div class="tk-da-card">
+                    <div class="tk-da-card-header">
+                        <h3 class="tk-da-sidebar-title"><span class="material-symbols-outlined tk-text-orange">cake</span> Sinh nhật hôm nay</h3>
+                    </div>
+                    <div class="tk-da-card-body">
+                        <div class="tk-da-sidebar-item">
+                            <div class="tk-da-avatar-sm tk-bg-orange">H</div>
+                            <div>
+                                <p class="tk-da-font-bold">Nguyễn Văn Hải</p>
+                                <p class="tk-da-text-sm tk-text-muted">Học sinh lớp 4A2</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tk-da-card">
+                    <div class="tk-da-card-header">
+                        <h3 class="tk-da-sidebar-title"><span class="material-symbols-outlined tk-text-blue">event</span> Sự kiện sắp tới</h3>
+                    </div>
+                    <div class="tk-da-card-body">
+                        <div class="tk-da-sidebar-item">
+                            <div class="tk-da-date-box tk-bg-blue"><b>26</b><span>T3</span></div>
+                            <div>
+                                <p class="tk-da-font-bold">Hội khỏe Phù Đổng</p>
+                                <p class="tk-da-text-sm tk-text-muted">Sân vận động trường</p>
+                            </div>
+                        </div>
+                        <div class="tk-da-sidebar-item mt-2">
+                            <div class="tk-da-date-box tk-bg-green"><b>30</b><span>T4</span></div>
+                            <div>
+                                <p class="tk-da-font-bold">Nghỉ lễ 30/4 - 1/5</p>
+                                <p class="tk-da-text-sm tk-text-muted">Toàn trường</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* MODAL XÁC NHẬN XÓA BÀI VIẾT *@
+@if (showDeleteModal)
+{
+    <div class="tk-modal-overlay">
+        <div class="tk-modal-box">
+            <h3 class="tk-modal-title"><span class="material-symbols-outlined tk-text-red">warning</span> Xác nhận xóa</h3>
+            <p class="tk-modal-text">Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.</p>
+            <div class="tk-modal-actions">
+                <button class="tk-btn-cancel" @onclick="CancelDelete">Hủy bỏ</button>
+                <button class="tk-btn-confirm-delete" @onclick="ConfirmDelete">Xóa bài viết</button>
+            </div>
+        </div>
+    </div>
+}
+
+@* TOAST THÔNG BÁO *@
+@if (showToast)
+{
+    <div class="tk-toast @toastClass">
+        <span class="material-symbols-outlined">@toastIcon</span>
+        <span>@toastMessage</span>
+    </div>
+}
+
+<style>
+    /* VARIABLES & RESET */
+    .tk-da-wrapper {
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        background-color: #f1f5f9;
+        min-height: 100vh;
+        padding: 1.5rem;
+        color: #1e293b;
+        box-sizing: border-box;
+    }
+
+        .tk-da-wrapper * {
+            box-sizing: border-box;
+        }
+
+    .tk-da-container {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .m-0 {
+        margin: 0;
+    }
+
+    .mt-2 {
+        margin-top: 0.5rem;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    /* COLORS */
+    .tk-text-green {
+        color: #22c55e !important;
+    }
+
+    .tk-text-orange {
+        color: #f97316 !important;
+    }
+
+    .tk-text-blue {
+        color: #3b82f6 !important;
+    }
+
+    .tk-text-red {
+        color: #ef4444 !important;
+    }
+
+    .tk-text-muted {
+        color: #64748b !important;
+    }
+
+    .tk-bg-orange {
+        background: #ffedd5 !important;
+        color: #f97316 !important;
+    }
+
+    .tk-bg-blue {
+        background: #dbeafe !important;
+        color: #3b82f6 !important;
+    }
+
+    .tk-bg-green {
+        background: #dcfce7 !important;
+        color: #22c55e !important;
+    }
+
+    /* CARD STYLE */
+    .tk-da-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+    }
+
+    .tk-da-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        background: #f8fafc;
+    }
+
+    .tk-da-card-body {
+        padding: 1rem 1.25rem;
+    }
+
+    /* TOOLBAR */
+    .tk-da-toolbar {
+        padding: 1rem 1.25rem;
+    }
+
+    .tk-da-page-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .tk-da-filter-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .tk-da-select {
+        border: 1px solid #cbd5e1;
+        padding: 6px 12px;
+        border-radius: 8px;
+        outline: none;
+        background: #fff;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    /* LAYOUT */
+    .tk-da-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @@media(min-width: 1024px) {
+        .tk-da-layout {
+            grid-template-columns: 2.5fr 1fr;
+        }
+    }
+
+    /* CREATOR */
+    .tk-da-creator {
+        padding: 1.25rem;
+    }
+
+    .tk-da-creator-top {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .tk-da-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #1e88e5;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .tk-avatar-blue {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    .tk-da-input {
+        flex: 1;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 12px 16px;
+        outline: none;
+        resize: none;
+        height: 65px;
+        font-family: inherit;
+        transition: 0.2s;
+    }
+
+        .tk-da-input:focus {
+            border-color: #93c5fd;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+    /* Image Preview in Creator */
+    .tk-da-preview-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        margin-left: 58px;
+    }
+
+    .tk-da-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+        .tk-da-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .tk-da-preview-remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .tk-da-preview-remove:hover {
+            background: #ef4444;
+        }
+
+        .tk-da-preview-remove span {
+            font-size: 16px;
+        }
+
+    .tk-da-creator-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 0.75rem;
+    }
+
+    .tk-da-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .tk-da-btn-action {
+        background: transparent;
+        border: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .tk-da-btn-action:hover {
+            background: #f1f5f9;
+        }
+
+    .tk-da-btn-submit {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 2px 4px rgba(59,130,246,0.3);
+    }
+
+        .tk-da-btn-submit:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .tk-da-btn-submit:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+    /* POST ITEM */
+    .tk-da-post {
+        padding: 1.25rem;
+    }
+
+    .tk-da-post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .tk-da-post-author {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .tk-da-author-name {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #0f172a;
+    }
+
+    .tk-da-post-time {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    .tk-da-btn-icon {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: 0.2s;
+    }
+
+        .tk-da-btn-icon:hover {
+            background: #fee2e2;
+        }
+
+    .tk-da-post-body p {
+        margin: 0 0 1rem 0;
+        color: #334155;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        font-size: 0.95rem;
+    }
+
+    .tk-da-images {
+        display: grid;
+        gap: 5px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+        .tk-da-images.grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .tk-da-images img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+    .tk-da-post-stats {
+        font-size: 0.85rem;
+        color: #64748b;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 500;
+    }
+
+    .tk-da-stat-text {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .tk-da-post-actions {
+        display: flex;
+        padding-top: 0.5rem;
+        gap: 5px;
+    }
+
+    .tk-da-action-btn {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .tk-da-action-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .tk-da-action-btn.liked {
+            color: #3b82f6;
+        }
+
+            .tk-da-action-btn.liked span {
+                font-variation-settings: 'FILL' 1;
+            }
+
+    /* COMMENTS */
+    .tk-da-comments-section {
+        border-top: 1px solid #e2e8f0;
+        margin-top: 0.5rem;
+        padding-top: 1.25rem;
+    }
+
+    .tk-da-comment-item {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .tk-da-avatar-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #94a3b8;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .tk-da-comment-box {
+        background: #f1f5f9;
+        padding: 10px 14px;
+        border-radius: 16px;
+        border-top-left-radius: 4px;
+        border: 1px solid #e2e8f0;
+    }
+
+        .tk-da-comment-box b {
+            font-size: 0.9rem;
+            color: #0f172a;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .tk-da-comment-box p {
+            font-size: 0.95rem;
+            color: #334155;
+            margin: 0;
+        }
+
+    .tk-da-comment-input-area {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .tk-da-input-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 4px 16px;
+        transition: 0.2s;
+    }
+
+        .tk-da-input-wrapper:focus-within {
+            border-color: #93c5fd;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .tk-da-input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px 0;
+            outline: none;
+            font-family: inherit;
+        }
+
+    .tk-da-send-btn {
+        background: transparent;
+        border: none;
+        color: #3b82f6;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        margin-left: 5px;
+        border-radius: 50%;
+        transition: 0.2s;
+    }
+
+        .tk-da-send-btn:hover {
+            background: #dbeafe;
+        }
+
+    /* SIDEBAR */
+    .tk-da-sidebar-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #0f172a;
+    }
+
+    .tk-da-sidebar-item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        border: 1px solid transparent;
+    }
+
+        .tk-da-sidebar-item:hover {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+    .tk-da-date-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        .tk-da-date-box b {
+            font-size: 1.1rem;
+        }
+
+        .tk-da-date-box span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+    .tk-da-font-bold {
+        font-weight: 700;
+        margin: 0;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .tk-da-text-sm {
+        font-size: 0.85rem;
+        margin: 0;
+        margin-top: 2px;
+    }
+
+    /* MODAL CSS */
+    .tk-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .tk-modal-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        width: 350px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        animation: popUp 0.2s ease-out;
+    }
+
+    .tk-modal-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        color: #1e293b;
+    }
+
+    .tk-modal-text {
+        color: #475569;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .tk-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .tk-btn-cancel {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: #475569;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .tk-btn-cancel:hover {
+            background: #f1f5f9;
+        }
+
+    .tk-btn-confirm-delete {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        background: #ef4444;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+
+        .tk-btn-confirm-delete:hover {
+            background: #dc2626;
+        }
+
+    /* EMOJI PICKER POPUP */
+    .tk-da-emoji-picker {
+        position: absolute;
+        bottom: 110%; 
+        left: 0;
+        background: white;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        padding: 12px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr); 
+        gap: 6px;
+        z-index: 1000;
+        width: max-content;
+        animation: popUp 0.2s ease-out;
+    }
+
+        .tk-da-emoji-picker::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 20px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            transform: rotate(45deg);
+        }
+
+    .tk-da-emoji-item {
+        font-size: 1.4rem;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.2s;
+        user-select: none; 
+    }
+
+        .tk-da-emoji-item:hover {
+            background-color: #f1f5f9;
+            transform: scale(1.2);
+        }
+
+    /* TOAST CSS */
+    .tk-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: white;
+        z-index: 10000;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    .tk-toast-success {
+        background-color: #10b981;
+    }
+
+    .tk-toast-danger {
+        background-color: #ef4444;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes popUp {
+        from {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+@code {
+    private string newPostContent = "";
+    private List<string> previewImages = new();
+    private bool showEmojiPicker = false;
+    private string[] popularEmojis = new[]
+    {
+        "😀", "😂", "🥰", "😍", "😎", "🤔",
+        "😢", "😡", "👍", "👎", "❤️", "🔥",
+        "🎉", "✨", "🙌", "👏", "💡", "💯"
+    };
+
+    // Modal Delete Variables
+    private bool showDeleteModal = false;
+    private Post postToDelete;
+
+    // Toast Variables
+    private bool showToast = false;
+    private string toastMessage = "";
+    private string toastClass = "";
+    private string toastIcon = "";
+
+    class Comment { public string Author { get; set; } public string Text { get; set; } }
+    class Post
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string AuthorName { get; set; }
+        public string TimeAgo { get; set; }
+        public string Content { get; set; }
+        public List<string> Images { get; set; } = new();
+        public int Likes { get; set; }
+        public bool IsLiked { get; set; }
+        public bool ShowComments { get; set; }
+        public string NewCommentText { get; set; } = "";
+        public List<Comment> Comments { get; set; } = new();
+    }
+
+    private List<Post> Posts = new();
+
+    protected override void OnInitialized()
+    {
+        Posts.Add(new Post
+        {
+            AuthorName = "Cô Trần Uyên",
+            TimeAgo = "2 giờ trước",
+            Likes = 45,
+            Content = "Sáng nay các con lớp 1A1 đã có một buổi trải nghiệm trồng cây rất vui và ý nghĩa. Cảm ơn các bậc phụ huynh đã hỗ trợ các con hoàn thành tốt nhiệm vụ nhé! 🌱🌻",
+            Images = { "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&q=80&w=500" },
+            Comments = { new Comment { Author = "Phụ huynh bé Bo", Text = "Tuyệt vời quá cô ơi!" } }
+        });
+
+        Posts.Add(new Post
+        {
+            AuthorName = "Nhà trường",
+            TimeAgo = "Hôm qua lúc 15:30",
+            Likes = 120,
+            Content = "THÔNG BÁO: Lịch nghỉ lễ Giải phóng miền Nam 30/4 và Quốc tế lao động 1/5.\nCác em học sinh sẽ được nghỉ từ ngày 29/04 đến hết ngày 03/05. Chúc các gia đình có kỳ nghỉ lễ vui vẻ!",
+        });
+    }
+
+    // --- LOGIC ẢNH ---
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var maxAllowedFiles = 4;
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            var resizedImage = await file.RequestImageFileAsync(file.ContentType, 800, 800);
+            var buffer = new byte[resizedImage.Size];
+            await resizedImage.OpenReadStream().ReadAsync(buffer);
+            var imageBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+            previewImages.Add(imageBase64);
+        }
+    }
+
+    private void RemovePreviewImage(string img)
+    {
+        previewImages.Remove(img);
+    }
+
+    // --- LOGIC ĐĂNG BÀI ---
+    private async Task CreatePost()
+    {
+        if (string.IsNullOrWhiteSpace(newPostContent) && !previewImages.Any()) return;
+
+        Posts.Insert(0, new Post
+        {
+            AuthorName = "Admin",
+            TimeAgo = "Vừa xong",
+            Content = newPostContent,
+            Likes = 0,
+            Images = new List<string>(previewImages)
+        });
+
+        // Clear dữ liệu nhập
+        newPostContent = "";
+        previewImages.Clear();
+
+        await ShowToastNoti("Đăng bài viết thành công!", "success");
+    }
+
+    // --- LOGIC XÓA ---
+    private void RequestDeletePost(Post p)
+    {
+        postToDelete = p;
+        showDeleteModal = true;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteModal = false;
+        postToDelete = null;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (postToDelete != null)
+        {
+            Posts.Remove(postToDelete);
+            postToDelete = null;
+        }
+        showDeleteModal = false;
+        await ShowToastNoti("Đã xóa bài viết", "danger");
+    }
+
+    // --- LOGIC KHÁC ---
+    private void ToggleLike(Post p)
+    {
+        p.IsLiked = !p.IsLiked;
+        p.Likes += p.IsLiked ? 1 : -1;
+    }
+
+    private void AddComment(Post p)
+    {
+        if (string.IsNullOrWhiteSpace(p.NewCommentText)) return;
+        p.Comments.Add(new Comment { Author = "Admin", Text = p.NewCommentText });
+        p.NewCommentText = "";
+    }
+
+    private void HandleCommentSubmit(KeyboardEventArgs e, Post p)
+    {
+        if (e.Key == "Enter") AddComment(p);
+    }
+
+    private void ToggleEmojiPicker()
+    {
+        showEmojiPicker = !showEmojiPicker;
+    }
+
+    private void InsertEmoji(string emoji)
+    {
+        newPostContent += emoji;
+        showEmojiPicker = false;
+    }
+
+    // --- HIỂN THỊ TOAST ---
+    private async Task ShowToastNoti(string message, string type)
+    {
+        toastMessage = message;
+        toastClass = type == "success" ? "tk-toast-success" : "tk-toast-danger";
+        toastIcon = type == "success" ? "check_circle" : "delete";
+        showToast = true;
+        StateHasChanged();
+
+        await Task.Delay(3000); // Đợi 3 giây tự tắt
+
+        showToast = false;
+        StateHasChanged();
+    }
+}

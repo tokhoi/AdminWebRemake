@@ -36,36 +36,59 @@
             </div>
         </div>
 
+        @* --- THANH CÔNG CỤ FILTER --- *@
         <div class="lm-toolbar">
             <div class="lm-filter-group">
                 <label class="lm-label">Năm học</label>
-                <select class="lm-select">
-                    <option>2025-2026</option>
-                    <option>2024-2025</option>
+                <select class="lm-select" @bind="filterYear">
+                    <option value="2025-2026">2025-2026</option>
+                    <option value="2024-2025">2024-2025</option>
                 </select>
             </div>
+
             <div class="lm-filter-group">
                 <label class="lm-label">Khối</label>
-                <select class="lm-select"><option>Tất cả khối</option></select>
+                <select class="lm-select" @bind="filterGrade">
+                    <option value="0">Tất cả khối</option>
+                    <option value="6">Khối 6</option>
+                    <option value="7">Khối 7</option>
+                </select>
             </div>
+
             <div class="lm-filter-group">
                 <label class="lm-label">Lớp</label>
-                <select class="lm-select"><option>Tất cả lớp</option></select>
+                <select class="lm-select" @bind="filterClass">
+                    <option value="">Tất cả lớp</option>
+                    @foreach (var c in availableClasses)
+                    {
+                        <option value="@c">@c</option>
+                    }
+                </select>
             </div>
+
             <div class="lm-filter-group" style="flex: 1.5;">
                 <label class="lm-label">Giáo viên</label>
                 <div class="lm-input-icon-wrapper">
                     <span class="material-icons-round">search</span>
-                    <input type="text" class="lm-input" placeholder="Tìm giáo viên..." @bind="filterTeacherName" @bind:event="oninput" />
+                    @* Bind oninput để tìm kiếm ngay lập tức khi gõ *@
+                    <input type="text" class="lm-input"
+                           placeholder="Tìm giáo viên..."
+                           @bind="filterTeacherName"
+                           @bind:event="oninput"
+                           @bind:after="ApplyFilter" />
                 </div>
             </div>
-            <button class="lm-btn lm-btn-primary" style="width: 100%;">
+
+            @* Nút Lọc: Gọi hàm ApplyFilter *@
+            <button class="lm-btn lm-btn-primary" style="width: 100%;" @onclick="ApplyFilter">
                 <span class="material-icons-round" style="font-size:18px; margin-right:4px;">filter_list</span> Lọc
             </button>
         </div>
 
+        @* --- BẢNG DỮ LIỆU --- *@
         <div class="lm-table-wrapper" style="max-height: calc(100vh - 280px);">
             <table class="lm-table">
+                @* ... (Phần Thead giữ nguyên) ... *@
                 <thead>
                     <tr>
                         <th class="lm-sticky-header-corner text-center" style="width: 80px;">TIẾT</th>
@@ -92,7 +115,9 @@
                             {
                                 var date = startDate.AddDays(dayIndex - 2);
                                 var isToday = date.Date == DateTime.Today;
-                                var cellData = MockData.Where(x => x.Thu == dayIndex && x.Tiet == period.Index).ToList();
+
+                                // QUAN TRỌNG: Sử dụng _filteredData thay vì MockData
+                                var cellData = _filteredData.Where(x => x.Thu == dayIndex && x.Tiet == period.Index).ToList();
 
                                 <td style="vertical-align: top; height: 120px; min-width: 180px; background-color: @(isToday ? "#f0f9ff" : "inherit");">
                                     @if (cellData.Any())
@@ -100,7 +125,6 @@
                                         @foreach (var item in cellData)
                                         {
                                             <div class="lm-tkb-card" style="border-left-color: @GetSubjectColor(item.MonHoc);" @onclick="() => EditTKB(item)">
-
                                                 <input type="checkbox" class="lm-tkb-checkbox"
                                                        checked="@item.IsSelected"
                                                        @onclick:stopPropagation="true"
@@ -108,7 +132,6 @@
 
                                                 <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: var(--lm-text-main);">
                                                     @item.MonHoc
-
                                                     @if (item.IsActive)
                                                     {
                                                         <span class="lm-live-indicator" title="Đang học"></span>
@@ -192,17 +215,50 @@
     private DateTime selectedDateSingle = DateTime.Today;
     private int selectedPeriod = 1;
 
-    // Search Filters
-    private string searchSubject = "";
-    private string searchTeacher = "";
-    private string filterTeacherName = "";
+    // --- FILTER VARIABLES ---
+    string filterYear = "2025-2026";
+    int filterGrade = 0; 
+    string filterClass = ""; 
+    string filterTeacherName = "";
+
+    private List<MockTKB> _originalData = new();
+    private List<MockTKB> _filteredData = new();
+
+    private List<string> availableClasses => GetClassesByGrade(filterGrade);
 
     protected override void OnInitialized()
     {
         SetCurrentWeek();
+        SeedMockData(); 
+        ApplyFilter();  
     }
 
-    // --- LOGIC ---
+    // --- LOGIC FILTER ---
+    private void ApplyFilter()
+    {
+        _filteredData = _originalData.Where(x =>
+            (string.IsNullOrEmpty(filterYear) || true) &&
+            (filterGrade == 0 || GetGradeFromClass(x.Lop) == filterGrade) &&
+            (string.IsNullOrEmpty(filterClass) || x.Lop == filterClass) &&
+            (string.IsNullOrEmpty(filterTeacherName) ||
+             x.GiaoVien.ToLower().Contains(filterTeacherName.ToLower()))
+        ).ToList();
+    }
+
+    private int GetGradeFromClass(string className)
+    {
+        var digits = new string(className.TakeWhile(char.IsDigit).ToArray());
+        return int.TryParse(digits, out int g) ? g : 0;
+    }
+
+    private List<string> GetClassesByGrade(int grade)
+    {
+        if (grade == 6) return new List<string> { "6A1", "6A2", "6A3" };
+        if (grade == 7) return new List<string> { "7A1", "7A2" };
+        return new List<string>(); 
+    }
+
+    // --- CÁC HÀM CŨ ---
     private void SetCurrentWeek()
     {
         var today = DateTime.Today;
@@ -210,30 +266,25 @@
         startDate = today.AddDays(-1 * diff);
         endDate = startDate.AddDays(6);
     }
-
     private void PreviousWeek() { startDate = startDate.AddDays(-7); endDate = endDate.AddDays(-7); }
     private void NextWeek() { startDate = startDate.AddDays(7); endDate = endDate.AddDays(7); }
     private string GetDayName(int thu) => thu == 8 ? "Chủ Nhật" : $"Thứ {thu}";
-
-    // --- ACTIONS ---
     private void ShowAddForm() { showModal = true; isEditing = false; }
-
-    private void EditTKB(MockTKB item)
-    {
-        showModal = true;
-        isEditing = true;
-        searchSubject = item.MonHoc;
-        searchTeacher = item.GiaoVien;
-    }
-
+    private void EditTKB(MockTKB item) { showModal = true; isEditing = true; searchSubject = item.MonHoc; searchTeacher = item.GiaoVien; }
     private void CloseModal() => showModal = false;
     private void SaveData() => showModal = false;
+    private int CountSelected() => _filteredData.Count(x => x.IsSelected); // Đếm trên list đang hiện
 
-    // Xóa nhiều
-    private int CountSelected() => MockData.Count(x => x.IsSelected);
-    private void DeleteSelectedTKB() => MockData.RemoveAll(x => x.IsSelected);
+    private void DeleteSelectedTKB()
+    {
+        var toDelete = _filteredData.Where(x => x.IsSelected).ToList();
+        foreach (var item in toDelete)
+        {
+            _originalData.Remove(item);
+        }
+        ApplyFilter();
+    }
 
-    // Color Helper
     private string GetSubjectColor(string name)
     {
         string[] colors = { "#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4" };
@@ -241,7 +292,21 @@
         return colors[Math.Abs(name.GetHashCode()) % colors.Length];
     }
 
-    // --- MOCK DATA ---
+    // --- MOCK DATA SETUP ---
+    private void SeedMockData()
+    {
+        _originalData = new List<MockTKB>
+        {
+            new MockTKB { Thu = 2, Tiet = 1, MonHoc = "Toán", Lop = "6A1", GiaoVien = "Nguyễn Văn A" },
+            new MockTKB { Thu = 2, Tiet = 2, MonHoc = "Văn", Lop = "6A1", GiaoVien = "Trần Thị B" },
+            new MockTKB { Thu = 3, Tiet = 1, MonHoc = "Lý", Lop = "7A1", GiaoVien = "Lê Văn C" },
+            new MockTKB { Thu = 4, Tiet = 3, MonHoc = "Hóa", Lop = "7A2", GiaoVien = "Phạm Văn D", IsActive = true },
+            new MockTKB { Thu = 5, Tiet = 1, MonHoc = "Anh", Lop = "6A2", GiaoVien = "Đỗ Thị E" },
+            new MockTKB { Thu = 6, Tiet = 5, MonHoc = "Sinh", Lop = "6A1", GiaoVien = "Hoàng Văn F" }
+        };
+    }
+
+    // --- CLASSES ---
     public class MockTKB
     {
         public int Thu { get; set; }
@@ -249,26 +314,16 @@
         public string MonHoc { get; set; } = "";
         public string Lop { get; set; } = "";
         public string GiaoVien { get; set; } = "";
-
-        // Hai thuộc tính quan trọng bạn cần
-        public bool IsActive { get; set; } = false;   // Cho dấu chấm đỏ
-        public bool IsSelected { get; set; } = false; // Cho checkbox
+        public bool IsActive { get; set; } = false;
+        public bool IsSelected { get; set; } = false;
     }
 
     public class MockPeriod { public int Index { get; set; } public string Time { get; set; } = ""; }
-
     private List<MockPeriod> MockPeriods = new()
     {
         new() {Index=1, Time="07:15 - 08:15"}, new() {Index=2, Time="08:15 - 09:00"}, new() {Index=3, Time="09:00 - 09:45"},
         new() {Index=4, Time="10:00 - 10:45"}, new() {Index=5, Time="10:45 - 11:30"}
     };
 
-    private List<MockTKB> MockData = new()
-    {
-        new MockTKB { Thu = 2, Tiet = 1, MonHoc = "GD Chính Trị", Lop = "DC25T", GiaoVien = "Nguyễn Văn A" },
-        new MockTKB { Thu = 3, Tiet = 1, MonHoc = "Nghiệp vụ Lễ tân", Lop = "NH25A", GiaoVien = "Trần Thị B" },
-        // Item này có IsActive = true để test dấu chấm đỏ
-        new MockTKB { Thu = 4, Tiet = 2, MonHoc = "Tin học", Lop = "DC25T", GiaoVien = "Đặng Văn C", IsActive = true },
-        new MockTKB { Thu = 6, Tiet = 1, MonHoc = "Giáo dục chính trị", Lop = "DL25B1", GiaoVien = "Lê Văn D" }
-    };
+    string searchSubject = ""; string searchTeacher = "";
 }

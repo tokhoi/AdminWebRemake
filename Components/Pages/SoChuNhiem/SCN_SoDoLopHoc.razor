@@ -1,0 +1,533 @@
+﻿<div class="scn-child-container animate-fade-in">
+    <div class="toolbar flex-between">
+        <div>
+            <h2 class="page-title">Sơ đồ chỗ ngồi - Lớp 10A1</h2>
+            <span class="text-muted">Sĩ số: @TotalStudents HS | Đã xếp: @SeatedStudents.Count | Chưa xếp: @UnassignedStudents.Count</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            @if (IsEditMode)
+            {
+                <button class="btn-outline" @onclick="ToggleEditMode">Hủy</button>
+                <button class="btn-primary" @onclick="ToggleEditMode"><span class="material-icons-round">save</span> Lưu sơ đồ</button>
+            }
+            else
+            {
+                <button class="btn-outline" @onclick="ShuffleSeats"><span class="material-icons-round">shuffle</span> Sắp xếp ngẫu nhiên</button>
+                <button class="btn-primary" @onclick="ToggleEditMode"><span class="material-icons-round">settings</span> Cấu hình & Xếp chỗ</button>
+            }
+        </div>
+    </div>
+
+    @if (IsEditMode)
+    {
+        <div class="config-panel animate-slide-down">
+            <div style="font-weight: 600; margin-right: 15px;">Cấu hình không gian:</div>
+            <div class="config-item">
+                <label>Số Dãy (Cột):</label>
+                <input type="number" class="input-control" style="width: 80px;" min="1" max="6" @bind="Cols" @bind:after="RebuildGrid" />
+            </div>
+            <div class="config-item">
+                <label>Số Bàn/Dãy (Hàng):</label>
+                <input type="number" class="input-control" style="width: 80px;" min="1" max="10" @bind="Rows" @bind:after="RebuildGrid" />
+            </div>
+            <div style="margin-left: auto; color: var(--c-orange); font-size: 0.85rem; font-style: italic;">
+                <span class="material-icons-round" style="font-size: 16px; vertical-align: bottom;">info</span>
+                Chọn HS bên dưới, sau đó click vào ghế trống để xếp chỗ.
+            </div>
+        </div>
+    }
+
+    <div class="workspace-layout">
+        @if (IsEditMode)
+        {
+            <div class="waiting-list-panel">
+                <h3 style="font-size: 1rem; margin: 0 0 10px 0; color: var(--text-main);">Danh sách chưa xếp (@UnassignedStudents.Count)</h3>
+                <div class="student-list">
+                    @foreach (var hs in UnassignedStudents)
+                    {
+                        <div class="student-list-item @(SelectedStudentToAssign?.Id == hs.Id ? "selected" : "")"
+                             @onclick="() => SelectStudentForAssignment(hs)">
+                            <div class="avatar-mini">@hs.Name.Substring(0, 1)</div>
+                            <span>@hs.Name</span>
+                        </div>
+                    }
+                    @if (UnassignedStudents.Count == 0)
+                    {
+                        <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem;">
+                            Đã xếp hết học sinh!
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="grid-panel">
+            <div class="teachers-desk">BÀN GIÁO VIÊN</div>
+
+            <div class="classroom-grid" style="grid-template-columns: repeat(@Cols, 1fr);">
+                @for (int row = 0; row < Rows; row++)
+                {
+                    @for (int col = 0; col < Cols; col++)
+                    {
+                        var currentRow = row;
+                        var currentCol = col;
+                        var seat = Seats.FirstOrDefault(s => s.Row == currentRow && s.Col == currentCol);
+
+                        <div class="desk-slot @(IsEditMode ? "edit-mode" : "") @(seat != null && seat.Student != null ? "occupied" : "empty")"
+                             @onclick="() => HandleSeatClick(currentRow, currentCol)">
+
+                            @if (seat != null && seat.Student != null)
+                            {
+                                <div class="desk-avatar">@seat.Student.Name.Substring(0, 1)</div>
+                                <div class="desk-name">@seat.Student.Name</div>
+
+                                @if (IsEditMode)
+                                {
+                                    <div class="remove-badge" title="Gỡ học sinh này"><span class="material-icons-round">close</span></div>
+                                }
+                            }
+                            else
+                            {
+                                @if (IsEditMode)
+                                {
+                                    <span class="material-icons-round empty-icon">add</span>
+                                    <div class="empty-text">Trống</div>
+                                }
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsEditMode = false;
+    private int Rows = 5;
+    private int Cols = 4; // 4 Dãy, mỗi dãy 5 bàn = 20 chỗ (Giả lập mỗi bàn 2 HS thì có thể chia 8 cột)
+    private int TotalStudents = 18;
+
+    class StudentMock { public string Id { get; set; } = ""; public string Name { get; set; } = ""; }
+    class Seat { public int Row { get; set; } public int Col { get; set; } public StudentMock? Student { get; set; } }
+
+    List<StudentMock> AllStudents = new();
+    List<StudentMock> UnassignedStudents = new();
+    List<StudentMock> SeatedStudents => Seats.Where(s => s.Student != null).Select(s => s.Student!).ToList();
+    List<Seat> Seats = new();
+
+    StudentMock? SelectedStudentToAssign;
+
+    protected override void OnInitialized()
+    {
+        // Khởi tạo 18 học sinh giả lập
+        for (int i = 1; i <= TotalStudents; i++)
+        {
+            AllStudents.Add(new StudentMock { Id = $"HS{i}", Name = $"Học sinh {i}" });
+        }
+
+        // Khởi tạo danh sách chờ ban đầu
+        UnassignedStudents = AllStudents.ToList();
+
+        RebuildGrid();
+        ShuffleSeats(); // Xếp ngẫu nhiên lần đầu cho có dữ liệu
+    }
+
+    // Xây dựng lại lưới dựa trên cấu hình Dãy x Bàn
+    private void RebuildGrid()
+    {
+        var oldSeats = Seats.ToList();
+        Seats.Clear();
+
+        for (int r = 0; r < Rows; r++)
+        {
+            for (int c = 0; c < Cols; c++)
+            {
+                // Giữ lại học sinh cũ nếu ghế đó vẫn nằm trong giới hạn lưới mới
+                var existingSeat = oldSeats.FirstOrDefault(s => s.Row == r && s.Col == c);
+                Seats.Add(new Seat { Row = r, Col = c, Student = existingSeat?.Student });
+            }
+        }
+
+        // Đẩy những học sinh bị mất ghế (do thu hẹp lưới) về lại danh sách chờ
+        var validSeatStudents = Seats.Where(s => s.Student != null).Select(s => s.Student!.Id).ToList();
+        UnassignedStudents = AllStudents.Where(hs => !validSeatStudents.Contains(hs.Id)).ToList();
+    }
+
+    private void ToggleEditMode()
+    {
+        IsEditMode = !IsEditMode;
+        SelectedStudentToAssign = null;
+    }
+
+    // Xếp ngẫu nhiên
+    private void ShuffleSeats()
+    {
+        UnassignedStudents = AllStudents.ToList();
+        foreach (var seat in Seats) { seat.Student = null; }
+
+        var rnd = new Random();
+        var randomStudents = AllStudents.OrderBy(x => rnd.Next()).ToList();
+
+        int studentIndex = 0;
+        foreach (var seat in Seats)
+        {
+            if (studentIndex < randomStudents.Count)
+            {
+                seat.Student = randomStudents[studentIndex];
+                UnassignedStudents.Remove(randomStudents[studentIndex]);
+                studentIndex++;
+            }
+        }
+    }
+
+    // ===== LOGIC CHỌN VÀ GẮN CHỖ (EDIT MODE) =====
+
+    private void SelectStudentForAssignment(StudentMock student)
+    {
+        // Bấm chọn HS trong danh sách chờ
+        if (SelectedStudentToAssign == student)
+            SelectedStudentToAssign = null; // Bỏ chọn nếu bấm lại
+        else
+            SelectedStudentToAssign = student;
+    }
+
+    private void HandleSeatClick(int row, int col)
+    {
+        if (!IsEditMode) return;
+
+        var seat = Seats.First(s => s.Row == row && s.Col == col);
+
+        if (seat.Student != null)
+        {
+            // Ghế đã có người -> Bấm vào để gỡ học sinh ra khỏi ghế, đưa về danh sách chờ
+            UnassignedStudents.Add(seat.Student);
+            seat.Student = null;
+        }
+        else if (SelectedStudentToAssign != null)
+        {
+            // Ghế trống và đang có học sinh được chọn -> Gắn vào ghế
+            seat.Student = SelectedStudentToAssign;
+            UnassignedStudents.Remove(SelectedStudentToAssign);
+            SelectedStudentToAssign = null; // Reset lựa chọn
+        }
+    }
+}
+
+<style>
+    .scn-child-container {
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .toolbar {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .page-title {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.15rem;
+        color: var(--text-main);
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .input-control {
+        padding: 6px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+    }
+
+        .input-control:focus {
+            border-color: #1b6ec2;
+        }
+
+    .btn-primary {
+        background: #1b6ec2;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .btn-outline {
+        background: white;
+        color: var(--text-main);
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+        }
+
+    /* Cấu hình Panel */
+    .config-panel {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        padding: 12px 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .config-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Layout Không gian làm việc chia 2 cột nếu Edit mode */
+    .workspace-layout {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* Danh sách chờ */
+    .waiting-list-panel {
+        width: 250px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        max-height: 600px;
+    }
+
+    .student-list {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-right: 4px;
+    }
+
+    .student-list-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: 0.2s;
+    }
+
+        .student-list-item:hover {
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+
+        .student-list-item.selected {
+            border-color: #f59e0b;
+            background: #fffbeb;
+            box-shadow: 0 0 0 2px rgba(245,158,11,0.2);
+            color: #b45309;
+        }
+
+    .avatar-mini {
+        width: 24px;
+        height: 24px;
+        background: #cbd5e1;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+
+    /* Sơ đồ chính */
+    .grid-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow-x: auto;
+    }
+
+    .teachers-desk {
+        background: #e0f2fe;
+        border: 1px dashed #3b82f6;
+        color: #1d4ed8;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 800;
+        border-radius: 8px;
+        margin: 0 auto 2rem auto;
+        width: 300px;
+        box-shadow: 0 4px 6px rgba(59,130,246,0.1);
+    }
+
+    .classroom-grid {
+        display: grid;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .desk-slot {
+        width: 110px;
+        height: 75px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: 0.2s;
+    }
+
+        /* Trạng thái ghế */
+        .desk-slot.occupied {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .desk-slot.empty {
+            background: #fdfdfd;
+            border: 1px dashed #cbd5e1;
+        }
+
+        /* Chế độ Edit */
+        .desk-slot.edit-mode.empty {
+            cursor: pointer;
+        }
+
+            .desk-slot.edit-mode.empty:hover {
+                background: #eff6ff;
+                border-color: #3b82f6;
+                color: #3b82f6;
+            }
+
+        .desk-slot.edit-mode.occupied {
+            cursor: pointer;
+        }
+
+            .desk-slot.edit-mode.occupied:hover {
+                border-color: #ef4444;
+                background: #fef2f2;
+            }
+
+                .desk-slot.edit-mode.occupied:hover .remove-badge {
+                    display: flex;
+                }
+
+    .desk-avatar {
+        width: 28px;
+        height: 28px;
+        background: #94a3b8;
+        border-radius: 50%;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 0.75rem;
+    }
+
+    .desk-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-main);
+        text-align: center;
+        line-height: 1.2;
+        padding: 0 4px;
+    }
+
+    .empty-icon {
+        font-size: 24px;
+        color: #cbd5e1;
+    }
+
+    .empty-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    /* Nút xóa ẩn ở góc ghế */
+    .remove-badge {
+        display: none;
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+        .remove-badge span {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+    .animate-slide-down {
+        animation: slideDown 0.2s ease-out forwards;
+        transform-origin: top;
+    }
+    @@keyframes slideDown {
+        from
+
+    {
+        opacity: 0;
+        transform: scaleY(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+
+    }
+</style>

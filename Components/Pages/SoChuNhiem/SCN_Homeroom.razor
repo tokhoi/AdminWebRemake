@@ -1,0 +1,227 @@
+﻿@page "/school/homeroom"
+@rendermode InteractiveServer
+
+<PageTitle>Sổ Chủ Nhiệm Điện Tử</PageTitle>
+
+<div class="scn-container animate-fade-in">
+    <div class="scn-sidebar">
+        <div class="scn-sidebar-header">
+            <div class="scn-icon-box"><span class="material-icons-round">book</span></div>
+            <div>
+                <div class="scn-sidebar-title">SỔ CHỦ NHIỆM</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Năm học 2025-2026</div>
+            </div>
+        </div>
+        
+        <div class="scn-nav-wrapper">
+            <ul class="scn-nav-group">
+                <li class="scn-nav-label">THÔNG TIN CHUNG</li>
+                <li class="scn-nav-item @(ActiveTab == "index" ? "active" : "")" @onclick='() => ActiveTab = "index"'>
+                    <span class="material-icons-round scn-nav-icon">dashboard</span> Tổng quan
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "hocsinh" ? "active" : "")" @onclick='() => ActiveTab = "hocsinh"'>
+                    <span class="material-icons-round scn-nav-icon">groups</span> Danh sách Học sinh
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "sodo" ? "active" : "")" @onclick='() => ActiveTab = "sodo"'>
+                    <span class="material-icons-round scn-nav-icon">grid_view</span> Sơ đồ lớp học
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "to" ? "active" : "")" @onclick='() => ActiveTab = "to"'>
+                    <span class="material-icons-round scn-nav-icon">safety_divider</span> Quản lý HS theo tổ
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "cmhs" ? "active" : "")" @onclick='() => ActiveTab = "cmhs"'>
+                    <span class="material-icons-round scn-nav-icon">family_restroom</span> Ban đại diện CMHS
+                </li>
+            </ul>
+
+            <ul class="scn-nav-group">
+                <li class="scn-nav-label">KẾ HOẠCH & ĐÁNH GIÁ</li>
+                <li class="scn-nav-item @(ActiveTab == "kh_chunhiem" ? "active" : "")" @onclick='() => ActiveTab = "kh_chunhiem"'>
+                    <span class="material-icons-round scn-nav-icon">menu_book</span> Kế hoạch Chủ nhiệm
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "kh_giaoduc" ? "active" : "")" @onclick='() => ActiveTab = "kh_giaoduc"'>
+                    <span class="material-icons-round scn-nav-icon">auto_stories</span> Kế hoạch Giáo dục
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "kh_thang" ? "active" : "")" @onclick='() => ActiveTab = "kh_thang"'>
+                    <span class="material-icons-round scn-nav-icon">calendar_month</span> Kế hoạch Tháng
+                </li>
+            </ul>
+
+            <ul class="scn-nav-group">
+                <li class="scn-nav-label">THEO DÕI KỶ LUẬT</li>
+                <li class="scn-nav-item @(ActiveTab == "tienbo" ? "active" : "")" @onclick='() => ActiveTab = "tienbo"'>
+                    <span class="material-icons-round scn-nav-icon">trending_up</span> Theo dõi Tiến bộ
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "nhacnho" ? "active" : "")" @onclick='() => ActiveTab = "nhacnho"'>
+                    <span class="material-icons-round scn-nav-icon">warning_amber</span> Hiện tượng & Nhắc nhở
+                </li>
+                <li class="scn-nav-item @(ActiveTab == "hieutruong" ? "active" : "")" @onclick='() => ActiveTab = "hieutruong"'>
+                    <span class="material-icons-round scn-nav-icon">verified</span> Hiệu trưởng nhận xét
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="scn-main-area">
+        <div class="scn-content-body">
+            @switch (ActiveTab)
+            {
+                case "index":
+                    <SCN_Index />
+                    break;
+                case "hocsinh":
+                    <SCN_HocSinh />
+                    break;
+                case "sodo":
+                    <SCN_SoDoLopHoc />
+                    break;
+                case "to":
+                    <SCN_QuanLyHocSinhTheoTo />
+                    break;
+                case "cmhs":
+                    <SCN_BanDaiDienChaMeHocSinh />
+                    break;
+                case "kh_chunhiem":
+                    <SCN_KeHoachChuNhiem />
+                    break;
+                case "kh_giaoduc":
+                    <SCN_KeHoachGiaoDuc />
+                    break;
+                case "kh_thang":
+                    <SCN_KeHoachThang />
+                    break;
+                case "tienbo":
+                    <SCN_TienBo />
+                    break;
+                case "nhacnho":
+                    <SCN_HienTuongNhacNho />
+                    break;
+                case "hieutruong":
+                    <SCN_HieuTruongNhanXet />
+                    break;
+                default:
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        Đang tải nội dung...
+                    </div>
+                    break;
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string ActiveTab = "index";
+}
+
+<style>
+    /* Bố cục chính của Không gian làm việc */
+    .scn-container {
+        display: flex;
+        flex-direction: row !important;
+        height: calc(100vh - 100px);
+        margin: 1rem 1.5rem;
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* === CỘT TRÁI (SIDEBAR) === */
+    .scn-sidebar {
+        width: 280px;
+        background: #f8fafc;
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+    }
+
+    .scn-sidebar-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #ffffff;
+    }
+
+    .scn-icon-box {
+        width: 38px; height: 38px;
+        background: #e0f2fe; color: var(--primary);
+        border-radius: 10px;
+        display: flex; justify-content: center; align-items: center;
+    }
+
+    .scn-sidebar-title {
+        font-weight: 800;
+        font-size: 1rem;
+        color: var(--text-main);
+    }
+
+    .scn-nav-wrapper {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+
+    .scn-nav-group {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.5rem 0;
+    }
+
+    .scn-nav-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #94a3b8;
+        padding: 0 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .scn-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 1.5rem;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-weight: 500;
+        transition: 0.2s;
+        border-left: 3px solid transparent;
+        font-size: 0.95rem;
+    }
+    
+    .scn-nav-item:hover { background: #e2e8f0; color: var(--text-main); }
+    .scn-nav-item.active { 
+        background: #eff6ff; 
+        color: var(--primary); 
+        border-left-color: var(--primary); 
+        font-weight: 700; 
+    }
+
+    .scn-nav-icon { font-size: 20px; }
+
+    /* === CỘT PHẢI (MAIN CONTENT) === */
+    .scn-main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f4f7f9; 
+        min-width: 0;
+    }
+
+    .scn-content-body {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+
++    .scn-content-body > div > .page-header {
+        display: none; +
+    }
+    .scn-content-body > div > .filter-card {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+</style>

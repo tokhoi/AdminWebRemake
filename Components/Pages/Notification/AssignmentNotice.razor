@@ -1,0 +1,154 @@
+﻿@rendermode InteractiveServer
+
+<PageTitle>Báo bài & Dặn dò</PageTitle>
+
+<div class="nt-page-container nt-animate-fade-in">
+    <div class="nt-card">
+        <div class="nt-card-header">
+            <h2 class="nt-card-title">
+                <span class="material-icons-round">assignment</span> BÁO BÀI & DẶN DÒ
+            </h2>
+            <button class="nt-btn nt-btn-primary" @onclick="OpenCreateModal">
+                <span class="material-icons-round" style="font-size:18px; margin-right:6px;">post_add</span> Báo bài mới
+            </button>
+        </div>
+
+        <div class="nt-toolbar">
+            <div class="nt-filter-group">
+                <label class="nt-label">Lớp</label>
+                <select class="nt-select"><option>Lớp 1A1</option><option>Lớp 1A2</option></select>
+            </div>
+            <div class="nt-filter-group" style="flex: 2;">
+                <label class="nt-label">Môn học</label>
+                <div class="nt-input-wrapper">
+                    <span class="material-icons-round nt-input-icon">search</span>
+                    <input class="nt-input nt-input-has-icon" placeholder="Tìm theo môn..." @bind="SearchTerm" @bind:event="oninput" />
+                </div>
+            </div>
+            <button class="nt-btn nt-btn-primary">Lọc</button>
+        </div>
+
+        <div class="nt-list-container">
+            @foreach (var item in FilteredAssignments)
+            {
+                <div class="nt-list-item" @onclick="() => EditItem(item)">
+                    <div class="nt-date-box" style="background: #eef2ff; color: #4f46e5;">
+                        <span class="material-icons-round" style="font-size: 28px;">menu_book</span>
+                    </div>
+
+                    <div class="nt-item-content">
+                        <div class="nt-item-title" style="color: var(--nt-primary);">[@item.Subject] - @item.Title</div>
+                        <div class="nt-item-desc">@item.Content</div>
+                        <div class="nt-item-meta" style="color: #64748b;">
+                            <span class="nt-badge" style="background:#e0f2fe; color:#0369a1;">@item.Class</span>
+                            <span style="display:flex; align-items:center; gap:4px;">
+                                <span class="material-icons-round" style="font-size:14px;">event</span> Hạn nộp: @item.DueDate.ToString("dd/MM/yyyy")
+                            </span>
+                        </div>
+                    </div>
+
+                    <button class="nt-btn-danger-soft" style="height:32px; width:32px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center;" @onclick:stopPropagation="true" @onclick="() => DeleteItem(item)">
+                        <span class="material-icons-round" style="font-size:18px;">delete</span>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (showModal)
+{
+    <div class="nt-modal-backdrop">
+        <div class="nt-modal-dialog">
+            <div class="nt-modal-content">
+                <div class="nt-modal-header">
+                    <h4 class="nt-card-title" style="font-size:1.1rem;">@(isEdit ? "Sửa Báo Bài" : "Tạo Báo Bài")</h4>
+                    <button style="background:none; border:none; cursor:pointer;" @onclick="() => showModal = false"><span class="material-icons-round">close</span></button>
+                </div>
+                <div class="nt-modal-body">
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Tiêu đề bài tập</label>
+                            <input class="nt-input" @bind="editingItem.Title" />
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                            <div class="nt-filter-group">
+                                <label class="nt-label">Môn học</label>
+                                <select class="nt-select" @bind="editingItem.Subject">
+                                    <option>Tiếng Việt</option>
+                                    <option>Toán</option>
+                                    <option>Tiếng Anh</option>
+                                </select>
+                            </div>
+                            <div class="nt-filter-group">
+                                <label class="nt-label">Lớp áp dụng</label>
+                                <select class="nt-select" @bind="editingItem.Class">
+                                    <option>Lớp 1A1</option>
+                                    <option>Lớp 1A2</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Hạn nộp</label>
+                            <input type="date" class="nt-input" @bind="editingItem.DueDate" />
+                        </div>
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Nội dung dặn dò</label>
+                            <textarea class="nt-input" @bind="editingItem.Content" rows="3" style="height:auto;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="nt-modal-footer">
+                    <button class="nt-btn nt-btn-outline" @onclick="() => showModal = false">Hủy</button>
+                    <button class="nt-btn nt-btn-primary" @onclick="SaveData">Lưu lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool showModal = false;
+    private bool isEdit = false;
+    private string SearchTerm = "";
+
+    public class AssignmentModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Subject { get; set; } = "";
+        public string Content { get; set; } = "";
+        public string Class { get; set; } = "Lớp 1A1";
+        public DateTime DueDate { get; set; } = DateTime.Today.AddDays(1);
+    }
+
+    private List<AssignmentModel> Assignments = new();
+    private AssignmentModel editingItem = new();
+
+    private IEnumerable<AssignmentModel> FilteredAssignments =>
+        Assignments.Where(x => x.Subject.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || x.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        Assignments.Add(new AssignmentModel { Id = 1, Title = "Bài tập đọc tuần 20", Subject = "Tiếng Việt", Content = "Đọc bài Chuyện bốn mùa...", DueDate = DateTime.Today.AddDays(2) });
+        Assignments.Add(new AssignmentModel { Id = 2, Title = "Phép cộng trong phạm vi 100", Subject = "Toán", Content = "Làm bài tập trang 56 SGK", DueDate = DateTime.Today.AddDays(1) });
+    }
+
+    private void OpenCreateModal() { isEdit = false; editingItem = new AssignmentModel(); showModal = true; }
+    private void EditItem(AssignmentModel item) { isEdit = true; editingItem = new AssignmentModel { Id = item.Id, Title = item.Title, Subject = item.Subject, Content = item.Content, Class = item.Class, DueDate = item.DueDate }; showModal = true; }
+    private void DeleteItem(AssignmentModel item) { Assignments.Remove(item); }
+    private void SaveData()
+    {
+        if (isEdit)
+        {
+            var ex = Assignments.FirstOrDefault(x => x.Id == editingItem.Id);
+            if (ex != null) { ex.Title = editingItem.Title; ex.Subject = editingItem.Subject; ex.Content = editingItem.Content; ex.Class = editingItem.Class; ex.DueDate = editingItem.DueDate; }
+        }
+        else
+        {
+            editingItem.Id = Assignments.Any() ? Assignments.Max(x => x.Id) + 1 : 1;
+            Assignments.Insert(0, editingItem);
+        }
+        showModal = false;
+    }
+}

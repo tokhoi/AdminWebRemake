@@ -1,0 +1,233 @@
+﻿<div class="scn-child-container animate-fade-in">
+    <div class="toolbar flex-between">
+        <h2 class="page-title">Kế hoạch công tác Tháng</h2>
+        <select class="input-control" style="width: 200px; font-weight: bold; color: var(--primary);" @bind="SelectedMonth">
+            <option value="9">Tháng 9/2025</option>
+            <option value="10">Tháng 10/2025</option>
+            <option value="11">Tháng 11/2025</option>
+        </select>
+    </div>
+
+    <div class="month-plan-grid">
+        <div class="plan-card">
+            <div class="card-header"><span class="material-icons-round" style="color: #f59e0b;">emoji_events</span> Mục tiêu trọng tâm</div>
+            <div class="card-body">
+                <textarea class="plan-textarea" placeholder="Nhập mục tiêu trọng tâm của tháng... (Vd: Duy trì sĩ số, đạt giải văn nghệ trường)">
+1. 100% học sinh đi học đúng giờ.
+2. Hoàn thành thu BHYT.
+3. Thi đua hoa điểm tốt chào mừng 20/11.
+                </textarea>
+                <div style="text-align: right; margin-top: 10px;">
+                    <button class="btn-outline">Cập nhật mục tiêu</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="plan-card">
+            <div class="card-header"><span class="material-icons-round" style="color: #10b981;">fact_check</span> Nhiệm vụ chi tiết</div>
+            <div class="card-body">
+                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <input type="text" class="input-control" placeholder="Thêm công việc mới..." @bind="NewTask" />
+                    <button class="btn-primary" @onclick="AddTask"><span class="material-icons-round">add</span></button>
+                </div>
+
+                <div class="task-list">
+                    @foreach (var task in Tasks)
+                    {
+                        <div class="task-item @(task.IsDone ? "task-done" : "")">
+                            <input type="checkbox" checked="@task.IsDone" @onchange="() => task.IsDone = !task.IsDone" class="task-checkbox" />
+                            <span class="task-text">@task.Name</span>
+                            <button class="icon-btn text-danger" @onclick="() => Tasks.Remove(task)"><span class="material-icons-round" style="font-size: 18px;">close</span></button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string SelectedMonth = "11";
+    private string NewTask = "";
+
+    class TaskItem { public string Name { get; set; } = ""; public bool IsDone { get; set; } }
+    List<TaskItem> Tasks = new()
+    {
+        new TaskItem { Name = "Họp phụ huynh đầu năm", IsDone = true },
+        new TaskItem { Name = "Thu các khoản phí đầu năm", IsDone = false },
+        new TaskItem { Name = "Xếp sơ đồ lớp học", IsDone = true },
+        new TaskItem { Name = "Bầu ban cán sự lớp", IsDone = false }
+    };
+
+    private void AddTask()
+    {
+        if (!string.IsNullOrWhiteSpace(NewTask))
+        {
+            Tasks.Add(new TaskItem { Name = NewTask, IsDone = false });
+            NewTask = "";
+        }
+    }
+}
+
+<style>
+    .scn-child-container {
+        padding: 0.5rem;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .toolbar {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .page-title {
+        margin: 0;
+        font-size: 1.15rem;
+        color: var(--text-main);
+    }
+
+    .input-control {
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+    }
+
+        .input-control:focus {
+            border-color: #1b6ec2;
+        }
+
+    .btn-primary {
+        background: #1b6ec2;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-outline {
+        background: white;
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .icon-btn {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px;
+    }
+
+    /* Layout Kế hoạch tháng */
+    .month-plan-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .plan-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-header {
+        background: #f8fafc;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-main);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plan-textarea {
+        flex: 1;
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 1rem;
+        outline: none;
+        resize: none;
+        font-family: inherit;
+        line-height: 1.6;
+        min-height: 200px;
+    }
+
+        .plan-textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow-y: auto;
+        max-height: 300px;
+    }
+
+    .task-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        transition: 0.2s;
+    }
+
+        .task-item:hover {
+            border-color: #1b6ec2;
+        }
+
+    .task-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #10b981;
+    }
+
+    .task-text {
+        flex: 1;
+        font-weight: 500;
+        color: var(--text-main);
+        transition: 0.2s;
+    }
+
+    .task-done {
+        background: #f8fafc;
+        opacity: 0.8;
+    }
+
+        .task-done .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+</style>

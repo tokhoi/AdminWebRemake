@@ -1,0 +1,207 @@
+﻿@rendermode InteractiveServer
+
+<PageTitle>Thông báo chung</PageTitle>
+
+<div class="nt-page-container nt-animate-fade-in">
+    <div class="nt-card">
+        <div class="nt-card-header">
+            <h2 class="nt-card-title">
+                <span class="material-icons-round">campaign</span> THÔNG BÁO CHUNG
+            </h2>
+            <button class="nt-btn nt-btn-primary" @onclick="OpenCreateModal">
+                <span class="material-icons-round" style="font-size:18px; margin-right:6px;">add</span> Tạo thông báo
+            </button>
+        </div>
+
+        <div class="nt-toolbar">
+            <div class="nt-filter-group" style="flex: 2;">
+                <label class="nt-label">Tìm kiếm</label>
+                <div class="nt-input-wrapper">
+                    <span class="material-icons-round nt-input-icon">search</span>
+                    <input class="nt-input nt-input-has-icon" placeholder="Tìm tiêu đề thông báo..." @bind="SearchTerm" @bind:event="oninput" />
+                </div>
+            </div>
+            <div class="nt-filter-group">
+                <label class="nt-label">Đối tượng</label>
+                <select class="nt-select">
+                    <option>Tất cả</option>
+                    <option>Học sinh</option>
+                    <option>Giáo viên</option>
+                    <option>Phụ huynh</option>
+                </select>
+            </div>
+            <div class="nt-filter-group">
+                <label class="nt-label">Ngày đăng</label>
+                <input type="date" class="nt-input" />
+            </div>
+        </div>
+
+        <div class="nt-list-container">
+            @if (FilteredNotifications.Any())
+            {
+                @foreach (var item in FilteredNotifications)
+                {
+                    <div class="nt-list-item" @onclick="() => EditNotification(item)">
+                        <div class="nt-date-box">
+                            <span class="nt-date-day">@item.Date.Day</span>
+                            <span class="nt-date-month">THG @item.Date.Month</span>
+                        </div>
+
+                        <div class="nt-item-content">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div class="nt-item-title">@item.Title</div>
+                                <button class="nt-btn-danger-soft" style="padding:4px 8px; border-radius:6px; border:none; cursor:pointer;" @onclick:stopPropagation="true" @onclick="() => DeleteNotification(item)">
+                                    <span class="material-icons-round" style="font-size:16px;">delete</span>
+                                </button>
+                            </div>
+                            <div class="nt-item-desc">@item.Content</div>
+                            <div class="nt-item-meta">
+                                <span class="nt-badge">@item.Target</span>
+                                <span style="display:flex; align-items:center; gap:4px;">
+                                    <span class="material-icons-round" style="font-size:14px;">visibility</span> @item.Views xem
+                                </span>
+                                <span style="display:flex; align-items:center; gap:4px;">
+                                    <span class="material-icons-round" style="font-size:14px;">person</span> @item.Author
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="padding:40px; text-align:center; color:#64748b;">Không tìm thấy thông báo nào.</div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (showModal)
+{
+    <div class="nt-modal-backdrop">
+        <div class="nt-modal-dialog">
+            <div class="nt-modal-content">
+                <div class="nt-modal-header">
+                    <h4 class="nt-card-title" style="font-size:1.1rem;">@(isEdit ? "Cập Nhật Thông Báo" : "Tạo Thông Báo Mới")</h4>
+                    <button style="background:none; border:none; cursor:pointer; color:#64748b;" @onclick="() => showModal = false">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                <div class="nt-modal-body">
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Tiêu đề <span style="color:var(--nt-danger)">*</span></label>
+                            <input class="nt-input" @bind="editingItem.Title" placeholder="Nhập tiêu đề..." />
+                        </div>
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Đối tượng nhận</label>
+                            <select class="nt-select" @bind="editingItem.Target">
+                                <option>Toàn trường</option>
+                                <option>Giáo viên</option>
+                                <option>Học sinh</option>
+                                <option>Phụ huynh</option>
+                            </select>
+                        </div>
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Nội dung chi tiết</label>
+                            <textarea class="nt-input" @bind="editingItem.Content" rows="5" style="height:auto;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="nt-modal-footer">
+                    <button class="nt-btn nt-btn-outline" @onclick="() => showModal = false">Hủy</button>
+                    <button class="nt-btn nt-btn-primary" @onclick="SaveData">Lưu lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool showModal = false;
+    private bool isEdit = false;
+    private string SearchTerm = "";
+
+    public class NotificationModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Content { get; set; } = "";
+        public string Target { get; set; } = "Toàn trường";
+        public DateTime Date { get; set; } = DateTime.Today;
+        public int Views { get; set; }
+        public string Author { get; set; } = "Admin";
+    }
+
+    private List<NotificationModel> Notifications = new();
+    private NotificationModel editingItem = new();
+
+    private IEnumerable<NotificationModel> FilteredNotifications =>
+        Notifications.Where(x => x.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        // Mock Data
+        for (int i = 1; i <= 5; i++)
+        {
+            Notifications.Add(new NotificationModel
+            {
+                Id = i,
+                Title = $"Thông báo nghỉ lễ số {i}/2026",
+                Content = "Nhà trường xin thông báo lịch nghỉ lễ chính thức đến toàn thể cán bộ, giáo viên và học sinh...",
+                Date = DateTime.Today.AddDays(-i),
+                Views = 100 * i
+            });
+        }
+    }
+
+    private void OpenCreateModal()
+    {
+        isEdit = false;
+        editingItem = new NotificationModel(); // Reset form
+        showModal = true;
+    }
+
+    private void EditNotification(NotificationModel item)
+    {
+        isEdit = true;
+        // Clone object để tránh sửa trực tiếp khi chưa lưu
+        editingItem = new NotificationModel
+        {
+            Id = item.Id,
+            Title = item.Title,
+            Content = item.Content,
+            Target = item.Target,
+            Date = item.Date,
+            Views = item.Views,
+            Author = item.Author
+        };
+        showModal = true;
+    }
+
+    private void DeleteNotification(NotificationModel item)
+    {
+        Notifications.Remove(item);
+    }
+
+    private void SaveData()
+    {
+        if (isEdit)
+        {
+            var existing = Notifications.FirstOrDefault(x => x.Id == editingItem.Id);
+            if (existing != null)
+            {
+                existing.Title = editingItem.Title;
+                existing.Content = editingItem.Content;
+                existing.Target = editingItem.Target;
+            }
+        }
+        else
+        {
+            editingItem.Id = Notifications.Any() ? Notifications.Max(x => x.Id) + 1 : 1;
+            editingItem.Date = DateTime.Now;
+            Notifications.Insert(0, editingItem); // Thêm lên đầu
+        }
+        showModal = false;
+    }
+}

@@ -113,22 +113,129 @@
         </div>
     </div>
 </div>
-
 @code {
     private bool _isMobileMenuOpen = false;
-    private string? expandedMenuTitle = null; // Theo dõi menu nào đang mở
+    private string? expandedMenuTitle = null;
+
+    public enum SchoolLevel
+    {
+        Primary,    
+        Secondary,  
+        HighSchool  
+    }
+
+    private SchoolLevel CurrentSchoolLevel = SchoolLevel.Primary;
+
+    private List<MenuItem> MenuItems = new();
 
     protected override void OnInitialized()
     {
         NavManager.LocationChanged += HandleLocationChanged;
+
+        BuildMenu();
     }
 
+    private void BuildMenu()
+    {
+        MenuItems = new List<MenuItem>();
+
+        // --- A. NHÓM MENU CHUNG  ---
+        MenuItems.Add(new MenuItem { Title = "Tổng quan", Link = "", Icon = "dashboard", IconColor = "#facc15" });
+        MenuItems.Add(new MenuItem { Title = "Chức năng", Link = "apps", Icon = "apps", IconColor = "#facc15" });
+        MenuItems.Add(new MenuItem { Title = "Quản lý điểm", Link = "score", Icon = "apps", IconColor = "#facc15" });
+        MenuItems.Add(new MenuItem { Title = "Hoạt động hằng ngày", Link = "daily-activity", Icon = "fitbit", IconColor = "#facc15" });
+        MenuItems.Add(new MenuItem { Title = "Thống kê số liệu", Link = "analytic", Icon = "analytics", IconColor = "#facc15" });
+
+
+        // MenuItems.Add(new MenuItem
+        // {
+        //     Title = "QL Trường học",
+        //     Link = "school",
+        //     Icon = "school",
+        //     IconColor = "#0ea5e9",
+        //     SubItems = new List<MenuItem> {
+        //         new MenuItem { Title = "Hồ sơ Học sinh", Link = "school/students", Icon = "account_tree" }, 
+        //         new MenuItem { Title = "Giáo viên & Nhân sự", Link = "school/staffs", Icon = "people" },    
+        //         new MenuItem { Title = "Sổ chủ nhiệm", Link = "school/homeroom", Icon = "book"},
+        //         new MenuItem { Title = "Vai trò & Phân quyền", Link = "school/security", Icon = "admin_panel_settings" }, 
+        //         new MenuItem { Title = "Cài đặt hệ thống", Link = "school/settings", Icon = "settings" }
+        //     }
+        // });
+
+        // MenuItems.Add(new MenuItem
+        // {
+        //     Title = "QL Đào tạo",
+        //     Link = "training",
+        //     Icon = "school",
+        //     IconColor = "#22c55e",
+        //     SubItems = new List<MenuItem> {
+        //         new MenuItem { Title = "Học kỳ", Link = "training/semesters", Icon = "date_range" },
+        //         new MenuItem { Title = "Môn học", Link = "training/subjects", Icon = "menu_book" },
+        //         new MenuItem { Title = "Thời khoá biểu", Link = "training/schedule", Icon = "calendar_month" }
+        //     }
+        // });
+
+        // MenuItems.Add(new MenuItem
+        // {
+        //     Title = "QL Thông báo",
+        //     Link = "notifications",
+        //     Icon = "notifications",
+        //     IconColor = "#ef4444",
+        //     SubItems = new List<MenuItem> {
+        //         new MenuItem { Title = "Thông báo chung", Link = "notifications/general", Icon = "campaign" },
+        //         new MenuItem { Title = "Báo bài", Link = "notifications/assignments", Icon = "assignment" },
+        //         new MenuItem { Title = "Thực đơn", Link = "notifications/menu", Icon = "restaurant_menu" }
+        //     }
+        // });
+
+        // var studySubItems = new List<MenuItem>();
+
+        // if (CurrentSchoolLevel == SchoolLevel.Primary) 
+        // {
+        //     studySubItems.Add(new MenuItem { Title = "Đánh giá môn học", Link = "learning/ratingsubject", Icon = "chrome_reader_mode" });
+        //     studySubItems.Add(new MenuItem { Title = "Đánh giá năng lực", Link = "learning/ratingtalent", Icon = "emoji_people" });
+        //     studySubItems.Add(new MenuItem { Title = "Tổng hợp bản điểm", Link = "learning/summary", Icon = "summarize" });
+        // }
+        // else 
+        // {
+        //     studySubItems.Add(new MenuItem { Title = "Quản lý đợt nhập", Link = "learning/period", Icon = "view_timeline" });
+        //     studySubItems.Add(new MenuItem { Title = "Khóa sổ điểm", Link = "learning/gradelock", Icon = "calculate" });
+        //     studySubItems.Add(new MenuItem { Title = "Nhập điểm/Đánh giá", Link = "learning/pointInput", Icon = "accessibility_new" });
+        //     studySubItems.Add(new MenuItem { Title = "Tổng kết điểm", Link = "learning/finalsummary", Icon = "view_comfy" });
+        // }
+
+        // MenuItems.Add(new MenuItem
+        // {
+        //     Title = "QL Học tập",
+        //     Link = "learning",
+        //     Icon = "menu_book",
+        //     IconColor = "#a855f7",
+        //     SubItems = studySubItems
+        // });
+
+        // MenuItems.Add(new MenuItem 
+        // { 
+        //     Title = "QL Bán trú", 
+        //     Link = "meals",
+        //     Icon = "restaurant",
+        //     IconColor = "#f97316", 
+        //     SubItems = new List<MenuItem>
+        //     {
+        //        new MenuItem { Title = "Quản lý học sinh bán trú", Icon = "storage", IconColor = "#f97316", Link = "meals/student" },
+        //        new MenuItem { Title = "Thực đơn bán trú", Icon = "menu_book", IconColor = "#f97316", Link = "meals/menu" },
+        //     }
+        // });
+        // MenuItems.Add(new MenuItem { Title = "Đồng bộ", Link = "sync", Icon = "sync", IconColor = "#ec4899" });
+        // MenuItems.Add(new MenuItem { Title = "Thư viện số", Link = "library", Icon = "local_library", IconColor = "#14b8a6" });
+    }
+
+    // 6. Xử lý sự kiện Navigation & UI
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         if (_isMobileMenuOpen)
         {
             _isMobileMenuOpen = false;
-            expandedMenuTitle = null; // Reset menu con khi chuyển trang
+            expandedMenuTitle = null;
             StateHasChanged();
         }
     }
@@ -148,7 +255,6 @@
         _isMobileMenuOpen = false;
     }
 
-    // Xử lý mở accordion menu con
     private void ToggleSubMenu(string title, bool hasSub, string link)
     {
         if (!hasSub)
@@ -160,7 +266,7 @@
 
         if (expandedMenuTitle == title)
         {
-            expandedMenuTitle = null; // Đóng nếu đang mở
+            expandedMenuTitle = null; 
         }
         else
         {
@@ -168,16 +274,13 @@
         }
     }
 
-    public class MenuItem { public string Title { get; set; } = ""; public string Link { get; set; } = "#"; public string Icon { get; set; } = ""; public string IconColor { get; set; } = "white"; public List<MenuItem>? SubItems { get; set; } }
-
-    private List<MenuItem> MenuItems = new List<MenuItem> {
-        new MenuItem { Title = "Tổng quan", Link = "", Icon = "dashboard", IconColor = "#facc15" },
-        new MenuItem { Title = "QL Trường học", Link = "school", Icon = "school", IconColor = "#0ea5e9", SubItems = new List<MenuItem> { new MenuItem { Title = "Thông tin trường", Link = "school/info", Icon = "info" }, new MenuItem { Title = "Chức vụ", Link = "school/roles", Icon = "badge" }, new MenuItem { Title = "Khối", Link = "school/grades", Icon = "view_column" }, new MenuItem { Title = "Lớp", Link = "school/classes", Icon = "class" }, new MenuItem { Title = "Giáo viên", Link = "school/teachers", Icon = "person" }, new MenuItem { Title = "Phân công", Link = "school/assignment", Icon = "assignment_ind" }, new MenuItem { Title = "Duyệt phép", Link = "school/leaves", Icon = "playlist_add_check" }, new MenuItem { Title = "Học sinh", Link = "school/students", Icon = "face" }, new MenuItem { Title = "Phân quyền", Link = "school/permissions", Icon = "security" }, new MenuItem { Title = "Cấu hình giờ", Link = "school/time-config", Icon = "schedule" }, new MenuItem { Title = "Phụ huynh", Link = "school/parents", Icon = "family_restroom" }, new MenuItem { Title = "Camera AI", Link = "school/camera", Icon = "videocam" } } },
-        new MenuItem { Title = "QL Đào tạo", Link = "training", Icon = "school", IconColor = "#22c55e", SubItems = new List<MenuItem> { new MenuItem { Title = "Học kỳ", Link = "training/semesters", Icon = "date_range" }, new MenuItem { Title = "Môn học", Link = "training/subjects", Icon = "menu_book" }, new MenuItem { Title = "Thời khoá biểu", Link = "training/schedule", Icon = "calendar_month" } } },
-        new MenuItem { Title = "QL Thông báo", Link = "notifications", Icon = "notifications", IconColor = "#ef4444", SubItems = new List<MenuItem> { new MenuItem { Title = "Thông báo chung", Link = "notifications/general", Icon = "campaign" }, new MenuItem { Title = "Báo bài", Link = "notifications/assignments", Icon = "assignment" }, new MenuItem { Title = "Thực đơn", Link = "notifications/menu", Icon = "restaurant_menu" } } },
-        new MenuItem { Title = "QL Học tập", Link = "study", Icon = "menu_book", IconColor = "#a855f7" },
-        new MenuItem { Title = "QL Bán trú", Link = "meals", Icon = "restaurant", IconColor = "#f97316" },
-        new MenuItem { Title = "Đồng bộ", Link = "sync", Icon = "sync", IconColor = "#ec4899" },
-        new MenuItem { Title = "Thư viện số", Link = "library", Icon = "local_library", IconColor = "#14b8a6" }
-    };
+    // 7. Class Model cho Menu Item
+    public class MenuItem
+    {
+        public string Title { get; set; } = "";
+        public string Link { get; set; } = "#";
+        public string Icon { get; set; } = "";
+        public string IconColor { get; set; } = "white";
+        public List<MenuItem>? SubItems { get; set; }
+    }
 }

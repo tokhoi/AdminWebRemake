@@ -15,13 +15,12 @@
     --c-red: #ef4444;
     --c-orange: #f97316;
     --c-yellow: #eab308;
-    --c-green: #22c55e;
+    --c-green: #10b981;
     --c-blue: #1b6ec2;
     --c-purple: #a855f7;
     --grad-blue: linear-gradient(135deg, #1b6ec2 0%, #1b81e8 100%);
     --grad-orange: linear-gradient(135deg, #c2554d 0%, #ef756b 100%);
-    --grad-green: linear-gradient(135deg, #71c3a9 0%, #76d0a9 100%);
-    --grad-purple: linear-gradient(135deg, #823faf 0%, #a740b7 100%);
+    --grad-green: linear-gradient(135deg, #34d399 0%, #059669 100%) --grad-purple: linear-gradient(135deg, #823faf 0%, #a740b7 100%);
     --grad-red: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
 }
 
@@ -399,7 +398,7 @@ button {
     font-weight: 700;
     text-transform: uppercase;
     padding: 14px 16px;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid var(--border);
     font-size: 0.75rem;
     white-space: nowrap;
@@ -492,14 +491,14 @@ button {
 }
 
 .status-present {
-    background: #dcfce7;
-    color: #166534;
+    background: #d1fae5;
+    color: #065f46;
 }
 
-.status-present:hover {
-    background: #bbf7d0;
-    transform: translateY(-1px);
-}
+    .status-present:hover {
+        background: #a7f3d0;
+        transform: translateY(-1px);
+    }
 
 .status-late {
     background: #fef9c3;
@@ -596,7 +595,7 @@ button {
     overflow: hidden;
 }
 
-.layout-header {
+.layout-header {    
     background: var(--primary);
     color: white;
     flex-shrink: 0;
@@ -799,14 +798,13 @@ button {
 .layout-body {
     flex: 1;
     background: var(--bg-page);
-    padding: 1.5rem;
+    padding: 0.5rem;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .layout-content {
-    max-width: 1400px;
     width: 100%;
     margin: 0 auto;
     flex: 1;
@@ -832,7 +830,7 @@ button {
     border-radius: 12px;
     display: flex;
     gap: 6px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
     border: 1px solid #e2e8f0;
     flex-shrink: 0;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);

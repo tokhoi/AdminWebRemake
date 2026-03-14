@@ -1,0 +1,222 @@
+﻿@page "/learning/gradelock"
+@rendermode InteractiveServer
+
+<div class="st-page-wrapper">
+    @* --- HEADER --- *@
+    <div class="st-page-header">
+        <div class="st-title-icon" style="background:#6f42c1">
+            <span class="material-icons-round">verified_user</span>
+        </div>
+        <h4>TRẠNG THÁI NHẬP ĐIỂM & KHÓA SỔ</h4>
+
+        <div class="st-ms-auto st-d-flex st-gap-2">
+            @* Dropdown chọn đợt nhập điểm *@
+            <select class="st-form-control st-form-select-sm" @onchange="OnPeriodChanged">
+                @foreach (var p in listPeriods)
+                {
+                    <option value="@p.Id">@p.Name (@(p.IsActive ? "Đang mở" : "Đã đóng"))</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    @* --- LEVEL 1: KHỐI --- *@
+    <div class="st-lock-wrapper">
+        @foreach (var grade in Grades)
+        {
+            <div class="st-grade-block">
+                @* Header Khối *@
+                <div class="st-grade-header" @onclick="() => ToggleGrade(grade)">
+                    <div class="st-d-flex st-align-center st-gap-2">
+                        <span class="material-icons-round st-text-muted" style="font-size:20px">
+                            @(grade.IsExpanded ? "expand_more" : "chevron_right")
+                        </span>
+                        <span class="st-fw-bold st-text-primary">KHỐI @grade.Name</span>
+                        <span class="st-badge st-bg-light">@grade.Classes.Count lớp</span>
+                    </div>
+
+                    <div class="st-d-flex st-align-center st-gap-3">
+                        <div class="st-progress-box">
+                            <span class="small st-text-muted me-2" style="margin-right:8px; font-size:0.85em">Tiến độ: @grade.LockPercent%</span>
+                            <div class="st-progress-track">
+                                <div class="st-progress-bar @GetProgressColor(grade.LockPercent)" role="progressbar" style="width: @grade.LockPercent%"></div>
+                            </div>
+                        </div>
+                        <button class="st-btn-icon st-btn-icon-box" @onclick:stopPropagation title="Khóa toàn khối">
+                            <span class="material-icons-round">lock</span>
+                        </button>
+                    </div>
+                </div>
+
+                @* Level 2: DANH SÁCH LỚP (Chỉ hiện khi Expand Khối) *@
+                @if (grade.IsExpanded)
+                {
+                    <div class="st-class-list st-animate-fade-in">
+                        @foreach (var cls in grade.Classes)
+                        {
+                            <div class="st-class-item @(cls.IsExpanded ? "st-active" : "")">
+                                <div class="st-class-header" @onclick="() => ToggleClass(cls)">
+                                    <div class="st-d-flex st-align-center st-gap-3">
+                                        <span class="material-icons-round st-text-warning">
+                                            @(cls.IsExpanded ? "folder_open" : "folder")
+                                        </span>
+                                        <b class="st-text-dark">@cls.Name</b>
+                                        <span class="small st-text-muted">GVCN: @cls.TeacherName</span>
+                                    </div>
+                                    <div class="st-d-flex st-align-center st-gap-3">
+                                        @if (cls.IsFullLocked)
+                                        {
+                                            <span class="st-badge st-bg-success">
+                                                <span class="material-icons-round" style="font-size:14px; margin-right:4px; vertical-align:middle">check</span> Đã khóa sổ
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="st-badge st-bg-warning">Chưa xong (@cls.LockedSubjects/@cls.TotalSubjects môn)</span>
+                                        }
+
+                                        @* Nút khóa nhanh cả lớp *@
+                                        <div class="st-form-check st-switch" @onclick:stopPropagation>
+                                            <input class="st-check-input" type="checkbox" checked="@cls.IsFullLocked" @onchange="() => ToggleLockClass(cls)">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @* Level 3: DANH SÁCH MÔN (Chỉ hiện khi Expand Lớp) *@
+                                @if (cls.IsExpanded)
+                                {
+                                    <div class="st-subject-grid st-animate-fade-in">
+                                        @foreach (var sub in cls.Subjects)
+                                        {
+                                            <div class="st-subject-card @(sub.IsLocked ? "st-locked" : "")" @onclick="() => ToggleSubject(sub, cls)">
+                                                <div class="st-sub-name">@sub.Name</div>
+                                                <div class="st-sub-status">
+                                                    @if (sub.IsLocked)
+                                                    {
+                                                        <span class="st-text-success" style="display:flex; align-items:center; gap:4px">
+                                                            <span class="material-icons-round" style="font-size:14px">lock</span> Đã khóa
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="st-text-danger" style="display:flex; align-items:center; gap:4px">
+                                                            <span class="material-icons-round" style="font-size:14px">lock_open</span> Đang mở
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="st-sub-teacher">GV: @sub.TeacherCode</div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // --- MODELS ---
+    class GradeModel
+    {
+        public string Name { get; set; }
+        public bool IsExpanded { get; set; }
+        public List<ClassModel> Classes { get; set; } = new();
+        public int LockPercent => Classes.Any() ? (int)(Classes.Average(c => (double)c.LockedSubjects / c.TotalSubjects * 100)) : 0;
+    }
+
+    class ClassModel
+    {
+        public string Name { get; set; }
+        public string TeacherName { get; set; }
+        public bool IsExpanded { get; set; }
+        public List<SubjectModel> Subjects { get; set; } = new();
+        public int TotalSubjects => Subjects.Count;
+        public int LockedSubjects => Subjects.Count(s => s.IsLocked);
+        public bool IsFullLocked => LockedSubjects == TotalSubjects;
+    }
+
+    class SubjectModel
+    {
+        public string Name { get; set; }
+        public string TeacherCode { get; set; }
+        public bool IsLocked { get; set; }
+    }
+
+    class GradePeriod
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    // --- DATA ---
+    List<GradePeriod> listPeriods = new List<GradePeriod>
+    {
+        new GradePeriod { Id = 1, Name = "Giữa HK2 (2025-2026)", IsActive = true },
+        new GradePeriod { Id = 2, Name = "Cuối HK1 (2025-2026)", IsActive = false }
+    };
+    List<GradeModel> Grades = new List<GradeModel>();
+    int selectedPeriodId = 1;
+
+    protected override void OnInitialized()
+    {
+        LoadDataForPeriod(selectedPeriodId);
+    }
+
+    void OnPeriodChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            selectedPeriodId = id;
+            LoadDataForPeriod(id);
+        }
+    }
+
+    void LoadDataForPeriod(int periodId)
+    {
+        Grades.Clear();
+        var subjectsTemplate = new[] { "Toán", "Văn", "Anh", "Lý", "Hóa", "Sinh", "Sử", "Địa", "GDCD", "Tin" };
+        var rnd = new Random(periodId);
+
+        for (int g = 10; g <= 12; g++)
+        {
+            var grade = new GradeModel { Name = g.ToString() };
+            for (int c = 1; c <= 5; c++)
+            {
+                var cls = new ClassModel { Name = $"{g}A{c}", TeacherName = "Nguyễn Văn A" };
+                foreach (var s in subjectsTemplate)
+                {
+                    cls.Subjects.Add(new SubjectModel
+                    {
+                        Name = s,
+                        TeacherCode = "GV00" + c,
+                        IsLocked = rnd.Next(0, 2) == 1
+                    });
+                }
+                grade.Classes.Add(cls);
+            }
+            Grades.Add(grade);
+        }
+    }
+
+    // --- ACTIONS ---
+    void ToggleGrade(GradeModel g) => g.IsExpanded = !g.IsExpanded;
+    void ToggleClass(ClassModel c) => c.IsExpanded = !c.IsExpanded;
+
+    void ToggleLockClass(ClassModel c)
+    {
+        bool newState = !c.IsFullLocked;
+        foreach (var s in c.Subjects) s.IsLocked = newState;
+    }
+
+    void ToggleSubject(SubjectModel s, ClassModel c)
+    {
+        s.IsLocked = !s.IsLocked;
+    }
+
+    string GetProgressColor(int p) => p < 50 ? "st-bg-danger" : (p < 100 ? "st-bg-warning" : "st-bg-success");
+}

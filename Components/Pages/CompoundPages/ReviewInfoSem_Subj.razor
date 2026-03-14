@@ -1,0 +1,119 @@
+﻿@page "/training/sem-sub"
+@rendermode InteractiveServer
+
+<PageTitle>Học kỳ & môn học</PageTitle>
+
+<div class="se-sub-page-container se-sub-animate-fade-in" style="padding: 1.5rem; background: #f4f7f9; min-height: 100vh;">
+
+    <div class="se-sub-page-header">
+        <div class="se-sub-header-icon">
+            <span class="material-icons-round">campaign</span>
+        </div>
+        <div class="se-sub-header-text">
+            <h2 class="se-sub-title">Xem môn học, học kỳ</h2>
+            <p class="se-sub-subtitle">Xem môn học, học kỳ.</p>
+        </div>
+    </div>
+    <div class="se-sub-tabs-wrapper">
+        <div class="se-sub-tab @(ActiveTab == 1 ? "active" : "")" @onclick="() => ActiveTab = 1">
+            Học kỳ
+        </div>
+        <div class="se-sub-tab @(ActiveTab == 2 ? "active" : "")" @onclick="() => ActiveTab = 2">
+            Môn học
+        </div>
+    </div>
+
+    <div class="se-sub-tab-content">
+        @if (ActiveTab == 1)
+        {
+            <AdminWebRemake.Components.Pages.TrainManagement.Semester />
+        }
+        else if (ActiveTab == 2)
+        {
+            <AdminWebRemake.Components.Pages.TrainManagement.Subject />
+        }
+    </div>
+
+</div>
+
+@code {
+    private int ActiveTab = 1;
+}
+
+<style>
+    .se-sub-page-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        background: #ffffff;
+        padding: 1.25rem 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #1b6ec2; 
+    }
+
+    .se-sub-header-icon {
+        width: 50px;
+        height: 50px;
+        background: #eff6ff; 
+        color: #1b6ec2; 
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+        .se-sub-header-icon span {
+            fose-sub-size: 26px;
+        }
+
+    .se-sub-header-text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .se-sub-title {
+        margin: 0 0 0.25rem 0;
+        fose-sub-size: 1.3rem;
+        fose-sub-weight: 800;
+        color: #1e293b; 
+        letter-spacing: -0.5px;
+    }
+
+    .se-sub-subtitle {
+        margin: 0;
+        fose-sub-size: 0.9rem;
+        color: #64748b;
+        fose-sub-weight: 500;
+    }
+    .se-sub-tabs-wrapper {
+        display: flex;
+        gap: 2rem;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 1.5rem;
+    }
+
+    .se-sub-tab {
+        padding: 0.75rem 0.5rem;
+        fose-sub-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transform: translateY(2px);
+        transition: all 0.2s ease;
+        fose-sub-size: 0.95rem;
+    }
+
+        .se-sub-tab:hover {
+            color: #1b6ec2;
+        }
+
+        .se-sub-tab.active {
+            color: #1b6ec2;
+            border-bottom-color: #1b6ec2;
+        }
+</style>

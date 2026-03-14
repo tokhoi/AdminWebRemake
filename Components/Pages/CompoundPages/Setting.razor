@@ -1,0 +1,456 @@
+﻿@page "/school/settings"
+@rendermode InteractiveServer
+
+<PageTitle>Cài đặt hệ thống</PageTitle>
+
+<div class="set-container animate-fade-in">
+    <div class="set-sidebar">
+        <h3 class="set-sidebar-title">Cài đặt</h3>
+        <ul class="set-nav">
+            <li class="set-nav-item @(ActiveTab == "info" ? "active" : "")" @onclick='() => ActiveTab = "info"'>
+                <span class="material-icons-round set-nav-icon">school</span> Thông tin trường
+            </li>
+            <li class="set-nav-item @(ActiveTab == "time" ? "active" : "")" @onclick='() => ActiveTab = "time"'>
+                <span class="material-icons-round set-nav-icon">schedule</span> Cấu hình giờ
+            </li>
+            <li class="set-nav-item @(ActiveTab == "camera" ? "active" : "")" @onclick='() => ActiveTab = "camera"'>
+                <span class="material-icons-round set-nav-icon">videocam</span> Tích hợp Camera AI
+            </li>
+        </ul>
+    </div>
+
+    <div class="set-content">
+        @if (ActiveTab == "info")
+        {
+            <div class="set-card animate-fade-in">
+                <div class="set-header flex-between">
+                    <h2 class="set-title">Thông tin chung</h2>
+                    <button class="set-btn @(IsEditingInfo ? "set-btn-success" : "set-btn-primary")" @onclick="ToggleEditInfo">
+                        <span class="material-icons-round">@(IsEditingInfo ? "save" : "edit")</span> @(IsEditingInfo ? "Lưu thay đổi" : "Chỉnh sửa")
+                    </button>
+                </div>
+                <div class="set-body">
+                    <div class="set-info-layout">
+                        <div class="set-logo-col">
+                            <div class="set-logo-box">
+                                <span class="material-icons-round" style="font-size: 64px; color: #cbd5e1;">school</span>
+                                <div>LOGO TRƯỜNG</div>
+                            </div>
+                        </div>
+                        <div class="set-details-col">
+                            <h3 class="set-group-title">Thông tin liên hệ</h3>
+                            <div class="set-grid-2">
+                                <div>
+                                    <label class="set-label">Tên trường</label>
+                                    @if (IsEditingInfo)
+                                    {
+                                        <input class="set-input" @bind="SchoolName" />
+                                    }
+                                    else
+                                    {
+
+                                        <div class="set-value fw-bold">@SchoolName</div>
+                                    }
+                                </div>
+                                <div>
+                                    <label class="set-label">Hiệu trưởng</label>
+                                    @if (IsEditingInfo)
+                                    {
+                                        <input class="set-input" @bind="PrincipalName" />
+                                    }
+                                    else
+                                    {
+
+                                        <div class="set-value">@PrincipalName</div>
+                                    }
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label class="set-label">Địa chỉ</label>
+                                    @if (IsEditingInfo)
+                                    {
+                                        <input class="set-input" @bind="Address" />
+                                    }
+                                    else
+                                    {
+
+                                        <div class="set-value">@Address</div>
+                                    }
+                                </div>
+                                <div>
+                                    <label class="set-label">Điện thoại</label>
+                                    @if (IsEditingInfo)
+                                    {
+                                        <input class="set-input" @bind="Phone" />
+                                    }
+                                    else
+                                    {
+
+                                        <div class="set-value">@Phone</div>
+                                    }
+                                </div>
+                                <div>
+                                    <label class="set-label">Email</label>
+                                    @if (IsEditingInfo)
+                                    {
+                                        <input class="set-input" @bind="Email" />
+                                    }
+                                    else
+                                    {
+
+                                        <div class="set-value">@Email</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (ActiveTab == "time")
+        {
+            <div class="set-card animate-fade-in">
+                <div class="set-header">
+                    <h2 class="set-title">Cấu hình thời gian điểm danh</h2>
+                </div>
+                <div class="set-body">
+                    <div class="set-grid-2">
+                        <div class="set-time-box" style="background: #fffbeb; border-color: #fcd34d;">
+                            <h3 style="color:#d97706; display:flex; align-items:center; gap:8px;"><span class="material-icons-round">wb_sunny</span> Buổi Sáng</h3>
+                            <div class="set-input-group mt-3">
+                                <label class="set-label">Bắt đầu</label>
+                                <input type="time" class="set-input" @bind="MorningStart" />
+                            </div>
+                            <div class="set-input-group mt-3">
+                                <label class="set-label">Kết thúc</label>
+                                <input type="time" class="set-input" @bind="MorningEnd" />
+                            </div>
+                        </div>
+                        <div class="set-time-box" style="background: #eff6ff; border-color: #bfdbfe;">
+                            <h3 style="color:#1d4ed8; display:flex; align-items:center; gap:8px;"><span class="material-icons-round">nights_stay</span> Buổi Chiều</h3>
+                            <div class="set-input-group mt-3">
+                                <label class="set-label">Bắt đầu</label>
+                                <input type="time" class="set-input" @bind="AfternoonStart" />
+                            </div>
+                            <div class="set-input-group mt-3">
+                                <label class="set-label">Kết thúc</label>
+                                <input type="time" class="set-input" @bind="AfternoonEnd" />
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right; margin-top: 20px;">
+                        <button class="set-btn set-btn-primary" @onclick="SaveTimeConfig"><span class="material-icons-round">save</span> Lưu cấu hình</button>
+                        @if (ShowSavedMessage)
+                        {
+                            <span style="color: green; margin-left: 10px; font-weight: bold;">Đã lưu thành công!</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else if (ActiveTab == "camera")
+        {
+            <div class="set-card animate-fade-in">
+                <div class="set-header flex-between">
+                    <h2 class="set-title">Quản lý thiết bị Camera AI</h2>
+                    <button class="set-btn set-btn-primary"><span class="material-icons-round">add</span> Thêm thiết bị</button>
+                </div>
+                <div class="set-table-wrap">
+                    <table class="set-table">
+                        <thead><tr><th>#</th><th>Tên Thiết Bị</th><th>Mã Thiết Bị</th><th style="text-align:center;">Trạng Thái</th><th style="text-align:center;">Thao tác</th></tr></thead>
+                        <tbody>
+                            @for (int i = 0; i < Cameras.Count; i++)
+                            {
+                                var cam = Cameras[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td class="fw-bold">@cam.Name</td>
+                                    <td><span class="set-tag">@cam.Id</span></td>
+                                    <td style="text-align:center;">
+                                        @if (cam.IsOnline)
+                                        {
+                                            <span class="set-tag set-tag-success">Online</span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="set-tag set-tag-danger">Offline</span>
+                                        }
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <button class="set-btn-icon" @onclick="() => ToggleCamera(cam)"><span class="material-icons-round">power_settings_new</span></button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string ActiveTab = "info";
+
+    // Data Tab 1
+    private bool IsEditingInfo = false;
+    private string SchoolName = "Trường Tiểu học Tân Hưng";
+    private string PrincipalName = "Nguyễn Văn A";
+    private string Address = "Số 123 Đường ABC, Quận X, TP.HCM";
+    private string Phone = "0909 000 111";
+    private string Email = "hieutruong@tanhung.edu.vn";
+
+    private void ToggleEditInfo() { IsEditingInfo = !IsEditingInfo; }
+
+    // ========================================================
+    // ĐÃ SỬA LỖI TIMEONLY Ở ĐÂY (Thay string bằng TimeOnly?)
+    // ========================================================
+    private TimeOnly? MorningStart = new TimeOnly(6, 30);
+    private TimeOnly? MorningEnd = new TimeOnly(11, 0);
+    private TimeOnly? AfternoonStart = new TimeOnly(13, 30);
+    private TimeOnly? AfternoonEnd = new TimeOnly(17, 0);
+    private bool ShowSavedMessage = false;
+
+    private async Task SaveTimeConfig()
+    {
+        ShowSavedMessage = true;
+        await Task.Delay(2000);
+        ShowSavedMessage = false;
+    }
+
+    // Data Tab 3
+    class CameraDevice { public string Id { get; set; } = ""; public string Name { get; set; } = ""; public bool IsOnline { get; set; } }
+    List<CameraDevice> Cameras = new()
+    {
+        new CameraDevice { Id = "CAM-001", Name = "Camera Cổng Chính", IsOnline = true },
+        new CameraDevice { Id = "CAM-002", Name = "Camera Cổng Phụ", IsOnline = true },
+        new CameraDevice { Id = "CAM-003", Name = "Camera Sảnh A", IsOnline = false },
+        new CameraDevice { Id = "CAM-004", Name = "Camera Nhà xe", IsOnline = true }
+    };
+
+    private void ToggleCamera(CameraDevice cam) { cam.IsOnline = !cam.IsOnline; }
+}
+<style>
+    /* Prefix: set- */
+    .set-container {
+        display: flex;
+        height: calc(100vh - 100px);
+        background: #f4f7f9;
+        margin: 1rem;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-direction: row; !important
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+    }
+
+    .set-sidebar {
+        width: 250px;
+        background: white;
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .set-sidebar-title {
+        padding: 1.5rem;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 800;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .set-nav {
+        list-style: none;
+        padding: 1rem 0;
+        margin: 0;
+    }
+
+    .set-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 1.5rem;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-weight: 500;
+        transition: 0.2s;
+        border-left: 3px solid transparent;
+    }
+
+        .set-nav-item:hover {
+            background: #f8fafc;
+            color: var(--primary);
+        }
+
+        .set-nav-item.active {
+            background: #eff6ff;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 700;
+        }
+
+    .set-nav-icon {
+        font-size: 20px;
+    }
+
+    .set-content {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+        background: #f4f7f9;
+    }
+
+    .set-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        overflow: hidden;
+    }
+
+    .set-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .set-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .set-body {
+        padding: 1.5rem;
+    }
+
+    .set-info-layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 2rem;
+    }
+
+    .set-logo-box {
+        width: 100%;
+        aspect-ratio: 1;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        font-weight: bold;
+        color: #94a3b8;
+    }
+
+    .set-group-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: var(--primary);
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .set-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem 2rem;
+    }
+
+    .set-label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .set-value {
+        font-size: 0.95rem;
+        color: var(--text-main);
+    }
+
+    .set-time-box {
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid transparent;
+    }
+
+    .set-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+    }
+
+        .set-input:focus {
+            border-color: var(--primary);
+        }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+
+    .set-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .set-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .set-table th {
+            background: #f8fafc;
+            padding: 12px 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .set-table td {
+            padding: 12px 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+    .set-tag {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #f1f5f9;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        font-family: monospace;
+    }
+
+    .set-tag-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .set-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .set-btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>

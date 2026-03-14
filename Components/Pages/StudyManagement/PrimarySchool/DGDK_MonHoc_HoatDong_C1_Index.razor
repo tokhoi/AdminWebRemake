@@ -1,0 +1,287 @@
+﻿@page "/learning/ratingsubject"
+
+<div class="point-page">
+    @* --- HEADER SECTION --- *@
+    <div class="page-title">
+        <div class="icon-title"><i class="fa-solid fa-table-cells"></i></div>
+        <h4>ĐÁNH GIÁ ĐỊNH KỲ MÔN HỌC</h4>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="alert-box info mb-2">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i>
+            <div>Đang tải dữ liệu, vui lòng đợi...</div>
+        </div>
+    }
+
+    @* --- FILTER BAR --- *@
+    <div class="filter-bar">
+        <div class="group">
+            <label>Năm học:</label>
+            <select class="select-highlight" @bind="SelectedNamHoc">
+                <option value="">Chọn năm học</option>
+                <option value="2023-2024">2023-2024</option>
+                <option value="2024-2025">2024-2025</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <label>Học kỳ:</label>
+            <select class="select-highlight" @bind="SelectedHocKy">
+                <option value="1">Học kỳ 1</option>
+                <option value="2">Học kỳ 2</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <label>Khối:</label>
+            <select class="select-highlight" @bind="SelectedKhoi" disabled="@IsGiaoVienChuNhiem">
+                <option value="">Tất cả khối</option>
+                <option value="Khối 1">Khối 1</option>
+                <option value="Khối 2">Khối 2</option>
+                <option value="Khối 3">Khối 3</option>
+                <option value="Khối 4">Khối 4</option>
+                <option value="Khối 5">Khối 5</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <label>Lớp: @if (IsGiaoVienChuNhiem) {
+            <span class="badge-mini ms-1" style="background:#198754; color:white; border:none;">Chủ nhiệm</span>
+                        }
+</label>
+            <select class="select-highlight" @bind="SelectedLop" disabled="@IsGiaoVienChuNhiem">
+                <option value="">Tất cả lớp</option>
+                <option value="1A1">1A1</option>
+                <option value="2A1">2A1</option>
+                <option value="3A1">3A1</option>
+                <option value="4A1">4A1</option>
+                <option value="5A1">5A1</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <label>Môn học:</label>
+            <select class="select-highlight" @bind="SelectedMonHoc">
+                <option value="">Chọn môn học</option>
+                <option value="01">Toán</option>
+                <option value="02">Tiếng Việt</option>
+                <option value="77">Ngoại Ngữ</option>
+                <option value="NK">Môn Năng khiếu</option>
+            </select>
+        </div>
+        <div class="actions-group">
+            <button class="btn-custom @(CurrentView == "GK" ? "btn-primary" : "btn-outline")" @onclick='() => SwitchView("GK")'>
+                <i class="fa-solid fa-chart-bar me-1"></i> Đánh giá giữa kỳ (GK)
+            </button>
+            <button class="btn-custom @(CurrentView == "CK" ? "btn-primary" : "btn-outline") ms-2" @onclick='() => SwitchView("CK")'>
+                <i class="fa-solid fa-chart-line me-1"></i> Đánh giá cuối kỳ (CK)
+            </button>
+        </div>
+        <div class="actions-group ms-auto">
+            <button class="btn-custom btn-primary" @onclick="LoadData">
+                <i class="fa-solid fa-search me-1"></i> Tìm kiếm
+            </button>
+        </div>
+    </div>
+
+    <div class="content-area-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; border: none;">
+        @if (CurrentView == "GK")
+        {
+            <DGDK_MonHoc_HoatDong_GKView SelectedNamHoc="@SelectedNamHoc"
+                                         SelectedKhoi="@SelectedKhoi"
+                                         SelectedLop="@SelectedLop"
+                                         SelectedMonHoc="@SelectedMonHoc"
+                                         SelectedHocKy="@SelectedHocKy"
+                                         IsLoading="@isLoading" />
+        }
+        else if (CurrentView == "CK")
+        {
+            <DGDK_MonHoc_HoatDong_CKView SelectedNamHoc="@SelectedNamHoc"
+                                         SelectedKhoi="@SelectedKhoi"
+                                         SelectedLop="@SelectedLop"
+                                         SelectedMonHoc="@SelectedMonHoc"
+                                         SelectedHocKy="@SelectedHocKy"
+                                         IsLoading="@isLoading" />
+        }
+    </div>
+</div>
+
+<style>
+    /* CSS CORE */
+    .point-page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding: 10px;
+        background-color: #f5f7fa;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+        overflow: scroll;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-shrink: 0;
+    }
+
+    .icon-title {
+        width: 32px;
+        height: 32px;
+        background: #1b6ec2;
+        color: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+
+    .page-title h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #444;
+    }
+
+    .alert-box.info {
+        background: #e7f5ff;
+        border: 1px solid #b3d7ff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        color: #004085;
+        font-size: 13px;
+    }
+
+    .filter-bar {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        flex-shrink: 0;
+    }
+
+    .group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .select-highlight {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        outline: none;
+        font-size: 13px;
+        min-width: 140px;
+        transition: all 0.2s;
+    }
+
+        .select-highlight:focus {
+            border-color: #1b6ec2;
+            box-shadow: 0 0 0 3px rgba(27, 110, 194, 0.1);
+        }
+
+        .select-highlight:disabled {
+            background: #f9f9f9;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+    .actions-group {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .ms-auto {
+        margin-left: auto;
+    }
+
+    .btn-custom {
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+        .btn-custom:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+    .btn-primary {
+        background: #1b6ec2;
+        color: white;
+    }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #155a9e;
+        }
+
+    .btn-outline {
+        border: 1px solid #1b6ec2;
+        color: #1b6ec2;
+        background: white;
+        font-weight: 600;
+    }
+
+        .btn-outline:hover:not(:disabled) {
+            background: #eef7ff;
+        }
+
+    .badge-mini {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        font-weight: 600;
+    }
+</style>
+
+@code {
+    private bool isLoading = false;
+    private bool IsGiaoVienChuNhiem = false; // Bật cờ này để test giao diện khoá chọn lớp
+
+    private string SelectedNamHoc { get; set; } = "2023-2024";
+    private string SelectedHocKy { get; set; } = "1";
+    private string SelectedKhoi { get; set; } = "Khối 4";
+    private string SelectedLop { get; set; } = "4A1";
+    private string SelectedMonHoc { get; set; } = "02"; // 02: Tiếng Việt
+    private string CurrentView { get; set; } = "GK";
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+        await Task.Delay(500); // Simulate API call
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void SwitchView(string view)
+    {
+        CurrentView = view;
+    }
+}

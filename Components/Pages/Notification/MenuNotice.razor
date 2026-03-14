@@ -1,0 +1,142 @@
+﻿@using System.Globalization
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Thực đơn tuần</PageTitle>
+
+<div class="nt-page-container nt-animate-fade-in">
+    <div class="nt-card">
+        <div class="nt-card-header">
+            <div>
+                <h2 class="nt-card-title">
+                    <span class="material-icons-round">restaurant_menu</span> THỰC ĐƠN TUẦN
+                </h2>
+                <div style="font-size:0.9rem; color:#6b7280; margin-top:4px; margin-left:38px;">
+                    Tuần 20: 19/01/2026 - 25/01/2026
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="display:flex; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                    <button class="nt-btn nt-btn-outline" style="border:none; border-right:1px solid #e2e8f0; border-radius:0; padding:0 12px;"><span class="material-icons-round">chevron_left</span></button>
+                    <button class="nt-btn nt-btn-outline" style="border:none; border-right:1px solid #e2e8f0; border-radius:0;">Tuần này</button>
+                    <button class="nt-btn nt-btn-outline" style="border:none; border-radius:0; padding:0 12px;"><span class="material-icons-round">chevron_right</span></button>
+                </div>
+                <button class="nt-btn nt-btn-outline" @onclick="ImportMenu">
+                    <span class="material-icons-round" style="font-size:18px; margin-right:6px;">upload_file</span> Import Excel
+                </button>
+                <button class="nt-btn nt-btn-primary" @onclick="OpenEditModal">
+                    <span class="material-icons-round" style="font-size:18px; margin-right:6px;">edit</span> Chỉnh sửa nhanh
+                </button>
+            </div>
+        </div>
+
+        <div class="nt-menu-viewport">
+            <table class="nt-menu-table">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">BỮA ĂN</th>
+                        @for (int i = 2; i <= 6; i++)
+                        {
+                            <th>THỨ @i<br><span style="font-size:0.7rem; font-weight:400; opacity:0.8;">@DateTime.Today.AddDays(i - 2).ToString("dd/MM")</span></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center"><span class="material-icons-round" style="color:#f59e0b;">wb_twilight</span><br>SÁNG</td>
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <td>
+                                <div class="nt-dish-card">
+                                    <img src="https://via.placeholder.com/32/fef3c7/f59e0b?text=P" alt="img" />
+                                    <span class="nt-dish-name">Phở bò</span>
+                                </div>
+                                <div class="nt-dish-card">
+                                    <img src="https://via.placeholder.com/32/e0f2fe/0ea5e9?text=M" alt="img" />
+                                    <span class="nt-dish-name">Sữa tươi</span>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="material-icons-round" style="color:#ef4444;">wb_sunny</span><br>TRƯA</td>
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <td>
+                                <div class="nt-dish-card">
+                                    <img src="https://via.placeholder.com/32/dcfce7/166534?text=C" alt="img" />
+                                    <span class="nt-dish-name">Cơm trắng</span>
+                                </div>
+                                <div class="nt-dish-card">
+                                    <img src="https://via.placeholder.com/32/ffedd5/c2410c?text=M" alt="img" />
+                                    <span class="nt-dish-name">Thịt kho</span>
+                                </div>
+                                <div class="nt-dish-card">
+                                    <img src="https://via.placeholder.com/32/f3e8ff/7e22ce?text=C" alt="img" />
+                                    <span class="nt-dish-name">Canh rau</span>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="material-icons-round" style="color:#3b82f6;">bakery_dining</span><br>XẾ</td>
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <td>
+                                <div class="nt-dish-card">
+                                    <img src="https://via.placeholder.com/32/fce7f3/db2777?text=B" alt="img" />
+                                    <span class="nt-dish-name">Bánh Flan</span>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (showModal)
+{
+    <div class="nt-modal-backdrop">
+        <div class="nt-modal-dialog">
+            <div class="nt-modal-content">
+                <div class="nt-modal-header">
+                    <h4 class="nt-card-title">Cập nhật thực đơn</h4>
+                    <button style="background:none; border:none; cursor:pointer;" @onclick="() => showModal = false"><span class="material-icons-round">close</span></button>
+                </div>
+                <div class="nt-modal-body">
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Chọn thứ</label>
+                            <select class="nt-select"><option>Thứ 2</option><option>Thứ 3</option></select>
+                        </div>
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Bữa ăn</label>
+                            <select class="nt-select"><option>Sáng</option><option>Trưa</option><option>Xế</option></select>
+                        </div>
+                        <div class="nt-filter-group">
+                            <label class="nt-label">Món chính</label>
+                            <input class="nt-input" placeholder="Nhập tên món..." />
+                        </div>
+                    </div>
+                </div>
+                <div class="nt-modal-footer">
+                    <button class="nt-btn nt-btn-outline" @onclick="() => showModal = false">Hủy</button>
+                    <button class="nt-btn nt-btn-primary" @onclick="() => showModal = false">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool showModal = false;
+    private void OpenEditModal() { showModal = true; }
+
+    private async Task ImportMenu()
+    {
+        await JSRuntime.InvokeVoidAsync("alert", "Tính năng Import Excel sẽ mở hộp thoại chọn file.");
+    }
+}

@@ -4,59 +4,60 @@
 <PageTitle>Điểm danh học sinh</PageTitle>
 
 <div class="page-student-attendance animate-fade-in">
-    <div class="std-card" style="flex: 0 0 auto; padding: 1rem 1.5rem; margin-bottom: 0;">
+    <div class="std-card" style="flex: 0 0 auto; padding: 0.75rem 1.5rem; margin-bottom: 0;">
         <div class="flex-between">
             <div class="card-title" style="font-size: 1.25rem;">
                 <div class="tea-icon"><span class="material-icons-round">school</span></div>
                 Điểm danh học sinh
             </div>
-        </div>
-    </div>
+            <div class="att-filters-row">
+                <div class="att-f-item">
+                    <label class="form-label">Ngày điểm danh</label>
+                    <input type="date" class="form-input" @bind="SelectedDate" @bind:after="FilterData" />
+                </div>
 
-    <div class="std-card att-filter-box">
-        <div class="att-filters-row">
-            <div class="att-f-item">
-                <label class="form-label">Ngày điểm danh</label>
-                <input type="date" class="form-input" @bind="SelectedDate" @bind:after="FilterData" />
-            </div>
+                <div class="att-f-item">
+                    <label class="form-label">Lớp học</label>
+                    <select class="form-input" @bind="SelectedClass" @bind:after="FilterData">
+                        <option value="">Tất cả các lớp</option>
+                        @foreach (var c in Classes)
+                        {
+                            <option value="@c">Lớp @c</option>
+                        }
+                    </select>
+                </div>
 
-            <div class="att-f-item">
-                <label class="form-label">Lớp học</label>
-                <select class="form-input" @bind="SelectedClass" @bind:after="FilterData">
-                    <option value="">Tất cả các lớp</option>
-                    @foreach (var c in Classes)
+                <div class="att-f-item-wide">
+                    <label class="form-label">Tìm kiếm học sinh</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons-round input-icon">search</span>
+                        <input class="form-input input-has-icon" placeholder="Nhập tên hoặc mã học sinh..." @bind="SearchTerm" @bind:event="oninput" @bind:after="FilterData" />
+                    </div>
+                </div>
+                <div class="action-group">
+                    <button class="btn btn-primary" @onclick="ToggleExportMenu">
+                        <span class="material-icons-round">file_download</span> Thao tác
+                        <span class="material-icons-round" style="font-size: 16px;">expand_more</span>
+                    </button>
+                    @if (_showExportMenu)
                     {
-                        <option value="@c">Lớp @c</option>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
+                            <div style="border-top:1px solid #eee; margin:4px 0;"></div>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#f97316;">person_off</span> Xuất Excel vắng mặt </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">dataset</span> Xuất Excel thống kê </button>
+                        </div>
+                        <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
                     }
-                </select>
-            </div>
-
-            <div class="att-f-item-wide">
-                <label class="form-label">Tìm kiếm học sinh</label>
-                <div class="input-wrapper">
-                    <span class="material-icons-round input-icon">search</span>
-                    <input class="form-input input-has-icon" placeholder="Nhập tên hoặc mã học sinh..." @bind="SearchTerm" @bind:event="oninput" @bind:after="FilterData" />
                 </div>
             </div>
-            <div class="action-group">
-                <button class="btn btn-primary" @onclick="ToggleExportMenu">
-                    <span class="material-icons-round">file_download</span> Thao tác
-                    <span class="material-icons-round" style="font-size: 16px;">expand_more</span>
-                </button>
-                @if (_showExportMenu)
-                {
-                    <div class="dropdown-menu">
-                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
-                        <div style="border-top:1px solid #eee; margin:4px 0;"></div>
-                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
-                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#f97316;">person_off</span> Xuất Excel vắng mặt </button>
-                        <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">dataset</span> Xuất Excel thống kê </button>
-                    </div>
-                    <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
-                }
-            </div>
-        </div>
+        </div>        
     </div>
+
+    @* <div class="std-card att-filter-box">
+        
+    </div> *@
 
     <div class="std-card att-table-box">
         <div class="att-header-row">
@@ -65,8 +66,8 @@
                 Danh sách học sinh - <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Tổng số: @FilteredStudents.Count</span>
             </div>
             <div class="att-legend">
-                <span class="status-badge" style="background: #dcfce7; color: #166534; gap: 8px;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                <span class="status-badge" style="background: #d1fae5; color: #065f46; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
                     <span>Có mặt: <b>@CountPresent</b></span>
                 </span>
                 <span class="status-badge" style="background: #fef9c3; color: #854d0e; gap: 8px;">
@@ -84,21 +85,20 @@
             <table class="data-table" style="table-layout: fixed;">
                 <colgroup>
                     <col style="width: 50px;">
-                    <col style="width: 70px;">
-                    <col style="width: 180px;">
-                    <col style="width: 60px;">
-                    <col style="width: 70px;">
-                    <col style="width: 90px;">
-                    <col style="width: 70px;">
-                    <col style="width: 70px;">
-                    <col style="width: 90px;">
-                    <col style="width: 60px;">
-                    <col style="width: 50px;">
+                    <col style="width: 8%;">
+                    <col style="width: 20%;">
+                    <col style="width: 8%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 80px;">
                 </colgroup>
                 <thead>
                     <tr style="background-color: #f8fafc;">
                         <th class="text-center col-fit">STT</th>
-                        <th class="col-fit">Mã HS</th>
+                        <th style="text-align: left;" class="col-fit">Mã HS</th>
                         <th style="text-align: left;">Tên học sinh</th>
                         <th class="text-center col-fit">Lớp</th>
                         <th class="text-center col-fit">Ngày</th>
@@ -106,7 +106,6 @@
                         <th class="text-center col-fit">Giờ vào</th>
                         <th class="text-center col-fit">Giờ ra</th>
                         <th class="text-center col-fit">Trạng thái chiều</th>
-                        <th class="text-center col-fit">Ghi chú</th>
                         <th class="text-center col-fit">Thao tác</th>
                     </tr>
                 </thead>
@@ -143,7 +142,6 @@
                                         @GetStatusIcon(s.PmStatus) @s.PmStatus
                                     </span>
                                 </td>
-                                <td class="text-center text-muted">-</td>
                                 <td class="text-center">
                                     <button class="btn-icon" title="Chỉnh sửa"><span class="material-icons-round">edit</span></button>
                                 </td>

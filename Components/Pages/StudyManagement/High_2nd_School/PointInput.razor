@@ -1,0 +1,1646 @@
+﻿@page "/learning/pointInput"
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+
+<div class="st-page-wrapper st-page-fixed">
+    @* --- HEADER --- *@
+    <div class="st-page-header">
+        <div class="st-title-icon" style="background:#1b6ec2">
+            <span class="material-icons-round">table_view</span>
+        </div>
+        <h4>Nhập điểm môn học</h4>
+    </div>
+
+    @* --- THÔNG BÁO --- *@
+    @if (isSystemLocked)
+    {
+        <div class="st-alert st-alert-locked">
+            <span class="material-icons-round" style="font-size:20px">warning_amber</span>
+            <div>
+                <b>Hệ thống đã khóa nhập liệu.</b><br />Đợt nhập điểm này đã kết thúc hoặc bị khóa bởi Quản trị viên. Bạn chỉ có quyền xem.
+            </div>
+        </div>
+    }
+    else if (isTeacherLocked)
+    {
+        <div class="st-alert st-alert-success">
+            <span class="material-icons-round" style="font-size:20px">check_circle</span>
+            <div>
+                <b>Bạn đã hoàn tất và khóa sổ môn này.</b><br />Dữ liệu an toàn. Vui lòng liên hệ Admin nếu cần mở lại.
+            </div>
+            <button class="st-btn st-btn-outline st-ms-auto" @onclick="UnlockGradeSheet" style="border-color:#198754; color:#198754;">Xin mở lại</button>
+        </div>
+    }
+
+    @* --- FILTER BAR --- *@
+    <div class="st-filter-bar">
+        <div class="st-filter-group"><label>Khối:</label><select class="st-form-control st-form-select-sm"><option>Khối 10</option></select></div>
+        <div class="st-filter-group"><label>Lớp:</label><select class="st-form-control st-form-select-sm"><option>10A1</option></select></div>
+
+        <div class="st-filter-group">
+            <label>Môn:</label>
+            <select value="@selectedSubjectId" @onchange="OnSubjectChanged" class="st-form-control st-form-select-sm st-select-highlight">
+                @foreach (var sub in listSubjects)
+                {
+                    <option value="@sub.Id">@sub.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="st-filter-group">
+            <label>Học kỳ:</label>
+            <select @bind="hocKy" class="st-form-control st-form-select-sm st-select-highlight" disabled>
+                <option value="1">Học kỳ 1</option>
+                <option value="2">Học kỳ 2</option>
+            </select>
+        </div>
+
+        <div class="st-filter-group st-ms-auto" style="position: relative; margin-left: 20px;">
+            <label style="cursor:pointer; display:flex; align-items:center; gap:5px">
+                <input type="checkbox" @bind="isAutoRound" disabled="@IsReadOnlyMode" class="st-check-input">
+                <span style="@(IsReadOnlyMode ? "color:#999" : "color:#000")">Tự động làm tròn</span>
+            </label>
+            @if (showTutorial)
+            {
+                <div class="st-popup-blue">
+                    <div class="st-popup-arrow"></div>
+                    <div style="display:flex; gap:8px;">
+                        <span class="material-icons-round">info</span>
+                        <div>Khi chọn ô hệ thống tự động làm tròn.<br />VD: <b>8.25</b> &rarr; <b>8.5</b></div>
+                    </div>
+                    <button class="st-popup-close" @onclick="() => showTutorial = false">Đã hiểu</button>
+                </div>
+            }
+        </div>
+
+        <div class="st-d-flex st-gap-2 st-ms-auto">
+            @if (!IsReadOnlyMode)
+            {
+                <button class="st-btn st-btn-success" @onclick="SaveData">
+                    <span class="material-icons-round">save</span> Lưu lại
+                </button>
+            }
+            <button class="st-btn st-btn-warning" @onclick="LockGradeSheet">
+                <span class="material-icons-round">lock</span> Khóa sổ
+            </button>
+            <button class="st-btn st-btn-primary">
+                <span class="material-icons-round">file_download</span> Xuất Excel
+            </button>
+        </div>
+    </div>
+
+    @* --- EXCEL TABLE --- *@
+    <div class="st-table-container">
+        @if (isLoading)
+        {
+            <div style="padding: 20px; text-align: center; color: #666;">
+                <div class="st-spin"><span class="material-icons-round">sync</span></div> Đang tải dữ liệu...
+            </div>
+        }
+        else
+        {
+            <table class="st-excel-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="st-sticky-col st-col-stt st-z-corner">STT</th>
+                        <th rowspan="2" class="st-sticky-col st-col-view st-z-corner">Xem</th>
+                        <th rowspan="2" class="st-sticky-col st-col-code st-z-corner">Mã ĐD</th>
+                        <th rowspan="2" class="st-sticky-col st-col-name st-z-corner">Họ và tên</th>
+
+                        <th colspan="@currentSubject.TxCols" class="st-th-group">ĐĐGtx (Hệ số 1)</th>
+
+                        <th rowspan="2" class="st-col-score">Giữa kỳ</th>
+                        <th rowspan="2" class="st-col-score">Cuối kỳ</th>
+
+                        @if (hocKy == 1)
+                        {
+                            <th rowspan="2" class="st-col-score" style="background:#0078d7; color:white;">ĐTB HK1</th>
+                            <th rowspan="2" class="st-col-note">Nhận xét HK1</th>
+                        }
+                        else
+                        {
+                            <th rowspan="2" class="st-col-score st-text-muted" style="background:#f0f0f0;">ĐTB HK1</th>
+                            <th rowspan="2" class="st-col-score" style="background:#0078d7; color:white;">ĐTB HK2</th>
+                            <th rowspan="2" class="st-col-score" style="background:#d9534f; color:white;">Cả năm</th>
+                            <th rowspan="2" class="st-col-note">Nhận xét HK2</th>
+                            <th rowspan="2" class="st-col-note">Nhận xét CN</th>
+                        }
+                    </tr>
+                    <tr>
+                        @for (int i = 1; i <= currentSubject.TxCols; i++)
+                        {
+                            <th class="st-col-score">@i</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var st in currentStudents)
+                    {
+                        <tr>
+                            <td class="st-sticky-col st-col-stt st-text-center">@st.Stt</td>
+                            <td class="st-sticky-col st-col-view st-text-center">
+                                <span class="material-icons-round st-text-muted" style="font-size:18px; cursor:pointer">visibility</span>
+                            </td>
+                            <td class="st-sticky-col st-col-code st-text-center">@st.Code</td>
+                            <td class="st-sticky-col st-col-name" style="font-weight:600; color:#2c3e50; padding-left:8px!important; text-align:left;">@st.Name</td>
+
+                            @for (int c = 0; c < currentSubject.TxCols; c++)
+                            {
+                                int colIndex = c;
+                                <td class="st-td-inp">
+                                    <input class="st-inp @(st.Errors.Contains(colIndex) ? "st-err" : "")"
+                                           disabled="@IsReadOnlyMode"
+                                           value="@st.TxScores[colIndex]"
+                                           @onchange="@(e => UpdateScore(st, colIndex, e.Value?.ToString()))" />
+                                </td>
+                            }
+
+                            <td class="st-td-inp"><input class="st-inp" disabled="@IsReadOnlyMode" value="@st.GkScore" /></td>
+                            <td class="st-td-inp"><input class="st-inp" disabled="@IsReadOnlyMode" value="@st.CkScore" /></td>
+
+                            @if (hocKy == 1)
+                            {
+                                <td class="st-td-readonly">@st.AvgHK1</td>
+                                <td class="st-td-inp"><input class="st-inp st-text-start px-2" disabled="@IsReadOnlyMode" value="@st.NoteHK1" /></td>
+                            }
+                            else
+                            {
+                                <td class="st-td-readonly st-text-muted">@st.AvgHK1</td>
+                                <td class="st-td-readonly" style="font-weight:bold">@st.AvgHK2</td>
+                                <td class="st-td-readonly st-text-danger" style="font-weight:bold">@st.AvgYear</td>
+                                <td class="st-td-inp"><input class="st-inp st-text-start px-2" disabled="@IsReadOnlyMode" value="@st.NoteHK2" /></td>
+                                <td class="st-td-inp"><input class="st-inp st-text-start px-2" disabled="@IsReadOnlyMode" value="@st.NoteCN" /></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    @* --- FOOTER --- *@
+    <div class="st-footer">
+        <div class="st-pager">
+            <button @onclick="() => LoadData(1)" disabled="@(currentPage == 1)">
+                <span class="material-icons-round">first_page</span>
+            </button>
+            <button @onclick="() => LoadData(currentPage - 1)" disabled="@(currentPage == 1)">
+                <span class="material-icons-round">chevron_left</span>
+            </button>
+            <span class="st-page-info">Trang @currentPage / @totalPages</span>
+            <button @onclick="() => LoadData(currentPage + 1)" disabled="@(currentPage == totalPages)">
+                <span class="material-icons-round">chevron_right</span>
+            </button>
+            <button @onclick="() => LoadData(totalPages)" disabled="@(currentPage == totalPages)">
+                <span class="material-icons-round">last_page</span>
+            </button>
+        </div>
+        <div style="font-size:13px; color:#666; font-weight: 500;">
+            Tổng số: <b style="color:#0091ff">@totalItems</b> học sinh
+        </div>
+    </div>
+</div>
+
+@code {
+    public class SubjectConfig { public string Id { get; set; } public string Name { get; set; } public int TxCols { get; set; } }
+    List<SubjectConfig> listSubjects = new List<SubjectConfig>
+    {
+        new SubjectConfig { Id = "Toan", Name = "Toán", TxCols = 4 },
+        new SubjectConfig { Id = "Van", Name = "Ngữ Văn", TxCols = 3 },
+        new SubjectConfig { Id = "Anh", Name = "Tiếng Anh", TxCols = 4 },
+        new SubjectConfig { Id = "Ly", Name = "Vật Lý", TxCols = 3 },
+        new SubjectConfig { Id = "Hoa", Name = "Hóa Học", TxCols = 3 },
+        new SubjectConfig { Id = "Sinh", Name = "Sinh Học", TxCols = 2 },
+        new SubjectConfig { Id = "Su", Name = "Lịch Sử", TxCols = 2 }
+    };
+
+    bool isAutoRound = false, isLoading = false, showTutorial = true, isSystemLocked = false, isTeacherLocked = false;
+    int hocKy = 1, currentPage = 1, pageSize = 20, totalItems = 0;
+    string selectedSubjectId = "Toan";
+    SubjectConfig currentSubject => listSubjects.First(s => s.Id == selectedSubjectId);
+    bool IsReadOnlyMode => isSystemLocked || isTeacherLocked;
+    int totalPages => (int)Math.Ceiling((double)totalItems / pageSize);
+
+    List<Student> currentStudents = new List<Student>();
+    class Student
+    {
+        public int Stt; public string Code;
+        public string Name;
+        public List<string> TxScores = new List<string> { "", "", "", "", "", "" };
+        public HashSet<int> Errors = new HashSet<int>();
+        public string GkScore; public string CkScore;
+        public string AvgHK1 = "7.5";
+        public string AvgHK2 = "8.2"; public string AvgYear = "7.9";
+        public string NoteHK1; public string NoteHK2; public string NoteCN;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckActivePeriod(); await LoadData(1);
+    }
+
+    async Task CheckActivePeriod()
+    {
+        var activePeriod = new { Semester = 2, ToDate = DateTime.Now.AddDays(5), IsActive = true };
+        hocKy = activePeriod.Semester;
+        isSystemLocked = !activePeriod.IsActive || DateTime.Now > activePeriod.ToDate;
+    }
+
+    async Task OnSubjectChanged(ChangeEventArgs e)
+    {
+        selectedSubjectId = e.Value.ToString(); await LoadData(1);
+    }
+
+    async Task LoadData(int page)
+    {
+        if (page < 1) page = 1;
+        isLoading = true; await Task.Delay(300);
+        currentPage = page; totalItems = 55; currentStudents.Clear();
+        int startStt = (page - 1) * pageSize + 1;
+        int itemsToTake = Math.Min(pageSize, totalItems - (page - 1) * pageSize);
+        for (int i = 0; i < itemsToTake; i++)
+        {
+            int realStt = startStt + i;
+            currentStudents.Add(new Student { Stt = realStt, Code = "HS" + (2000 + realStt), Name = GetRandomName(realStt) });
+        }
+        isLoading = false;
+    }
+
+    async Task SaveData()
+    {
+        await Task.Delay(500); await JS.InvokeVoidAsync("alert", "Lưu dữ liệu thành công!");
+    }
+    async Task LockGradeSheet()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "XÁC NHẬN KHÓA SỔ?");
+        if (confirmed) { await Task.Delay(300); isTeacherLocked = true; }
+    }
+    void UnlockGradeSheet()
+    {
+        JS.InvokeVoidAsync("alert", "Đã gửi yêu cầu mở khóa!");
+    }
+
+    void UpdateScore(Student st, int idx, string val)
+    {
+        if (IsReadOnlyMode) return;
+        st.TxScores[idx] = val;
+        if (string.IsNullOrWhiteSpace(val)) { st.Errors.Remove(idx); return; }
+        if (double.TryParse(val, out double d))
+        {
+            if (d < 0 || d > 10) st.Errors.Add(idx);
+            else
+            {
+                st.Errors.Remove(idx); if (isAutoRound) d = Math.Round(d * 2, MidpointRounding.AwayFromZero) / 2; st.TxScores[idx] = d.ToString("0.##");
+            }
+        }
+        else st.Errors.Add(idx);
+    }
+    string GetRandomName(int i)
+    {
+        string[] ho = { "Nguyễn", "Trần", "Lê", "Phạm", "Huỳnh", "Hoàng" };
+        string[] ten = { "Anh", "Bình", "Châu", "Dũng", "Em", "Giang", "Hân", "Khánh" };
+        return $"{ho[i % ho.Length]} {ten[i % ten.Length]}";
+    }
+}
+<style>
+    /* --- LAYOUT CHUNG --- */
+    .point-page {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 5rem);
+        padding: 10px;
+        font-family: 'Segoe UI', sans-serif;
+        overflow: hidden;
+        background-color: #f5f7fa;
+    }
+
+    /* HEADER */
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-shrink: 0;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        height: 50px;
+    }
+
+    .icons-title {
+        width: 32px;
+        height: 32px;
+        background: #1b6ec2;
+        color: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .icons-title i {
+            font-size: 18px;
+        }
+
+    .page-title h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #444;
+    }
+
+    /* FILTER BAR với dropdown-custom */
+    .filter-bar {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .dropdown-custom {
+        position: relative;
+    }
+
+    .dropdown-custom-toggle {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: white;
+        color: #333;
+        font-size: 13px;
+        min-width: 150px;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .dropdown-custom-toggle:hover {
+            border-color: #999;
+        }
+
+        .dropdown-custom-toggle:disabled {
+            background: #f9f9f9;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+    .dropdown-custom-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 200px;
+        max-height: 300px;
+        overflow-y: auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-top: 2px;
+    }
+
+    .dropdown-custom-item {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+    }
+
+        .dropdown-custom-item:hover {
+            background: #f5f5f5;
+        }
+
+        .dropdown-custom-item.active {
+            background: #eef7ff;
+            color: #1b6ec2;
+        }
+
+        .dropdown-custom-item:last-child {
+            border-bottom: none;
+        }
+
+    .class-info-dropdown-custom {
+        flex: 1;
+    }
+
+    .class-name {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .class-sub {
+        font-size: 11px;
+        color: #666;
+    }
+
+    .badge-count {
+        font-size: 11px;
+        background: #f0f0f0;
+        padding: 2px 6px;
+        border-radius: 10px;
+        color: #666;
+    }
+
+    .dropdown-custom-item.active .badge-count {
+        background: #1b6ec2;
+        color: white;
+    }
+
+    /* SELECT và các input khác */
+    .select-highlight {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        min-width: 150px;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+        .select-highlight:focus {
+            border-color: #1b6ec2;
+            box-shadow: 0 0 0 3px rgba(27, 110, 194, 0.1);
+        }
+
+        .select-highlight:disabled {
+            background: #f9f9f9;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #555;
+    }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+            .checkbox-label input[type="checkbox"]:disabled {
+                cursor: not-allowed;
+            }
+
+    /* BUTTONS */
+    .btn-save {
+        background: #198754;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .btn-save:hover:not(:disabled) {
+            background: #157347;
+            transform: translateY(-1px);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .btn-lock {
+        background: #eda00b;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .btn-lock:hover:not(:disabled) {
+            background: #ffbd3d;
+            transform: translateY(-1px);
+        }
+
+    .btn-excel {
+        background: #0091ff;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .btn-excel:hover:not(:disabled) {
+            background: #007acc;
+            transform: translateY(-1px);
+        }
+
+        .btn-excel:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .ms-auto {
+        margin-left: auto;
+    }
+
+    /* CLASS INFO BAR */
+    .class-info-bar {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+
+        .class-info-bar i {
+            font-size: 12px;
+            margin-right: 4px;
+            color: #1b6ec2;
+        }
+
+    /* TABLE SYSTEM (Fixed) */
+    .table-container {
+        flex: 1;
+        overflow: auto;
+        background: white;
+        border: 1px solid #ccc;
+        position: relative;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .excel-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 100%;
+        width: max-content;
+        table-layout: fixed;
+    }
+
+        /* Các ô chung */
+        .excel-table th, .excel-table td {
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            height: 34px;
+            padding: 0;
+            box-sizing: border-box;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        /* HEADER STYLES */
+        .excel-table thead th {
+            background: #005b9f;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+    .th-group {
+        background: #005b9f !important;
+        border-bottom: 1px solid #4da3e2 !important;
+    }
+
+    .excel-table thead tr:nth-child(2) th {
+        top: 34px;
+        background: #2a92df;
+        z-index: 10;
+    }
+
+    /* COLUMN WIDTHS */
+    .col-stt {
+        width: 40px;
+        min-width: 40px;
+    }
+
+    .col-view {
+        width: 40px;
+        min-width: 40px;
+    }
+
+    .col-code {
+        width: 90px;
+        min-width: 90px;
+    }
+
+    .col-name {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .col-dob {
+        width: 100px;
+        min-width: 100px;
+    }
+
+    .col-gender {
+        width: 80px;
+        min-width: 80px;
+    }
+
+    .col-score {
+        width: 65px;
+        min-width: 65px;
+    }
+
+    .col-note {
+        min-width: 150px;
+        width: auto;
+    }
+
+    /* --- STICKY LEFT COLUMNS --- */
+    .sticky-col {
+        position: sticky;
+        background: white;
+        z-index: 5;
+        border-right: 1px solid #ddd;
+    }
+
+    .col-stt.sticky-col {
+        left: 0;
+    }
+
+    .col-view.sticky-col {
+        left: 40px;
+    }
+
+    .col-code.sticky-col {
+        left: 80px;
+    }
+
+    .col-name.sticky-col {
+        left: 170px;
+        border-right: 2px solid #bbb !important;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+
+    .col-dob.sticky-col {
+        left: 390px;
+    }
+
+    .col-gender.sticky-col {
+        left: 490px;
+        border-right: 2px solid #bbb !important;
+    }
+
+    /* GÓC CHẾT */
+    .z-corner {
+        z-index: 20 !important;
+        background: #005b9f !important;
+        border-right: 1px solid #4da3e2 !important;
+    }
+
+    .col-name.z-corner,
+    .col-gender.z-corner {
+        border-right: 2px solid #4da3e2 !important;
+    }
+
+    /* BODY STYLES */
+    .excel-table tbody tr:hover td {
+        background-color: #f0f8ff;
+    }
+
+    .excel-table tbody td.sticky-col {
+        background-color: white;
+    }
+
+    .excel-table tbody tr:hover td.sticky-col {
+        background-color: #f0f8ff;
+    }
+
+    /* INPUTS và các element khác */
+    .td-inp {
+        position: relative;
+        width: 65px;
+    }
+
+    .point-input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        text-align: center;
+        background: transparent;
+        font-family: 'Consolas', monospace;
+        font-weight: 600;
+        font-size: 13px;
+        display: block;
+    }
+
+        .point-input:focus {
+            background: #e6f7ff;
+            box-shadow: inset 0 0 0 2px #0091ff;
+        }
+
+        .point-input.point-good {
+            background: #e6fffa;
+            color: #00a86b;
+        }
+
+        .point-input.point-medium {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .point-input.point-average {
+            background: #fff8e1;
+            color: #ffc107;
+        }
+
+        .point-input.point-poor {
+            background: #ffe6e6;
+            color: #dc3545;
+        }
+
+        .point-input:disabled {
+            background: #f9f9f9;
+            color: #666;
+        }
+
+    /* Note input */
+    .note-input {
+        width: 100%;
+        min-height: 32px;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 12px;
+        resize: vertical;
+        outline: none;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+        .note-input:focus {
+            border-color: #1b6ec2;
+            box-shadow: 0 0 0 3px rgba(27, 110, 194, 0.1);
+        }
+
+        .note-input:disabled {
+            background: #f9f9f9;
+            color: #666;
+        }
+
+    /* Readonly Cell */
+    .td-readonly {
+        background: #f8f9fa;
+        color: #0091ff;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    /* Student info trong table */
+    .student-name-with-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 4px;
+    }
+
+    .student-sub-info {
+        font-size: 11px;
+        color: #666;
+        font-weight: normal;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .gender-badge {
+        background: #eef7ff;
+        color: #1b6ec2;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 600;
+        border: 1px solid #d1e7ff;
+    }
+
+    /* Point badges */
+    .point-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 12px;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .avg-good {
+        background: #e6fffa;
+        color: #00a86b;
+        border: 1px solid #b3f0e0;
+    }
+
+    .avg-medium {
+        background: #fff3e0;
+        color: #ff9800;
+        border: 1px solid #ffe0b2;
+    }
+
+    .avg-average {
+        background: #fff8e1;
+        color: #ffc107;
+        border: 1px solid #fff3cd;
+    }
+
+    .avg-poor {
+        background: #ffe6e6;
+        color: #dc3545;
+        border: 1px solid #ffb3b3;
+    }
+
+    .bg-year {
+        background: #e6f7ff;
+        color: #0091ff;
+        border: 1px solid #b3e0ff;
+    }
+
+    /* Code tag */
+    .code-tag {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        color: #1b6ec2;
+        background: #eef7ff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-block;
+        border: 1px solid #d1e7ff;
+    }
+
+    /* Button icon */
+    .btn-icon {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #666;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+        .btn-icon:hover {
+            background: #eee;
+            color: #1b6ec2;
+        }
+
+    /* Footer */
+    .footer {
+        background: #fff;
+        padding: 10px 15px;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        z-index: 100;
+    }
+
+    .pager {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .pager button {
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #0091ff;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+            .pager button i {
+                font-size: 14px;
+            }
+
+            .pager button:hover:not(:disabled) {
+                background: #0091ff;
+                color: white;
+                border-color: #0091ff;
+            }
+
+            .pager button:disabled {
+                color: #adb5bd;
+                background: #f8f9fa;
+                cursor: not-allowed;
+                border-color: #ebebeb;
+            }
+
+    .page-info {
+        font-weight: 600;
+        margin: 0 12px;
+        font-size: 13px;
+        color: #495057;
+        background: #e9ecef;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 40px 20px;
+        text-align: center;
+        color: #666;
+    }
+
+    .icon-empty {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.2;
+        color: #1b6ec2;
+    }
+
+    .empty-state h5 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .empty-state p {
+        max-width: 400px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Status tags */
+    .status-tag {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 80px;
+    }
+
+        .status-tag.active {
+            background: #e6fffa;
+            color: #00a86b;
+            border: 1px solid #b3f0e0;
+        }
+
+        .status-tag.graduated {
+            background: #e6f7ff;
+            color: #0091ff;
+            border: 1px solid #b3e0ff;
+        }
+
+        .status-tag.inactive {
+            background: #fff3e0;
+            color: #ff9800;
+            border: 1px solid #ffe0b2;
+        }
+
+    /* Modal styles CUSTOM */
+    .modal-backdrop-custom {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        backdrop-filter: blur(2px);
+        animation: fadeInCustom 0.2s ease;
+    }
+
+    @@keyframes fadeInCustom {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .modal-content-custom {
+        background: white;
+        border-radius: 12px;
+        width: 500px;
+        max-width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideUpCustom 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @@keyframes slideUpCustom {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal-header-custom {
+        padding: 20px 24px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+        border-radius: 12px 12px 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+        .modal-header-custom h5 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+    .btn-close-custom {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #6c757d;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+        .btn-close-custom:hover {
+            background: #f8f9fa;
+            color: #dc3545;
+            transform: rotate(90deg);
+        }
+
+    .modal-body-custom {
+        padding: 24px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .student-detail-info-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .detail-row-custom {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .detail-row-custom:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row-custom label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 160px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .detail-row-custom span {
+            flex: 1;
+            color: #212529;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+    .btn-custom {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary-custom {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        color: white;
+    }
+
+        .btn-secondary-custom:hover {
+            background: linear-gradient(135deg, #5a6268, #4a5056);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+    /* Text utilities */
+    .text-center {
+        text-align: center !important;
+    }
+
+    .text-muted {
+        color: #888 !important;
+    }
+
+    .fw-bold {
+        font-weight: 600 !important;
+    }
+
+    .font-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .point-page {
+            padding: 8px;
+        }
+
+        .filter-bar {
+            gap: 12px;
+        }
+
+        .dropdown-custom-toggle,
+        .select-highlight {
+            min-width: 130px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .group {
+            width: 100%;
+        }
+
+        .dropdown-custom-toggle,
+        .select-highlight {
+            width: 100%;
+        }
+
+        .ms-auto {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .d-flex {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .point-page {
+            height: auto;
+            min-height: calc(100vh - 5rem);
+        }
+
+        .page-title {
+            margin-bottom: 10px;
+            height: auto;
+        }
+
+            .page-title h4 {
+                font-size: 16px;
+            }
+
+        .dropdown-custom-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 300px;
+            max-height: 70vh;
+        }
+
+        .modal-content-custom {
+            width: 95%;
+            max-height: 85vh;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .filter-bar {
+            padding: 10px;
+        }
+
+        .btn-save, .btn-lock, .btn-excel {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .footer {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .pager {
+            justify-content: center;
+        }
+
+        .modal-header-custom {
+            padding: 16px 20px;
+        }
+
+        .modal-body-custom {
+            padding: 20px;
+        }
+
+        .detail-row-custom {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+            .detail-row-custom label {
+                min-width: auto;
+            }
+    }
+
+    /* Scrollbar styling */
+    .table-container::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+    /* MODAL FILE CUSTOM */
+    .modal-content-custom {
+        animation: slideUpCustom 0.3s ease;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Upload area cải thiện */
+    .upload-area-custom {
+        border: 2px dashed #ced4da;
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+        position: relative;
+    }
+
+        .upload-area-custom:hover {
+            border-color: #007bff;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,123,255,0.1);
+        }
+
+        .upload-area-custom.dragover {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+        }
+
+        .upload-area-custom.error {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fdecea 0%, #f8d7da 100%);
+        }
+
+    /* Progress bar */
+    .upload-progress-custom {
+        width: 100%;
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .upload-progress-bar-custom {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #00d4ff);
+        transition: width 0.3s ease;
+    }
+
+    /* File info */
+    .file-info-custom {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .file-icon-custom {
+        font-size: 24px;
+        margin-right: 10px;
+        color: #28a745;
+    }
+
+    /* Buttons trong modal */
+    .modal-footer-custom {
+        padding: 20px 24px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        background: #f8fafc;
+        border-radius: 0 0 12px 12px;
+    }
+
+        .modal-footer-custom .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            min-width: 120px;
+        }
+
+        .modal-footer-custom .btn-success-custom {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        }
+
+            .modal-footer-custom .btn-success-custom:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+            }
+
+            .modal-footer-custom .btn-success-custom:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+        .modal-footer-custom .btn-secondary-custom {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+        }
+
+            .modal-footer-custom .btn-secondary-custom:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+            }
+
+    /* Step indicators */
+    .step-item-custom {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.2rem;
+        padding: 14px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        transition: all 0.3s;
+        border: 1px solid transparent;
+    }
+
+        .step-item-custom:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #007bff;
+            transform: translateX(5px);
+        }
+
+    .step-number-custom {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #007bff, #6610f2);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 18px;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    }
+
+    .step-text-custom {
+        flex: 1;
+        font-size: 15px;
+        color: #495057;
+        font-weight: 500;
+    }
+
+    /* Download info */
+    .download-info-custom {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid #d1e7ff;
+    }
+
+    .info-text-custom {
+        display: flex;
+        align-items: center;
+        color: #495057;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    /* Loading states */
+    .spinner-container-custom {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+    }
+
+    .spinner-text-custom {
+        margin-left: 12px;
+        color: #6c757d;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    /* Status tag custom */
+    .status-tag-custom {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 90px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .status-tag-custom.active {
+            background: linear-gradient(135deg, #e6fffa, #b3f0e0);
+            color: #00a86b;
+            border: 1px solid #80e5cc;
+        }
+
+        .status-tag-custom.graduated {
+            background: linear-gradient(135deg, #e6f7ff, #b3e0ff);
+            color: #0091ff;
+            border: 1px solid #80c9ff;
+        }
+
+        .status-tag-custom.inactive {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            color: #ff9800;
+            border: 1px solid #ffcc80;
+        }
+
+    /* Download modal specific */
+    .file-steps-custom {
+        margin-top: 20px;
+    }
+
+    /* Upload modal specific */
+    .upload-input-container-custom {
+        margin-bottom: 20px;
+    }
+
+    .btn-outline-danger-custom {
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        background: transparent;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+        .btn-outline-danger-custom:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+    /* CSS cho môn đặc biệt */
+    .special-subject-select {
+        width: 100%;
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+    }
+
+        .special-subject-select:disabled {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+    .point-badge.special-pass {
+        background-color: #28a745;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+    }
+
+    .point-badge.special-fail {
+        background-color: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+    }
+
+    .required-field {
+        border-color: #ff6b6b !important;
+        background-color: #fff5f5 !important;
+    }
+</style>
