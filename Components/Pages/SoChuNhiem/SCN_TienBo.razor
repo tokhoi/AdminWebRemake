@@ -28,8 +28,8 @@
                     <tr>
                         <td style="text-align: center; color: var(--text-muted);">@(s.i + 1)</td>
                         <td style="font-weight: 600; color: var(--text-main);">@s.val.Name</td>
-                        <td style="text-align: center; font-family: monospace; font-size: 1.1rem;">@s.val.OldScore</td>
-                        <td style="text-align: center; font-family: monospace; font-size: 1.1rem; font-weight: bold;">@s.val.NewScore</td>
+                        <td style="text-align: center; font-family: var(--font-body); font-size: 1.1rem;">@s.val.OldScore</td>
+                        <td style="text-align: center; font-family: var(--font-body); font-size: 1.1rem; font-weight: bold;">@s.val.NewScore</td>
                         <td style="text-align: center;">
                             @if (s.val.NewScore > s.val.OldScore)
                             {
@@ -63,105 +63,4 @@
     };
 }
 
-<style>
-    .scn-child-container {
-        padding: 0.5rem;
-    }
 
-    .flex-between {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .toolbar {
-        padding-bottom: 1rem;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .page-title {
-        margin: 0 0 0.25rem 0;
-        font-size: 1.15rem;
-        color: var(--text-main);
-    }
-
-    .text-muted {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-    }
-
-    .input-control {
-        padding: 8px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        outline: none;
-    }
-
-    .btn-primary {
-        background: #1b6ec2;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .table-wrapper {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        overflow: hidden;
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        .data-table th {
-            background: #f8fafc;
-            padding: 12px 1rem;
-            text-align: left;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .data-table td {
-            padding: 12px 1rem;
-            border-bottom: 1px solid #f1f5f9;
-            vertical-align: middle;
-        }
-
-        .data-table tr:hover td {
-            background: #f8fafc;
-        }
-
-    .trend-icon {
-        padding: 4px 8px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .text-success {
-        color: #10b981;
-        background: #d1fae5;
-    }
-
-    .text-danger {
-        color: #ef4444;
-        background: #fee2e2;
-    }
-
-    .text-warning {
-        color: #f59e0b;
-        background: #fef3c7;
-    }
-</style>

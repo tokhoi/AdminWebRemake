@@ -1,0 +1,277 @@
+@page "/school/ordered-meals"
+@rendermode InteractiveServer
+@using System.Globalization
+
+<PageTitle>Thực đơn đã đặt</PageTitle>
+
+<div class="om-page animate-fade-in">
+    <section class="om-shell">
+        <header class="om-header-card">
+            <div class="om-header-copy">
+                <div class="om-kicker">Kết quả chốt món từ miniapp</div>
+                <h1>Thực đơn đã đặt</h1>
+                <p>
+                    Theo dõi các thực đơn đã được phụ huynh chốt cho từng bé sau ngày khóa món,
+                    xem nhanh theo lớp và mở chi tiết để kiểm tra từng ngày, từng bữa.
+                </p>
+            </div>
+
+            <div class="om-header-actions">
+                <div class="om-filter-group">
+                    <label class="om-label">Tuần áp dụng</label>
+                    <select class="om-select" @bind="SelectedWeek">
+                        @foreach (var option in WeekOptions)
+                        {
+                            <option value="@option">@option</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="om-filter-group">
+                    <label class="om-label">Khối / lớp</label>
+                    <select class="om-select" @bind="SelectedClass">
+                        <option value="">Tất cả lớp</option>
+                        @foreach (var option in ClassOptions)
+                        {
+                            <option value="@option">@option</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="om-filter-group">
+                    <label class="om-label">Tìm học sinh</label>
+                    <input class="om-input" @bind="SearchTerm" placeholder="Tên bé hoặc mã học sinh..." />
+                </div>
+            </div>
+        </header>
+
+        <section class="om-summary-grid">
+            <article class="om-summary-card">
+                <span class="material-icons-round">groups</span>
+                <div>
+                    <div class="om-summary-label">Bé đã chốt món</div>
+                    <div class="om-summary-value">@FilteredOrders.Count</div>
+                </div>
+            </article>
+
+            <article class="om-summary-card">
+                <span class="material-icons-round">receipt_long</span>
+                <div>
+                    <div class="om-summary-label">Tổng suất đã đặt</div>
+                    <div class="om-summary-value">@FilteredOrders.Sum(order => order.TotalItems)</div>
+                </div>
+            </article>
+
+            <article class="om-summary-card">
+                <span class="material-icons-round">payments</span>
+                <div>
+                    <div class="om-summary-label">Tổng tiền tạm tính</div>
+                    <div class="om-summary-value om-summary-value--small">@FilteredOrders.Sum(order => order.TotalAmount).ToString("N0", CultureInfo.InvariantCulture) đ</div>
+                </div>
+            </article>
+
+            <article class="om-summary-card">
+                <span class="material-icons-round">verified_user</span>
+                <div>
+                    <div class="om-summary-label">Trạng thái tuần</div>
+                    <div class="om-summary-value om-summary-value--small">Đã chốt chọn món</div>
+                </div>
+            </article>
+        </section>
+
+        <section class="om-content-grid">
+            <article class="om-panel">
+                <div class="om-panel-header">
+                    <div>
+                        <h2>Danh sách bé đã đặt món</h2>
+                        <p>Nhìn nhanh tổng số món và tổng tiền từng bé trong tuần đang chọn.</p>
+                    </div>
+                </div>
+
+                <div class="om-table-wrap">
+                    <table class="om-table">
+                        <thead>
+                            <tr>
+                                <th>Học sinh</th>
+                                <th>Lớp</th>
+                                <th>Số món</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in FilteredOrders)
+                            {
+                                <tr class="@(SelectedOrder?.StudentCode == order.StudentCode ? "is-active" : string.Empty)">
+                                    <td>
+                                        <div class="om-student-cell">
+                                            <div class="om-avatar">@order.StudentName[..1]</div>
+                                            <div>
+                                                <div class="om-student-name">@order.StudentName</div>
+                                                <div class="om-student-code">@order.StudentCode</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@order.ClassName</td>
+                                    <td>@order.TotalItems món</td>
+                                    <td>@order.TotalAmount.ToString("N0", CultureInfo.InvariantCulture) đ</td>
+                                    <td>
+                                        <span class="om-status-badge">@order.StatusLabel</span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="om-detail-btn" @onclick="() => SelectOrder(order.StudentCode)">
+                                            Xem chi tiết
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <aside class="om-panel om-detail-panel">
+                <div class="om-panel-header">
+                    <div>
+                        <h2>Chi tiết thực đơn của bé</h2>
+                        <p>Xem món phụ huynh đã chốt theo từng ngày và từng bữa.</p>
+                    </div>
+                </div>
+
+                @if (SelectedOrder is null)
+                {
+                    <div class="om-empty-detail">
+                        <span class="material-icons-round">food_bank</span>
+                        <p>Chọn một bé trong danh sách để xem thực đơn đã đặt.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="om-detail-head">
+                        <div>
+                            <div class="om-detail-name">@SelectedOrder.StudentName</div>
+                            <div class="om-detail-meta">@SelectedOrder.ClassName · @SelectedOrder.StudentCode</div>
+                        </div>
+                        <div class="om-detail-total">@SelectedOrder.TotalAmount.ToString("N0", CultureInfo.InvariantCulture) đ</div>
+                    </div>
+
+                    <div class="om-day-stack">
+                        @foreach (var day in SelectedOrder.Days)
+                        {
+                            <section class="om-day-card">
+                                <div class="om-day-head">
+                                    <div class="om-day-title">@day.DayLabel</div>
+                                    <div class="om-day-total">@day.DayAmount.ToString("N0", CultureInfo.InvariantCulture) đ</div>
+                                </div>
+
+                                <div class="om-meal-stack">
+                                    @foreach (var meal in day.Meals)
+                                    {
+                                        <article class="om-meal-card">
+                                            <div class="om-meal-meta">
+                                                <span class="material-icons-round">@meal.Icon</span>
+                                                <span>@meal.MealLabel</span>
+                                            </div>
+                                            <div class="om-meal-name">@meal.ItemName</div>
+                                            <div class="om-meal-price">@meal.Price.ToString("N0", CultureInfo.InvariantCulture) đ</div>
+                                        </article>
+                                    }
+                                </div>
+                            </section>
+                        }
+                    </div>
+                }
+            </aside>
+        </section>
+    </section>
+</div>
+
+@code {
+    private readonly IReadOnlyList<string> WeekOptions =
+    [
+        "Tuần 14/04 - 20/04/2026",
+        "Tuần 21/04 - 27/04/2026"
+    ];
+
+    private readonly IReadOnlyList<string> ClassOptions =
+    [
+        "Mầm 1A",
+        "Mầm 2A",
+        "Chồi 1",
+        "Lá 1"
+    ];
+
+    private string SelectedWeek { get; set; } = "Tuần 14/04 - 20/04/2026";
+    private string SelectedClass { get; set; } = string.Empty;
+    private string SearchTerm { get; set; } = string.Empty;
+    private string SelectedOrderCode { get; set; } = "HS-MN-006";
+
+    private IReadOnlyList<StudentMealOrder> Orders =>
+    [
+        new(
+            "HS-MN-006",
+            "Hoàng Tuấn Kiệt",
+            "Chồi 1",
+            "Đã chốt",
+            [
+                new DayMealOrder("Thứ Hai", [new OrderedMeal("Sáng", "Cháo cá hồi bí đỏ", 28000m, "ramen_dining"), new OrderedMeal("Trưa", "Phở bò mini", 32000m, "local_dining"), new OrderedMeal("Chiều", "Sữa chua trái cây", 18000m, "icecream")]),
+                new DayMealOrder("Thứ Ba", [new OrderedMeal("Sáng", "Bánh mì trứng cuộn", 24000m, "egg"), new OrderedMeal("Trưa", "Cơm gà áp chảo", 35000m, "lunch_dining"), new OrderedMeal("Chiều", "Sữa chua trái cây", 18000m, "icecream")]),
+                new DayMealOrder("Thứ Tư", [new OrderedMeal("Sáng", "Súp ngô gà non", 26000m, "emoji_food_beverage"), new OrderedMeal("Trưa", "Cơm gà áp chảo", 35000m, "lunch_dining")])
+            ]),
+        new(
+            "HS-MN-011",
+            "Phạm Gia Hân",
+            "Chồi 1",
+            "Đã chốt",
+            [
+                new DayMealOrder("Thứ Hai", [new OrderedMeal("Sáng", "Cháo cá hồi bí đỏ", 28000m, "ramen_dining"), new OrderedMeal("Trưa", "Mì Ý sốt bò bằm", 36000m, "dinner_dining")]),
+                new DayMealOrder("Thứ Ba", [new OrderedMeal("Trưa", "Phở bò mini", 32000m, "local_dining"), new OrderedMeal("Chiều", "Bánh flan caramel", 20000m, "bakery_dining")])
+            ]),
+        new(
+            "HS-MN-018",
+            "Nguyễn Khánh An",
+            "Lá 1",
+            "Đã chốt",
+            [
+                new DayMealOrder("Thứ Hai", [new OrderedMeal("Sáng", "Bánh mì trứng cuộn", 24000m, "egg"), new OrderedMeal("Trưa", "Cơm gà áp chảo", 35000m, "lunch_dining"), new OrderedMeal("Chiều", "Sữa chua trái cây", 18000m, "icecream")]),
+                new DayMealOrder("Thứ Tư", [new OrderedMeal("Trưa", "Phở bò mini", 32000m, "local_dining")]),
+                new DayMealOrder("Thứ Sáu", [new OrderedMeal("Trưa", "Mì Ý sốt bò bằm", 36000m, "dinner_dining"), new OrderedMeal("Chiều", "Sữa chua trái cây", 18000m, "icecream")])
+            ])
+    ];
+
+    private List<StudentMealOrder> FilteredOrders =>
+        Orders
+            .Where(order => string.IsNullOrWhiteSpace(SelectedClass) || order.ClassName == SelectedClass)
+            .Where(order => string.IsNullOrWhiteSpace(SearchTerm) ||
+                            order.StudentName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            order.StudentCode.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+    private StudentMealOrder? SelectedOrder =>
+        FilteredOrders.FirstOrDefault(order => order.StudentCode == SelectedOrderCode) ??
+        FilteredOrders.FirstOrDefault();
+
+    private void SelectOrder(string studentCode)
+    {
+        SelectedOrderCode = studentCode;
+    }
+
+    private sealed record OrderedMeal(string MealLabel, string ItemName, decimal Price, string Icon);
+
+    private sealed record DayMealOrder(string DayLabel, IReadOnlyList<OrderedMeal> Meals)
+    {
+        public decimal DayAmount => Meals.Sum(meal => meal.Price);
+    }
+
+    private sealed record StudentMealOrder(
+        string StudentCode,
+        string StudentName,
+        string ClassName,
+        string StatusLabel,
+        IReadOnlyList<DayMealOrder> Days)
+    {
+        public int TotalItems => Days.Sum(day => day.Meals.Count);
+        public decimal TotalAmount => Days.Sum(day => day.DayAmount);
+    }
+}

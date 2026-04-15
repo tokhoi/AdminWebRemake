@@ -1,0 +1,473 @@
+@page "/so-be-ngoan"
+@rendermode InteractiveServer
+@inject NavigationManager NavManager
+
+<PageTitle>Sổ Bé Ngoan</PageTitle>
+
+<div class="sbn-page animate-fade-in">
+    <section class="sbn-shell">
+        <aside class="sbn-sidebar">
+            <div class="sbn-profile-card">
+                <div class="sbn-avatar-wrap">
+                    <div class="sbn-avatar">@ChildInitials</div>
+                    <div class="sbn-star-badge">
+                        <span class="material-icons-round">star</span>
+                    </div>
+                </div>
+
+                <div class="sbn-profile-name">@CurrentChildName</div>
+                <div class="sbn-profile-meta">@CurrentClassName - @SchoolYear</div>
+            </div>
+
+            <button class="sbn-primary-action" @onclick="BackToList">
+                <span class="material-icons-round">arrow_back</span>
+                <span>Về danh sách bé</span>
+            </button>
+        </aside>
+
+        <main class="sbn-content">
+            <section class="sbn-hero-card">
+                <div class="sbn-season-tag">Tháng 10 - mùa thu</div>
+
+                <div class="sbn-hero-grid">
+                    <div class="sbn-hero-copy">
+                        <h1>
+                            Ghi chép của
+                            <span>@CurrentDisplayName</span>
+                        </h1>
+                        <p>
+                            Hành trình khôn lớn mỗi ngày của bé tại trường. Một góc nhật ký dịu nhẹ,
+                            nơi cô giáo, phụ huynh và nhà trường cùng nhìn thấy từng bước tiến bộ nhỏ.
+                        </p>
+                    </div>
+
+                    <div class="sbn-badge-card">
+                        <div class="sbn-badge-icon">
+                            @if (HasOutstandingAward)
+                            {
+                                <img src="@LotusBadgeImage"
+                                     alt="Cháu ngoan Bác Hồ"
+                                     class="sbn-badge-image" />
+                            }
+                            else
+                            {
+                                <span class="material-icons-round">workspace_premium</span>
+                            }
+                        </div>
+                        <div class="sbn-badge-title">@AwardTitle</div>
+                        <div class="sbn-badge-meta">@AwardSubtitle</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="sbn-main-grid">
+                <div class="sbn-column-main">
+                    <article class="sbn-card sbn-progress-card">
+                        <div class="sbn-card-head">
+                            <div>
+                                <h2>Tiến trình học tập</h2>
+                                <p>Theo dõi đánh giá “Bé ngoan” của từng tuần trong tháng.</p>
+                            </div>
+                            <div class="sbn-progress-pill">
+                                <span class="sbn-progress-dot"></span>
+                                @CompletedWeeks/@WeeklyProgress.Count tuần đạt
+                            </div>
+                        </div>
+
+                        <div class="sbn-progress-track">
+                            @foreach (var week in WeeklyProgress)
+                            {
+                                <div class="sbn-progress-step @(week.IsCurrent ? "current" : "") @(week.IsAchieved ? "done" : "")">
+                                    <div class="sbn-step-icon">
+                                        <img src="@RoseCardImage"
+                                             alt="Bé ngoan"
+                                             class="sbn-step-image" />
+                                    </div>
+                                    <div class="sbn-step-week">@week.Title</div>
+                                    <div class="sbn-step-label">Bé ngoan</div>
+                                    <div class="sbn-step-status @(GetWeekStatusClass(week))">@GetWeekStatusLabel(week)</div>
+                                </div>
+                            }
+                        </div>
+                    </article>
+
+                    <article class="sbn-card sbn-note-card">
+                        <div class="sbn-card-head">
+                            <div class="sbn-teacher-inline">
+                                <div class="sbn-teacher-avatar">ML</div>
+                                <div>
+                                    <h2>Cô Mai Lan</h2>
+                                    <p>Lời nhận xét tuần này</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sbn-note-body">
+                            @foreach (var paragraph in TeacherNoteParagraphs)
+                            {
+                                <p>@paragraph</p>
+                            }
+                        </div>
+
+                        @if (!IsEditingTeacherNote)
+                        {
+                            <div class="sbn-note-actions is-readonly">
+                                <button class="sbn-note-edit" @onclick="StartTeacherNoteEdit">
+                                    <span class="material-icons-round">edit</span>
+                                    <span>Chỉnh sửa</span>
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="sbn-note-composer">
+                                <div class="sbn-note-composer-head">
+                                    <div class="sbn-note-composer-title">Giáo viên nhập đánh giá</div>
+                                    <div class="sbn-note-composer-meta">Nhập nhận xét rồi bấm lưu để cập nhật ngay bên trên.</div>
+                                </div>
+
+                                <textarea class="sbn-textarea sbn-note-input"
+                                          placeholder="Ví dụ: Bé biết chào hỏi, chủ động dọn đồ chơi và hợp tác tốt với các bạn trong lớp..."
+                                          @bind="TeacherNoteDraft"></textarea>
+
+                                <div class="sbn-note-actions">
+                                    <button class="sbn-note-cancel" @onclick="CancelTeacherNoteEdit">
+                                        <span class="material-icons-round">close</span>
+                                        <span>Hủy</span>
+                                    </button>
+                                    <button class="sbn-note-save" @onclick="SaveTeacherNote">
+                                        <span class="material-icons-round">edit_note</span>
+                                        <span>Lưu nhận xét</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="sbn-evaluation-panel">
+                            <div class="sbn-evaluation-copy">
+                                <div class="sbn-evaluation-title">Xác nhận đánh giá tuần @CurrentWeek.Title</div>
+                                <div class="sbn-evaluation-desc">
+                                    Giáo viên chọn kết quả để cập nhật tiến trình “Bé ngoan” cho bé.
+                                </div>
+                            </div>
+
+                            <div class="sbn-evaluation-actions">
+                                <button class="sbn-eval-btn is-pass @(CurrentWeek.IsAchieved ? "active" : "")"
+                                        @onclick="MarkCurrentWeekAchieved">
+                                    <span class="material-icons-round">verified</span>
+                                    <span>Đạt bé ngoan</span>
+                                </button>
+
+                                <button class="sbn-eval-btn is-fail @((!CurrentWeek.IsAchieved && CurrentWeek.IsReviewed) ? "active" : "")"
+                                        @onclick="MarkCurrentWeekPending">
+                                    <span class="material-icons-round">history_toggle_off</span>
+                                    <span>Chưa đạt</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="sbn-column-side">
+                    <article class="sbn-card sbn-health-card">
+                        <div class="sbn-card-head">
+                            <div>
+                                <h2>Thông tin sức khỏe của bé</h2>
+                                <p>Theo dõi nhanh tình trạng sức khỏe và sinh hoạt hằng ngày của bé.</p>
+                            </div>
+                        </div>
+
+                        @if (!IsEditingHealth)
+                        {
+                            <div class="sbn-health-list">
+                                @foreach (var item in HealthDisplayItems)
+                                {
+                                    <div class="sbn-health-item">
+                                        <span class="material-icons-round">@item.Icon</span>
+                                        <div>
+                                            <strong>@item.Label</strong>
+                                            <span>@item.Value</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="sbn-health-note">
+                                @HealthNote
+                            </div>
+
+                            <div class="sbn-note-actions is-readonly">
+                                <button class="sbn-note-edit" @onclick="StartHealthEdit">
+                                    <span class="material-icons-round">edit</span>
+                                    <span>Chỉnh sửa</span>
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="sbn-health-editor">
+                                <div class="sbn-health-form">
+                                    <label class="sbn-field">
+                                        <span class="sbn-field-label">Chiều cao</span>
+                                        <input class="sbn-input" @bind="HealthDraft.Height" />
+                                    </label>
+
+                                    <label class="sbn-field">
+                                        <span class="sbn-field-label">Cân nặng</span>
+                                        <input class="sbn-input" @bind="HealthDraft.Weight" />
+                                    </label>
+
+                                    <label class="sbn-field">
+                                        <span class="sbn-field-label">Giấc ngủ trưa</span>
+                                        <input class="sbn-input" @bind="HealthDraft.Sleep" />
+                                    </label>
+
+                                    <label class="sbn-field">
+                                        <span class="sbn-field-label">Thân nhiệt</span>
+                                        <input class="sbn-input" @bind="HealthDraft.Temperature" />
+                                    </label>
+
+                                    <label class="sbn-field">
+                                        <span class="sbn-field-label">Dấu hiệu hôm nay</span>
+                                        <input class="sbn-input" @bind="HealthDraft.TodayStatus" />
+                                    </label>
+
+                                    <label class="sbn-field">
+                                        <span class="sbn-field-label">Lưu ý y tế</span>
+                                        <input class="sbn-input" @bind="HealthDraft.MedicalNote" />
+                                    </label>
+                                </div>
+
+                                <label class="sbn-field sbn-field-full">
+                                    <span class="sbn-field-label">Ghi chú sức khỏe</span>
+                                    <textarea class="sbn-textarea sbn-health-textarea" @bind="HealthDraft.Summary"></textarea>
+                                </label>
+
+                                <div class="sbn-note-actions">
+                                    <button class="sbn-note-cancel" @onclick="CancelHealthEdit">
+                                        <span class="material-icons-round">close</span>
+                                        <span>Hủy</span>
+                                    </button>
+                                    <button class="sbn-note-save" @onclick="SaveHealthEdit">
+                                        <span class="material-icons-round">save</span>
+                                        <span>Lưu sức khỏe</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </article>
+
+                    <article class="sbn-card sbn-feedback-card">
+                        <div class="sbn-card-head">
+                            <div>
+                                <h2>Phản hồi từ phụ huynh</h2>
+                                <p>Ba mẹ có thể nhắn nhanh cho giáo viên ở đây.</p>
+                            </div>
+                        </div>
+
+                        <div class="sbn-feedback-box">
+                            <textarea class="sbn-textarea"
+                                      placeholder="Ba mẹ chia sẻ thêm về thói quen của bé ở nhà..."
+                                      @bind="ParentFeedback"></textarea>
+
+                            <div class="sbn-feedback-foot">
+                                <button class="sbn-submit-btn" type="button">
+                                    <span>Gửi đi</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </section>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "student")]
+    public string? StudentName { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "class")]
+    public string? StudentClass { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "code")]
+    public string? StudentCode { get; set; }
+
+    private string CurrentChildName => string.IsNullOrWhiteSpace(StudentName) ? "Nguyễn Minh Anh" : StudentName;
+    private string CurrentDisplayName => CurrentChildName.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? CurrentChildName;
+    private string CurrentClassName => string.IsNullOrWhiteSpace(StudentClass) ? "Lớp Chồi 1" : StudentClass;
+    private string SchoolYear => "Niên khóa 2025-2026";
+    private string ChildInitials => string.Concat(CurrentChildName.Split(' ', StringSplitOptions.RemoveEmptyEntries).TakeLast(2).Select(x => x[0])).ToUpperInvariant();
+    private const string RoseCardImage = "/images/sobengoan/rose_card.png";
+    private const string LotusBadgeImage = "/images/sobengoan/lotus.png";
+    private string ParentFeedback { get; set; } = string.Empty;
+    private bool IsEditingTeacherNote { get; set; }
+    private bool IsEditingHealth { get; set; }
+
+    private string TeacherNoteText { get; set; } =
+        "Minh Anh trong tuần này rất ngoan. Con đã chủ động giữ trật tự trong giờ, biết xếp đồ gọn gàng và tích cực tham gia các hoạt động nhóm cùng các bạn.\n\nCon cũng bắt đầu tự tin hơn khi phát biểu và biết nhường nhịn bạn khi chơi. Đây là một tiến bộ đáng khen trong hành trình rèn thói quen tốt mỗi ngày.";
+
+    private string TeacherNoteDraft { get; set; } =
+        "Minh Anh trong tuần này rất ngoan. Con đã chủ động giữ trật tự trong giờ, biết xếp đồ gọn gàng và tích cực tham gia các hoạt động nhóm cùng các bạn.\n\nCon cũng bắt đầu tự tin hơn khi phát biểu và biết nhường nhịn bạn khi chơi. Đây là một tiến bộ đáng khen trong hành trình rèn thói quen tốt mỗi ngày.";
+
+    private readonly List<ProgressItem> WeeklyProgress =
+    [
+        new() { Title = "Tuần 1", IsAchieved = true, IsReviewed = true },
+        new() { Title = "Tuần 2", IsAchieved = true, IsReviewed = true },
+        new() { Title = "Tuần 3", IsAchieved = true, IsReviewed = true },
+        new() { Title = "Tuần 4", IsAchieved = false, IsReviewed = false, IsCurrent = true }
+    ];
+
+    private HealthInfo HealthState { get; set; } = new()
+    {
+        Height = "106 cm",
+        Weight = "17.8 kg",
+        Sleep = "Ngủ tốt 95 phút",
+        Temperature = "36.7°C",
+        TodayStatus = "Ổn định, không sốt",
+        MedicalNote = "Không có ghi chú đặc biệt",
+        Summary = "Cô giáo theo dõi bé sinh hoạt ổn định trong ngày, ăn ngủ đều và không có biểu hiện mệt mỏi."
+    };
+
+    private HealthInfo HealthDraft { get; set; } = new();
+
+    private int CompletedWeeks => WeeklyProgress.Count(x => x.IsAchieved);
+    private bool HasOutstandingAward => WeeklyProgress.All(x => x.IsAchieved);
+
+    private IEnumerable<string> TeacherNoteParagraphs =>
+        TeacherNoteText.Split("\n\n", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    private ProgressItem CurrentWeek => WeeklyProgress.FirstOrDefault(x => x.IsCurrent) ?? WeeklyProgress.Last();
+    private string HealthNote => HealthState.Summary;
+
+    private IReadOnlyList<HealthDisplayItem> HealthDisplayItems =>
+    [
+        new("straighten", "Chiều cao", HealthState.Height),
+        new("monitor_weight", "Cân nặng", HealthState.Weight),
+        new("bedtime", "Giấc ngủ trưa", HealthState.Sleep),
+        new("thermostat", "Thân nhiệt", HealthState.Temperature),
+        new("healing", "Dấu hiệu hôm nay", HealthState.TodayStatus),
+        new("vaccines", "Lưu ý y tế", HealthState.MedicalNote)
+    ];
+
+    private string AwardTitle => HasOutstandingAward
+        ? "Cháu ngoan Bác Hồ"
+        : "Đang rèn luyện";
+
+    private string AwardSubtitle => HasOutstandingAward
+        ? "Đủ 4 tuần đều đạt bé ngoan"
+        : $"Còn {WeeklyProgress.Count(x => !x.IsAchieved)} tuần cần hoàn thành";
+
+    private void StartTeacherNoteEdit()
+    {
+        TeacherNoteDraft = TeacherNoteText;
+        IsEditingTeacherNote = true;
+    }
+
+    private void CancelTeacherNoteEdit()
+    {
+        TeacherNoteDraft = TeacherNoteText;
+        IsEditingTeacherNote = false;
+    }
+
+    private void SaveTeacherNote()
+    {
+        TeacherNoteText = string.IsNullOrWhiteSpace(TeacherNoteDraft)
+            ? "Giáo viên chưa nhập nhận xét cho tuần này."
+            : TeacherNoteDraft.Trim();
+
+        IsEditingTeacherNote = false;
+    }
+
+    private void StartHealthEdit()
+    {
+        HealthDraft = HealthState with { };
+        IsEditingHealth = true;
+    }
+
+    private void CancelHealthEdit()
+    {
+        HealthDraft = HealthState with { };
+        IsEditingHealth = false;
+    }
+
+    private void SaveHealthEdit()
+    {
+        HealthState = new HealthInfo
+        {
+            Height = NormalizeHealthField(HealthDraft.Height, "Chưa cập nhật"),
+            Weight = NormalizeHealthField(HealthDraft.Weight, "Chưa cập nhật"),
+            Sleep = NormalizeHealthField(HealthDraft.Sleep, "Chưa cập nhật"),
+            Temperature = NormalizeHealthField(HealthDraft.Temperature, "Chưa cập nhật"),
+            TodayStatus = NormalizeHealthField(HealthDraft.TodayStatus, "Chưa cập nhật"),
+            MedicalNote = NormalizeHealthField(HealthDraft.MedicalNote, "Không có ghi chú đặc biệt"),
+            Summary = NormalizeHealthField(HealthDraft.Summary, "Giáo viên chưa cập nhật ghi chú sức khỏe.")
+        };
+
+        IsEditingHealth = false;
+    }
+
+    private void MarkCurrentWeekAchieved()
+    {
+        CurrentWeek.IsAchieved = true;
+        CurrentWeek.IsReviewed = true;
+    }
+
+    private void MarkCurrentWeekPending()
+    {
+        CurrentWeek.IsAchieved = false;
+        CurrentWeek.IsReviewed = true;
+    }
+
+    private void BackToList()
+    {
+        NavManager.NavigateTo("/nhat-ky-cua-be");
+    }
+
+    private static string NormalizeHealthField(string? value, string fallback) =>
+        string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+
+    private string GetWeekStatusLabel(ProgressItem week)
+    {
+        if (week.IsAchieved)
+        {
+            return "Đã đạt";
+        }
+
+        return week.IsReviewed ? "Chưa đạt" : "Đang chờ";
+    }
+
+    private string GetWeekStatusClass(ProgressItem week)
+    {
+        if (week.IsAchieved)
+        {
+            return "is-pass";
+        }
+
+        return week.IsReviewed ? "is-fail" : "is-waiting";
+    }
+
+    private sealed class ProgressItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public bool IsAchieved { get; set; }
+        public bool IsReviewed { get; set; }
+        public bool IsCurrent { get; set; }
+    }
+
+    private sealed record HealthDisplayItem(string Icon, string Label, string Value);
+
+    private sealed record HealthInfo
+    {
+        public string Height { get; set; } = string.Empty;
+        public string Weight { get; set; } = string.Empty;
+        public string Sleep { get; set; } = string.Empty;
+        public string Temperature { get; set; } = string.Empty;
+        public string TodayStatus { get; set; } = string.Empty;
+        public string MedicalNote { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
+    }
+}

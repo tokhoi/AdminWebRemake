@@ -61,18 +61,18 @@
                         {
                             <tr>
                                 <td class="lm-text-center">@(index++)</td>
-                                <td><span class="lm-badge lm-badge-gray" style="font-family:monospace;">@item.Code</span></td>
+                                <td><span class="lm-badge lm-badge-gray" style="font-family: var(--font-body);">@item.Code</span></td>
                                 <td style="font-weight: 600;">@item.Name</td>
                                 <td class="lm-text-center">@item.Credits</td>
                                 <td>
                                     @if (item.Type == "Lý thuyết")
                                     {
-                                        <span style="color:#0ea5e9;">Lý thuyết</span>
+                                        <span style="color:var(--kg-primary);">Lý thuyết</span>
                                     }
                                     else
                                     {
 
-                                        <span style="color:#f59e0b;">Thực hành</span>
+                                        <span style="color:var(--kg-warning);">Thực hành</span>
                                     }
                                 </td>
                                 <td class="lm-text-center" style="display:flex; justify-content:center; gap:8px;">
@@ -166,3 +166,5 @@
         public string Type { get; set; } = "";
     }
 }
+
+

@@ -17,7 +17,7 @@
 
         <div class="user-area">
             <div class="user-info">
-                <span class="material-icons-round" style="color: #fde047;">person</span>
+                <span class="material-icons-round" style="color: var(--kg-accent);">person</span>
                 <span>Admin</span>
             </div>
             <button class="year-btn">
@@ -68,8 +68,8 @@
     <div class="mobile-drawer">
         <div class="drawer-header">
             <div class="drawer-logo">
-                <div class="logo-box" style="color:#333; background: #fff">TH</div>
-                <span style="font-weight: 700; color: #fff;">Menu Chính</span>
+                <div class="logo-box" style="color:var(--kg-text-main); background: var(--kg-bg-card)">TH</div>
+                <span style="font-weight: 700; color: var(--kg-bg-card);">Menu Chính</span>
             </div>
             <button class="drawer-close-btn" @onclick="CloseMobileMenu">
                 <span class="material-icons-round">close</span>
@@ -85,7 +85,7 @@
                 <div class="drawer-item-group @(isExpanded ? "expanded" : "")">
                     <div class="drawer-link-parent" @onclick="() => ToggleSubMenu(item.Title, hasSub, item.Link)">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span class="material-icons-round" style="color: @(item.IconColor == "white" ? "#666" : item.IconColor);">@item.Icon</span>
+                            <span class="material-icons-round" style="color: @(item.IconColor == "white" ? "var(--kg-text-muted)" : item.IconColor);">@item.Icon</span>
                             <span class="drawer-text">@item.Title</span>
                         </div>
                         @if (hasSub)
@@ -140,11 +140,12 @@
         MenuItems = new List<MenuItem>();
 
         // --- A. NHÓM MENU CHUNG  ---
-        MenuItems.Add(new MenuItem { Title = "Tổng quan", Link = "", Icon = "dashboard", IconColor = "#facc15" });
-        MenuItems.Add(new MenuItem { Title = "Chức năng", Link = "apps", Icon = "apps", IconColor = "#facc15" });
-        MenuItems.Add(new MenuItem { Title = "Quản lý điểm", Link = "score", Icon = "apps", IconColor = "#facc15" });
-        MenuItems.Add(new MenuItem { Title = "Hoạt động hằng ngày", Link = "daily-activity", Icon = "fitbit", IconColor = "#facc15" });
-        MenuItems.Add(new MenuItem { Title = "Thống kê số liệu", Link = "analytic", Icon = "analytics", IconColor = "#facc15" });
+        MenuItems.Add(new MenuItem { Title = "Tổng quan", Link = "", Icon = "dashboard", IconColor = "var(--kg-accent)" });
+        MenuItems.Add(new MenuItem { Title = "Chức năng", Link = "apps", Icon = "apps", IconColor = "var(--kg-accent)" });
+        MenuItems.Add(new MenuItem { Title = "Chức năng", Link = "score", Icon = "apps", IconColor = "var(--kg-accent)" });
+        MenuItems.Add(new MenuItem { Title = "Hoạt động hằng ngày", Link = "daily-activity", Icon = "fitbit", IconColor = "var(--kg-accent)" });
+        MenuItems.Add(new MenuItem { Title = "Nhật ký của bé", Link = "nhat-ky-cua-be", Icon = "auto_stories", IconColor = "var(--kg-accent)" });
+        MenuItems.Add(new MenuItem { Title = "Thống kê số liệu", Link = "analytic", Icon = "analytics", IconColor = "var(--kg-accent)" });
 
 
         // MenuItems.Add(new MenuItem
@@ -152,7 +153,7 @@
         //     Title = "QL Trường học",
         //     Link = "school",
         //     Icon = "school",
-        //     IconColor = "#0ea5e9",
+        //     IconColor = "var(--kg-primary)",
         //     SubItems = new List<MenuItem> {
         //         new MenuItem { Title = "Hồ sơ Học sinh", Link = "school/students", Icon = "account_tree" }, 
         //         new MenuItem { Title = "Giáo viên & Nhân sự", Link = "school/staffs", Icon = "people" },    
@@ -167,7 +168,7 @@
         //     Title = "QL Đào tạo",
         //     Link = "training",
         //     Icon = "school",
-        //     IconColor = "#22c55e",
+        //     IconColor = "var(--kg-success)",
         //     SubItems = new List<MenuItem> {
         //         new MenuItem { Title = "Học kỳ", Link = "training/semesters", Icon = "date_range" },
         //         new MenuItem { Title = "Môn học", Link = "training/subjects", Icon = "menu_book" },
@@ -180,7 +181,7 @@
         //     Title = "QL Thông báo",
         //     Link = "notifications",
         //     Icon = "notifications",
-        //     IconColor = "#ef4444",
+        //     IconColor = "var(--kg-danger)",
         //     SubItems = new List<MenuItem> {
         //         new MenuItem { Title = "Thông báo chung", Link = "notifications/general", Icon = "campaign" },
         //         new MenuItem { Title = "Báo bài", Link = "notifications/assignments", Icon = "assignment" },
@@ -209,7 +210,7 @@
         //     Title = "QL Học tập",
         //     Link = "learning",
         //     Icon = "menu_book",
-        //     IconColor = "#a855f7",
+        //     IconColor = "var(--kg-purple)",
         //     SubItems = studySubItems
         // });
 
@@ -218,15 +219,15 @@
         //     Title = "QL Bán trú", 
         //     Link = "meals",
         //     Icon = "restaurant",
-        //     IconColor = "#f97316", 
+        //     IconColor = "var(--kg-warning)", 
         //     SubItems = new List<MenuItem>
         //     {
-        //        new MenuItem { Title = "Quản lý học sinh bán trú", Icon = "storage", IconColor = "#f97316", Link = "meals/student" },
-        //        new MenuItem { Title = "Thực đơn bán trú", Icon = "menu_book", IconColor = "#f97316", Link = "meals/menu" },
+        //        new MenuItem { Title = "Quản lý học sinh bán trú", Icon = "storage", IconColor = "var(--kg-warning)", Link = "meals/student" },
+        //        new MenuItem { Title = "Thực đơn bán trú", Icon = "menu_book", IconColor = "var(--kg-warning)", Link = "meals/menu" },
         //     }
         // });
-        // MenuItems.Add(new MenuItem { Title = "Đồng bộ", Link = "sync", Icon = "sync", IconColor = "#ec4899" });
-        // MenuItems.Add(new MenuItem { Title = "Thư viện số", Link = "library", Icon = "local_library", IconColor = "#14b8a6" });
+        // MenuItems.Add(new MenuItem { Title = "Đồng bộ", Link = "sync", Icon = "sync", IconColor = "var(--kg-secondary)" });
+        // MenuItems.Add(new MenuItem { Title = "Thư viện số", Link = "library", Icon = "local_library", IconColor = "var(--kg-primary)" });
     }
 
     // 6. Xử lý sự kiện Navigation & UI

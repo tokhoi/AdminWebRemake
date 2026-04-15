@@ -1,0 +1,1370 @@
+@page "/school/teaching-plan"
+@rendermode InteractiveServer
+@using System.Globalization
+@using System.IO.Compression
+@using System.Text
+@using System.Text.RegularExpressions
+@using System.Xml.Linq
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>Kế hoạch giảng dạy</PageTitle>
+
+<div class="tp-page animate-fade-in">
+    <section class="tp-shell">
+        <header class="tp-header-card">
+            <div class="tp-header-copy">
+                <div class="tp-kicker">Kế hoạch lớp học từ file Word</div>
+                <h1>Kế hoạch giảng dạy</h1>
+                <p>
+                    Tải lên file <strong>.docx</strong> để hệ thống tự bóc tách theo <strong>tuần</strong>,
+                    <strong>ngày</strong> và <strong>nhóm việc</strong>. Trang này ưu tiên đọc các keyword như
+                    <strong>Tuần 1</strong>, <strong>Ngày 1</strong>, <strong>Thứ Hai</strong>,
+                    <strong>Giờ học</strong>, <strong>Sinh hoạt sáng</strong>, <strong>Nhận xét cuối ngày</strong>.
+                    Nếu tài liệu thiếu phần nào, hệ thống sẽ giữ chỗ trống thay vì bỏ cả ngày học.
+                </p>
+
+                <div class="tp-keywords">
+                    <span class="tp-chip">Tuần 1</span>
+                    <span class="tp-chip">Ngày 1</span>
+                    <span class="tp-chip">Thứ Hai</span>
+                    <span class="tp-chip">Sinh hoạt sáng</span>
+                    <span class="tp-chip">Giờ học</span>
+                    <span class="tp-chip">Nhận xét cuối ngày</span>
+                </div>
+            </div>
+
+            <div class="tp-header-actions">
+                <div class="tp-filter">
+                    <div class="tp-filter-group">
+                        <label class="tp-label">Năm học</label>
+                        <select class="tp-select" @bind="SelectedSchoolYear">
+                            <option value="2025-2026">2025-2026</option>
+                            <option value="2024-2025">2024-2025</option>
+                        </select>
+                    </div>
+
+                    <div class="tp-filter-group">
+                        <label class="tp-label">Khối / lớp</label>
+                        <select class="tp-select" @bind="SelectedClassCode">
+                            @foreach (var cls in AvailableClasses)
+                            {
+                                <option value="@cls">@cls</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="tp-filter-group">
+                        <label class="tp-label">Lọc theo tuần</label>
+                        <select class="tp-select" @bind="SelectedWeekIdText" @bind:after="HandleWeekFilterChanged">
+                            <option value="">Tất cả các tuần</option>
+                            @foreach (var week in Plan.Weeks)
+                            {
+                                <option value="@week.Id.ToString()">@week.Title</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="tp-filter-group">
+                        <label class="tp-label">Lọc theo ngày</label>
+                        <select class="tp-select" @bind="SelectedDayIdText">
+                            <option value="">Tất cả các ngày</option>
+                            @foreach (var day in AvailableDaysForSelectedWeek)
+                            {
+                                <option value="@day.Id.ToString()">@day.Title</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <InputFile id="teaching-plan-upload"
+                           OnChange="HandleDocxImport"
+                           accept=".docx"
+                           class="tp-hidden-upload" />
+                <div class = "tp-action-group">
+                    <label for="teaching-plan-upload" class="tp-btn tp-btn-primary">
+                        <span class="material-icons-round">upload_file</span>
+                        <span>Import file Word</span>
+                    </label>
+
+                    <button type="button" class="tp-btn tp-btn-light" @onclick="LoadMockPlan">
+                        <span class="material-icons-round">auto_awesome</span>
+                        <span>Dùng dữ liệu mẫu</span>
+                    </button>
+
+                    <button type="button" class="tp-btn tp-btn-ghost" @onclick="ResetViewFilters">
+                        <span class="material-icons-round">filter_alt_off</span>
+                        <span>Xem toàn bộ</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="tp-status @StatusTone">
+                <span class="material-icons-round">@StatusIcon</span>
+                <span>@StatusMessage</span>
+            </div>
+        }
+
+        <section class="tp-overview-grid">
+            <article class="tp-stat-card">
+                <span class="material-icons-round">view_week</span>
+                <div>
+                    <div class="tp-stat-label">Số tuần đã nhận diện</div>
+                    <div class="tp-stat-value">@DisplayWeeks.Count</div>
+                </div>
+            </article>
+
+            <article class="tp-stat-card">
+                <span class="material-icons-round">today</span>
+                <div>
+                    <div class="tp-stat-label">Số ngày hoạt động</div>
+                    <div class="tp-stat-value">@DisplayWeeks.Sum(week => week.Days.Count)</div>
+                </div>
+            </article>
+
+            <article class="tp-stat-card">
+                <span class="material-icons-round">account_tree</span>
+                <div>
+                    <div class="tp-stat-label">Số nhóm việc</div>
+                    <div class="tp-stat-value">@DisplayWeeks.Sum(week => week.Days.Sum(day => day.Sections.Count))</div>
+                </div>
+            </article>
+
+            <article class="tp-stat-card">
+                <span class="material-icons-round">checklist</span>
+                <div>
+                    <div class="tp-stat-label">Tổng đầu việc</div>
+                    <div class="tp-stat-value">@DisplayWeeks.Sum(week => week.Days.Sum(day => day.Sections.Sum(section => section.Items.Count)))</div>
+                </div>
+            </article>
+        </section>
+
+        <section class="tp-content-grid">
+            <article class="tp-panel tp-panel-main">
+                <div class="tp-panel-header">
+                    <div>
+                        <h2>Dòng kế hoạch theo tuần</h2>
+                        <p>Hệ thống sẽ cố gắng bóc từ tổng quát đến chi tiết: tuần, ngày, rồi đến từng nhóm nội dung trong ngày.</p>
+                    </div>
+                </div>
+
+                @if (Plan.Weeks.Count == 0)
+                {
+                    <div class="tp-empty-state">
+                        <span class="material-icons-round">description</span>
+                        <h3>Chưa có kế hoạch nào</h3>
+                        <p>Hãy import file Word để hệ thống bóc tách kế hoạch theo tuần và ngày học.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="tp-week-list">
+                        @if (DisplayWeeks.Count == 0)
+                        {
+                            <div class="tp-empty-state tp-empty-state--compact">
+                                <span class="material-icons-round">filter_alt_off</span>
+                                <h3>Không có dữ liệu khớp bộ lọc</h3>
+                                <p>Hãy đổi tuần hoặc ngày đang chọn để xem phần kế hoạch khác.</p>
+                            </div>
+                        }
+
+                        @foreach (var week in DisplayWeeks)
+                        {
+                            <article class="tp-week-card">
+                                <div class="tp-week-head">
+                                    <div>
+                                        <div class="tp-week-badge">Tuần học</div>
+                                        <h3>@week.Title</h3>
+                                        @if (!string.IsNullOrWhiteSpace(week.Overview))
+                                        {
+                                            <p>@week.Overview</p>
+                                        }
+                                    </div>
+
+                                    <div class="tp-card-actions">
+                                        <button type="button" class="tp-icon-btn" @onclick="() => OpenWeekEditor(week.Id)" title="Chỉnh sửa tuần">
+                                            <span class="material-icons-round">edit</span>
+                                        </button>
+                                        <button type="button" class="tp-icon-btn is-danger" @onclick="() => RemoveWeek(week.Id)" title="Xóa tuần">
+                                            <span class="material-icons-round">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="tp-day-grid">
+                                    @foreach (var day in week.Days)
+                                    {
+                                        <section class="tp-day-card">
+                                            <div class="tp-day-head">
+                                                <div>
+                                                    <div class="tp-day-title">@day.Title</div>
+                                                    @if (!string.IsNullOrWhiteSpace(day.Note))
+                                                    {
+                                                        <div class="tp-day-note">@day.Note</div>
+                                                    }
+                                                </div>
+
+                                                <div class="tp-card-actions">
+                                                    <button type="button" class="tp-icon-btn" @onclick="() => OpenDayEditor(week.Id, day.Id)" title="Chỉnh sửa ngày">
+                                                        <span class="material-icons-round">edit</span>
+                                                    </button>
+                                                    <button type="button" class="tp-icon-btn is-danger" @onclick="() => RemoveDay(week.Id, day.Id)" title="Xóa ngày">
+                                                        <span class="material-icons-round">delete</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="tp-section-list">
+                                                @foreach (var daySection in day.Sections)
+                                                {
+                                                    <article class="tp-section-card @(daySection.Items.Count == 0 ? "is-empty" : string.Empty)">
+                                                        <div class="tp-section-title">@(daySection.Title)</div>
+
+                                                        @if (daySection.Items.Count == 0)
+                                                        {
+                                                            <div class="tp-section-empty">Chưa có nội dung trong phần này.</div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <ul class="tp-task-list">
+                                                                @foreach (var item in daySection.Items)
+                                                                {
+                                                                    <li>@item</li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                    </article>
+                                                }
+                                            </div>
+                                        </section>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </article>
+
+            <aside class="tp-side-stack">
+                <article class="tp-panel">
+                    <div class="tp-panel-header">
+                        <div>
+                            <h2>Parser đang hiểu gì</h2>
+                            <p>Phù hợp cho nhiều mẫu KHGD hơn, kể cả khi tài liệu không quá đều tay.</p>
+                        </div>
+                    </div>
+
+                    <ul class="tp-guide-list">
+                        <li>Ưu tiên nhận diện từ các mốc như <strong>Kế hoạch tuần</strong>, <strong>Tuần 1</strong>, <strong>Ngày 1</strong>, <strong>Thứ Hai</strong>.</li>
+                        <li>Tự gom các phần như <strong>Sinh hoạt sáng</strong>, <strong>Giờ học</strong>, <strong>HĐVC trong lớp</strong>, <strong>Giờ ngủ</strong>.</li>
+                        <li>Nếu thiếu nhóm việc, hệ thống vẫn giữ ngày học và để trống phần chưa có dữ liệu.</li>
+                        <li>Các phần không thuộc kế hoạch tuần sẽ được giảm ưu tiên hoặc bỏ qua để tránh nhiễu.</li>
+                    </ul>
+                </article>
+
+                <article class="tp-panel">
+                    <div class="tp-panel-header">
+                        <div>
+                            <h2>Thông tin file gần nhất</h2>
+                            <p>Giúp kiểm tra nhanh nguồn dữ liệu vừa nhập.</p>
+                        </div>
+                    </div>
+
+                    <dl class="tp-meta-list">
+                        <div>
+                            <dt>File</dt>
+                            <dd>@(LastImportedFileName ?? "Chưa import")</dd>
+                        </div>
+                        <div>
+                            <dt>Lớp áp dụng</dt>
+                            <dd>@SelectedClassCode</dd>
+                        </div>
+                        <div>
+                            <dt>Năm học</dt>
+                            <dd>@SelectedSchoolYear</dd>
+                        </div>
+                        <div>
+                            <dt>Lần cập nhật</dt>
+                            <dd>@(LastImportedAt?.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture) ?? "---")</dd>
+                        </div>
+                        <div>
+                            <dt>Nguồn dữ liệu</dt>
+                            <dd>@Plan.SourceLabel</dd>
+                        </div>
+                    </dl>
+                </article>
+            </aside>
+        </section>
+    </section>
+</div>
+
+@if (WeekEditor is not null)
+{
+    <div class="tp-modal-backdrop" @onclick="CloseEditors">
+        <div class="tp-modal" @onclick:stopPropagation>
+            <div class="tp-modal-header">
+                <h3>Chỉnh sửa tuần</h3>
+                <button type="button" class="tp-icon-btn" @onclick="CloseEditors">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <div class="tp-modal-body">
+                <div class="tp-field">
+                    <label class="tp-label">Tên tuần</label>
+                    <input class="tp-input" @bind="WeekEditor.Title" />
+                </div>
+
+                <div class="tp-field">
+                    <label class="tp-label">Mô tả / ghi chú tuần</label>
+                    <textarea class="tp-textarea" @bind="WeekEditor.Overview"></textarea>
+                </div>
+            </div>
+
+            <div class="tp-modal-footer">
+                <button type="button" class="tp-btn tp-btn-light" @onclick="CloseEditors">Hủy</button>
+                <button type="button" class="tp-btn tp-btn-primary" @onclick="SaveWeekEditor">Lưu chỉnh sửa</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (DayEditor is not null)
+{
+    <div class="tp-modal-backdrop" @onclick="CloseEditors">
+        <div class="tp-modal" @onclick:stopPropagation>
+            <div class="tp-modal-header">
+                <h3>Chỉnh sửa ngày</h3>
+                <button type="button" class="tp-icon-btn" @onclick="CloseEditors">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <div class="tp-modal-body">
+                <div class="tp-field">
+                    <label class="tp-label">Tên ngày</label>
+                    <input class="tp-input" @bind="DayEditor.Title" />
+                </div>
+
+                <div class="tp-field">
+                    <label class="tp-label">Ghi chú ngày</label>
+                    <input class="tp-input" @bind="DayEditor.Note" />
+                </div>
+
+                <div class="tp-field">
+                    <label class="tp-label">Nội dung ngày học</label>
+                    <textarea class="tp-textarea tp-textarea-lg" @bind="DayEditor.RawBody"></textarea>
+                </div>
+            </div>
+
+            <div class="tp-modal-footer">
+                <button type="button" class="tp-btn tp-btn-light" @onclick="CloseEditors">Hủy</button>
+                <button type="button" class="tp-btn tp-btn-primary" @onclick="SaveDayEditor">Lưu chỉnh sửa</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly string[] DefaultSectionTitles =
+    [
+        "Sinh hoạt sáng",
+        "Giờ học",
+        "HĐVC trong lớp",
+        "HĐVC ngoài trời",
+        "Giờ ăn",
+        "Giờ ngủ",
+        "Sinh hoạt chiều",
+        "Nhận xét cuối ngày"
+    ];
+
+    private static readonly Dictionary<string, string> KnownSectionTitles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["sinh hoat sang"] = "Sinh hoạt sáng",
+        ["don tre"] = "Sinh hoạt sáng",
+        ["gio hoc"] = "Giờ học",
+        ["hoat dong hoc"] = "Giờ học",
+        ["hoat dong hoc tap"] = "Giờ học",
+        ["hdvc trong lop"] = "HĐVC trong lớp",
+        ["hoat dong vui choi trong lop"] = "HĐVC trong lớp",
+        ["hoat dong goc"] = "HĐVC trong lớp",
+        ["hdvc ngoai troi"] = "HĐVC ngoài trời",
+        ["hoat dong vui choi ngoai troi"] = "HĐVC ngoài trời",
+        ["hoat dong ngoai troi"] = "HĐVC ngoài trời",
+        ["gio an"] = "Giờ ăn",
+        ["gio ngu"] = "Giờ ngủ",
+        ["ngu trua"] = "Giờ ngủ",
+        ["sinh hoat chieu"] = "Sinh hoạt chiều",
+        ["tra tre"] = "Sinh hoạt chiều",
+        ["nhan xet cuoi ngay"] = "Nhận xét cuối ngày",
+        ["danh gia cuoi ngay"] = "Nhận xét cuối ngày",
+        ["noi dung chung"] = "Nội dung chung",
+        ["muc tieu"] = "Mục tiêu",
+        ["chuan bi"] = "Chuẩn bị",
+        ["tien hanh"] = "Tiến hành"
+    };
+
+    private readonly List<string> AvailableClasses = ["Mầm 1A", "Mầm 2A", "Chồi 1", "Lá 1", "Lá 2"];
+    private readonly Regex WeekRegex = new(@"^\s*(tuan|week)\s*(?<index>[0-9ivx]+)?[\s:.\-]*(?<title>.*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private readonly Regex DayRegex = new(@"^\s*((thu\s*(hai|ba|tu|nam|sau|bay|2|3|4|5|6|7|cn|chu nhat))|(ngay\s*\d+)|(day\s*\d+))[\s:.\-]*(?<title>.*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private readonly Regex BulletRegex = new(@"^\s*(\-|\+|•|\*|\d+[\.\)])\s*", RegexOptions.Compiled);
+
+    private TeachingPlanDocument Plan { get; set; } = CreateMockPlan();
+    private string SelectedSchoolYear { get; set; } = "2025-2026";
+    private string SelectedClassCode { get; set; } = "Lá 1";
+    private string SelectedWeekIdText { get; set; } = string.Empty;
+    private string SelectedDayIdText { get; set; } = string.Empty;
+    private string? LastImportedFileName { get; set; }
+    private DateTime? LastImportedAt { get; set; }
+    private string? StatusMessage { get; set; }
+    private string StatusTone { get; set; } = "is-info";
+    private string StatusIcon { get; set; } = "info";
+    private WeekEditorModel? WeekEditor { get; set; }
+    private DayEditorModel? DayEditor { get; set; }
+    private Guid? SelectedWeekId => Guid.TryParse(SelectedWeekIdText, out var value) ? value : null;
+    private Guid? SelectedDayId => Guid.TryParse(SelectedDayIdText, out var value) ? value : null;
+
+    private List<TeachingDay> AvailableDaysForSelectedWeek =>
+        SelectedWeekId is Guid weekId
+            ? Plan.Weeks.FirstOrDefault(week => week.Id == weekId)?.Days ?? []
+            : [];
+
+    private List<TeachingWeek> DisplayWeeks =>
+        Plan.Weeks
+            .Where(week => SelectedWeekId is null || week.Id == SelectedWeekId.Value)
+            .Select(week => new TeachingWeek
+            {
+                Id = week.Id,
+                Title = week.Title,
+                Overview = week.Overview,
+                Days = week.Days
+                    .Where(day => SelectedDayId is null || day.Id == SelectedDayId.Value)
+                    .Select(CloneDay)
+                    .ToList()
+            })
+            .Where(week => week.Days.Count > 0 || SelectedDayId is null)
+            .ToList();
+
+    private async Task HandleDocxImport(InputFileChangeEventArgs eventArgs)
+    {
+        var file = eventArgs.File;
+
+        if (!file.Name.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+        {
+            SetStatus("Trang này hiện chỉ hỗ trợ import file Word định dạng .docx.", "is-error", "error");
+            return;
+        }
+
+        try
+        {
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            memory.Position = 0;
+
+            var paragraphs = ExtractParagraphsFromDocx(memory);
+            Plan = ParseTeachingPlan(paragraphs, file.Name);
+            LastImportedFileName = file.Name;
+            LastImportedAt = DateTime.Now;
+            ResetViewFilters();
+            CloseEditors();
+
+            SetStatus($"Đã import và bóc tách kế hoạch từ file {file.Name}.", "is-success", "check_circle");
+        }
+        catch (TeachingPlanImportException ex)
+        {
+            SetStatus(ex.Message, "is-error", "error");
+        }
+        catch
+        {
+            SetStatus("Không thể đọc file Word. Vui lòng kiểm tra lại định dạng .docx và thử lại.", "is-error", "error");
+        }
+    }
+
+    private void LoadMockPlan()
+    {
+        Plan = CreateMockPlan();
+        LastImportedFileName = "ke-hoach-mau.docx";
+        LastImportedAt = DateTime.Now;
+        ResetViewFilters();
+        CloseEditors();
+        SetStatus("Đã nạp dữ liệu mẫu cho giao diện kế hoạch giảng dạy.", "is-info", "description");
+    }
+
+    private void HandleWeekFilterChanged()
+    {
+        SelectedDayIdText = string.Empty;
+    }
+
+    private void ResetViewFilters()
+    {
+        SelectedWeekIdText = string.Empty;
+        SelectedDayIdText = string.Empty;
+    }
+
+    private static List<string> ExtractParagraphsFromDocx(Stream docxStream)
+    {
+        using var archive = new ZipArchive(docxStream, ZipArchiveMode.Read, leaveOpen: true);
+        var entry = archive.GetEntry("word/document.xml");
+        if (entry is null)
+        {
+            throw new TeachingPlanImportException("File Word không hợp lệ: thiếu nội dung document.xml.");
+        }
+
+        using var entryStream = entry.Open();
+        var xdoc = XDocument.Load(entryStream);
+        XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+
+        var paragraphs = xdoc
+            .Descendants(w + "p")
+            .Select(paragraph =>
+            {
+                var text = string.Concat(paragraph.Descendants(w + "t").Select(node => node.Value));
+                return NormalizeWhitespace(text);
+            })
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .ToList();
+
+        if (paragraphs.Count == 0)
+        {
+            throw new TeachingPlanImportException("File Word không có nội dung text để phân tích.");
+        }
+
+        return paragraphs;
+    }
+
+    private TeachingPlanDocument ParseTeachingPlan(List<string> paragraphs, string sourceFileName)
+    {
+        var document = new TeachingPlanDocument
+        {
+            SourceLabel = sourceFileName
+        };
+
+        TeachingWeek? currentWeek = null;
+        TeachingDay? currentDay = null;
+        TeachingSection? currentSection = null;
+        var weekIndex = 1;
+        var dayIndex = 1;
+        var insideWeeklyPlan = false;
+
+        foreach (var originalParagraph in paragraphs)
+        {
+            var paragraph = NormalizeWhitespace(originalParagraph);
+            if (string.IsNullOrWhiteSpace(paragraph))
+            {
+                continue;
+            }
+
+            var normalized = NormalizeForMatch(paragraph);
+            if (ShouldSkipLine(normalized))
+            {
+                continue;
+            }
+
+            if (normalized.Contains("ke hoach tuan"))
+            {
+                insideWeeklyPlan = true;
+                continue;
+            }
+
+            if (!insideWeeklyPlan && !IsWeekHeading(normalized))
+            {
+                continue;
+            }
+
+            if (TryCreateWeek(paragraph, normalized, ref weekIndex, out var week))
+            {
+                insideWeeklyPlan = true;
+                currentWeek = week;
+                document.Weeks.Add(currentWeek);
+                currentDay = null;
+                currentSection = null;
+                dayIndex = 1;
+                continue;
+            }
+
+            if (!insideWeeklyPlan)
+            {
+                continue;
+            }
+
+            if (TryCreateDay(paragraph, normalized, ref dayIndex, out var day))
+            {
+                if (currentWeek is null)
+                {
+                    currentWeek = CreateFallbackWeek(weekIndex++);
+                    document.Weeks.Add(currentWeek);
+                }
+
+                currentDay = day;
+                currentWeek.Days.Add(currentDay);
+                currentSection = null;
+                continue;
+            }
+
+            if (currentWeek is null)
+            {
+                currentWeek = CreateFallbackWeek(weekIndex++);
+                document.Weeks.Add(currentWeek);
+            }
+
+            if (currentDay is null)
+            {
+                currentWeek.Overview = AppendLine(currentWeek.Overview, paragraph);
+                continue;
+            }
+
+            if (TryCreateSection(paragraph, normalized, out var section, out var remainder))
+            {
+                currentSection = section;
+                currentDay.Sections.Add(currentSection);
+
+                if (!string.IsNullOrWhiteSpace(remainder))
+                {
+                    currentSection.Items.Add(NormalizeTask(remainder));
+                }
+
+                continue;
+            }
+
+            var splitSections = SplitInlineSections(paragraph);
+            if (splitSections.Count > 1)
+            {
+                foreach (var chunk in splitSections)
+                {
+                    var chunkNormalized = NormalizeForMatch(chunk);
+                    if (TryCreateSection(chunk, chunkNormalized, out var chunkSection, out var chunkRemainder))
+                    {
+                        currentSection = chunkSection;
+                        currentDay.Sections.Add(currentSection);
+                        if (!string.IsNullOrWhiteSpace(chunkRemainder))
+                        {
+                            currentSection.Items.Add(NormalizeTask(chunkRemainder));
+                        }
+                    }
+                    else
+                    {
+                        AddParagraphToDay(currentDay, ref currentSection, chunk);
+                    }
+                }
+
+                continue;
+            }
+
+            AddParagraphToDay(currentDay, ref currentSection, paragraph);
+        }
+
+        NormalizeDocument(document);
+
+        if (document.Weeks.Count == 0)
+        {
+            throw new TeachingPlanImportException("Chưa nhận diện được tuần nào từ file Word. Hãy thử thêm keyword như 'Tuần 1', 'Ngày 1' hoặc 'Thứ Hai'.");
+        }
+
+        return document;
+    }
+
+    private static bool ShouldSkipLine(string normalized)
+    {
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return true;
+        }
+
+        if (normalized.Contains("see attachment"))
+        {
+            return true;
+        }
+
+        if (normalized.StartsWith("ke hoach giao duc nam hoc") ||
+            normalized.StartsWith("ke hoach giao duc thang") ||
+            normalized.StartsWith("muc tieu") ||
+            normalized.StartsWith("linh vuc") ||
+            normalized.StartsWith("bo cong cu danh gia") ||
+            normalized.StartsWith("dac diem tinh hinh lop") ||
+            normalized.StartsWith("hinh thuc giao duc"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsWeekHeading(string normalized)
+    {
+        return normalized.StartsWith("tuan ") || normalized == "tuan" || normalized.StartsWith("week ");
+    }
+
+    private bool TryCreateWeek(string paragraph, string normalized, ref int weekIndex, out TeachingWeek week)
+    {
+        var match = WeekRegex.Match(normalized);
+        if (!match.Success)
+        {
+            week = default!;
+            return false;
+        }
+
+        var title = paragraph.Trim();
+        if (NormalizeForMatch(title) == "tuan" || NormalizeForMatch(title) == "week")
+        {
+            title = $"Tuần {weekIndex}";
+        }
+
+        week = new TeachingWeek
+        {
+            Id = Guid.NewGuid(),
+            Title = title
+        };
+
+        weekIndex++;
+        return true;
+    }
+
+    private bool TryCreateDay(string paragraph, string normalized, ref int dayIndex, out TeachingDay day)
+    {
+        var match = DayRegex.Match(normalized);
+        if (!match.Success)
+        {
+            day = default!;
+            return false;
+        }
+
+        var title = paragraph.Trim();
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            title = $"Ngày {dayIndex}";
+        }
+
+        day = new TeachingDay
+        {
+            Id = Guid.NewGuid(),
+            Title = title
+        };
+
+        dayIndex++;
+        return true;
+    }
+
+    private static TeachingWeek CreateFallbackWeek(int weekIndex)
+    {
+        return new TeachingWeek
+        {
+            Id = Guid.NewGuid(),
+            Title = $"Tuần {weekIndex}"
+        };
+    }
+
+    private bool TryCreateSection(string paragraph, string normalized, out TeachingSection section, out string remainder)
+    {
+        foreach (var entry in KnownSectionTitles)
+        {
+            if (!normalized.StartsWith(entry.Key, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var nextChar = normalized.Length > entry.Key.Length ? normalized[entry.Key.Length] : '\0';
+            if (nextChar != '\0' && !char.IsWhiteSpace(nextChar) && nextChar != ':' && nextChar != '-' && nextChar != '.')
+            {
+                continue;
+            }
+
+            remainder = paragraph.Length > entry.Key.Length
+                ? paragraph[entry.Key.Length..].Trim(' ', ':', '-', '.', '–')
+                : string.Empty;
+
+            section = new TeachingSection
+            {
+                Id = Guid.NewGuid(),
+                Title = entry.Value
+            };
+
+            return true;
+        }
+
+        section = default!;
+        remainder = string.Empty;
+        return false;
+    }
+
+    private List<string> SplitInlineSections(string paragraph)
+    {
+        var normalized = NormalizeForMatch(paragraph);
+        var matches = KnownSectionTitles.Keys
+            .Select(label => new
+            {
+                Index = normalized.IndexOf(label, StringComparison.Ordinal)
+            })
+            .Where(item => item.Index > 0)
+            .OrderBy(item => item.Index)
+            .ToList();
+
+        if (matches.Count == 0)
+        {
+            return [paragraph];
+        }
+
+        var ranges = new List<int> { 0 };
+        ranges.AddRange(matches.Select(match => match.Index));
+        ranges = ranges.Distinct().OrderBy(index => index).ToList();
+
+        var results = new List<string>();
+        for (var i = 0; i < ranges.Count; i++)
+        {
+            var start = ranges[i];
+            var end = i == ranges.Count - 1 ? paragraph.Length : ranges[i + 1];
+            if (end <= start)
+            {
+                continue;
+            }
+
+            var chunk = paragraph[start..end].Trim();
+            if (!string.IsNullOrWhiteSpace(chunk))
+            {
+                results.Add(chunk);
+            }
+        }
+
+        return results.Count == 0 ? [paragraph] : results;
+    }
+
+    private void AddParagraphToDay(TeachingDay day, ref TeachingSection? currentSection, string paragraph)
+    {
+        var normalized = NormalizeForMatch(paragraph);
+
+        if (string.IsNullOrWhiteSpace(day.Note) && !LooksLikeTaskLine(normalized))
+        {
+            day.Note = paragraph;
+            return;
+        }
+
+        currentSection ??= EnsureSection(day, "Nội dung chung");
+        currentSection.Items.Add(NormalizeTask(paragraph));
+    }
+
+    private static bool LooksLikeTaskLine(string normalized)
+    {
+        return normalized.StartsWith("-") ||
+               normalized.StartsWith("+") ||
+               normalized.StartsWith("*") ||
+               Regex.IsMatch(normalized, @"^\d+[\.\)]");
+    }
+
+    private static TeachingSection EnsureSection(TeachingDay day, string title)
+    {
+        var section = day.Sections.FirstOrDefault(item => string.Equals(item.Title, title, StringComparison.OrdinalIgnoreCase));
+        if (section is not null)
+        {
+            return section;
+        }
+
+        section = new TeachingSection
+        {
+            Id = Guid.NewGuid(),
+            Title = title
+        };
+        day.Sections.Add(section);
+        return section;
+    }
+
+    private string NormalizeTask(string line)
+    {
+        var cleaned = BulletRegex.Replace(line, string.Empty).Trim();
+        return string.IsNullOrWhiteSpace(cleaned) ? NormalizeWhitespace(line) : NormalizeWhitespace(cleaned);
+    }
+
+    private static string NormalizeWhitespace(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        var cleaned = text
+            .Replace('\u00A0', ' ')
+            .Replace('\t', ' ');
+
+        cleaned = Regex.Replace(cleaned, @"\s+", " ").Trim();
+        return cleaned;
+    }
+
+    private static string NormalizeForMatch(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        var decomposed = text.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(decomposed.Length);
+
+        foreach (var character in decomposed)
+        {
+            var category = CharUnicodeInfo.GetUnicodeCategory(character);
+            if (category == UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            builder.Append(character switch
+            {
+                'đ' => 'd',
+                'Đ' => 'd',
+                _ => character
+            });
+        }
+
+        return Regex.Replace(builder.ToString(), @"\s+", " ").Trim();
+    }
+
+    private static string AppendLine(string currentValue, string nextLine)
+    {
+        if (string.IsNullOrWhiteSpace(currentValue))
+        {
+            return nextLine;
+        }
+
+        return $"{currentValue} {nextLine}".Trim();
+    }
+
+    private static TeachingDay CloneDay(TeachingDay day)
+    {
+        return new TeachingDay
+        {
+            Id = day.Id,
+            Title = day.Title,
+            Note = day.Note,
+            Sections = day.Sections.Select(CloneSection).ToList()
+        };
+    }
+
+    private static TeachingSection CloneSection(TeachingSection section)
+    {
+        return new TeachingSection
+        {
+            Id = section.Id,
+            Title = section.Title,
+            Items = [.. section.Items]
+        };
+    }
+
+    private static void NormalizeDocument(TeachingPlanDocument document)
+    {
+        foreach (var week in document.Weeks)
+        {
+            week.Title = string.IsNullOrWhiteSpace(week.Title) ? "Tuần chưa đặt tên" : week.Title.Trim();
+            week.Overview = week.Overview?.Trim() ?? string.Empty;
+
+            foreach (var day in week.Days)
+            {
+                day.Title = string.IsNullOrWhiteSpace(day.Title) ? "Ngày học" : day.Title.Trim();
+                day.Note = day.Note?.Trim() ?? string.Empty;
+
+                var normalizedSections = day.Sections
+                    .Select(section => new TeachingSection
+                    {
+                        Id = section.Id == Guid.Empty ? Guid.NewGuid() : section.Id,
+                        Title = string.IsNullOrWhiteSpace(section.Title) ? "Nội dung chung" : section.Title.Trim(),
+                        Items = section.Items
+                            .Where(item => !string.IsNullOrWhiteSpace(item))
+                            .Select(NormalizeWhitespace)
+                            .Distinct()
+                            .ToList()
+                    })
+                    .GroupBy(section => section.Title, StringComparer.OrdinalIgnoreCase)
+                    .Select(group => new TeachingSection
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = group.First().Title,
+                        Items = group.SelectMany(section => section.Items).Distinct().ToList()
+                    })
+                    .ToList();
+
+                day.Sections = normalizedSections;
+
+                var hadStructuredSections = day.Sections.Any(section => DefaultSectionTitles.Contains(section.Title, StringComparer.OrdinalIgnoreCase));
+                if (hadStructuredSections)
+                {
+                    foreach (var title in DefaultSectionTitles)
+                    {
+                        EnsureSection(day, title);
+                    }
+                }
+
+                if (day.Sections.Count == 0)
+                {
+                    day.Sections.Add(new TeachingSection
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = "Nội dung chung"
+                    });
+                }
+            }
+        }
+    }
+
+    private void OpenWeekEditor(Guid weekId)
+    {
+        var week = Plan.Weeks.FirstOrDefault(item => item.Id == weekId);
+        if (week is null)
+        {
+            return;
+        }
+
+        WeekEditor = new WeekEditorModel
+        {
+            WeekId = weekId,
+            Title = week.Title,
+            Overview = week.Overview
+        };
+        DayEditor = null;
+    }
+
+    private void SaveWeekEditor()
+    {
+        if (WeekEditor is null)
+        {
+            return;
+        }
+
+        var week = Plan.Weeks.FirstOrDefault(item => item.Id == WeekEditor.WeekId);
+        if (week is null)
+        {
+            return;
+        }
+
+        week.Title = string.IsNullOrWhiteSpace(WeekEditor.Title) ? week.Title : WeekEditor.Title.Trim();
+        week.Overview = WeekEditor.Overview?.Trim() ?? string.Empty;
+        WeekEditor = null;
+        SetStatus("Đã cập nhật thông tin tuần học.", "is-success", "check_circle");
+    }
+
+    private void OpenDayEditor(Guid weekId, Guid dayId)
+    {
+        var week = Plan.Weeks.FirstOrDefault(item => item.Id == weekId);
+        var day = week?.Days.FirstOrDefault(item => item.Id == dayId);
+        if (day is null)
+        {
+            return;
+        }
+
+        DayEditor = new DayEditorModel
+        {
+            WeekId = weekId,
+            DayId = dayId,
+            Title = day.Title,
+            Note = day.Note,
+            RawBody = SerializeDay(day)
+        };
+        WeekEditor = null;
+    }
+
+    private void SaveDayEditor()
+    {
+        if (DayEditor is null)
+        {
+            return;
+        }
+
+        var week = Plan.Weeks.FirstOrDefault(item => item.Id == DayEditor.WeekId);
+        var day = week?.Days.FirstOrDefault(item => item.Id == DayEditor.DayId);
+        if (day is null)
+        {
+            return;
+        }
+
+        day.Title = string.IsNullOrWhiteSpace(DayEditor.Title) ? day.Title : DayEditor.Title.Trim();
+        day.Note = DayEditor.Note?.Trim() ?? string.Empty;
+        day.Sections = ParseEditorBody(DayEditor.RawBody);
+        NormalizeDocument(Plan);
+
+        DayEditor = null;
+        SetStatus("Đã cập nhật kế hoạch của ngày học.", "is-success", "check_circle");
+    }
+
+    private string SerializeDay(TeachingDay day)
+    {
+        var lines = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(day.Note))
+        {
+            lines.Add(day.Note);
+            lines.Add(string.Empty);
+        }
+
+        foreach (var section in day.Sections)
+        {
+            lines.Add($"{section.Title}:");
+            if (section.Items.Count == 0)
+            {
+                lines.Add(string.Empty);
+            }
+            else
+            {
+                lines.AddRange(section.Items.Select(item => $"- {item}"));
+            }
+
+            lines.Add(string.Empty);
+        }
+
+        return string.Join(Environment.NewLine, lines).Trim();
+    }
+
+    private List<TeachingSection> ParseEditorBody(string rawBody)
+    {
+        var sections = new List<TeachingSection>();
+        TeachingSection? currentSection = null;
+
+        var lines = rawBody
+            .Split(['\r', '\n'], StringSplitOptions.TrimEntries)
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToList();
+
+        foreach (var line in lines)
+        {
+            var normalized = NormalizeForMatch(line);
+            if (TryCreateSection(line, normalized, out var section, out var remainder))
+            {
+                currentSection = section;
+                sections.Add(currentSection);
+                if (!string.IsNullOrWhiteSpace(remainder))
+                {
+                    currentSection.Items.Add(NormalizeTask(remainder));
+                }
+
+                continue;
+            }
+
+            currentSection ??= new TeachingSection
+            {
+                Id = Guid.NewGuid(),
+                Title = "Nội dung chung"
+            };
+
+            if (!sections.Contains(currentSection))
+            {
+                sections.Add(currentSection);
+            }
+
+            currentSection.Items.Add(NormalizeTask(line));
+        }
+
+        return sections;
+    }
+
+    private void RemoveWeek(Guid weekId)
+    {
+        var week = Plan.Weeks.FirstOrDefault(item => item.Id == weekId);
+        if (week is null)
+        {
+            return;
+        }
+
+        Plan.Weeks.Remove(week);
+        CloseEditors();
+        SetStatus($"Đã xóa {week.Title.ToLowerInvariant()}.", "is-info", "delete");
+    }
+
+    private void RemoveDay(Guid weekId, Guid dayId)
+    {
+        var week = Plan.Weeks.FirstOrDefault(item => item.Id == weekId);
+        var day = week?.Days.FirstOrDefault(item => item.Id == dayId);
+        if (day is null)
+        {
+            return;
+        }
+
+        week!.Days.Remove(day);
+        CloseEditors();
+        SetStatus($"Đã xóa mục {day.Title.ToLowerInvariant()}.", "is-info", "delete");
+    }
+
+    private void CloseEditors()
+    {
+        WeekEditor = null;
+        DayEditor = null;
+    }
+
+    private void SetStatus(string message, string tone, string icon)
+    {
+        StatusMessage = message;
+        StatusTone = tone;
+        StatusIcon = icon;
+    }
+
+    private static TeachingPlanDocument CreateMockPlan()
+    {
+        return new TeachingPlanDocument
+        {
+            SourceLabel = "Dữ liệu mẫu",
+            Weeks =
+            [
+                new TeachingWeek
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Tuần 1 - Làm quen chủ đề Bản thân",
+                    Overview = "Trọng tâm là ổn định nề nếp, giúp bé quen lớp, quen bạn và bắt đầu các hoạt động đầu ngày.",
+                    Days =
+                    [
+                        new TeachingDay
+                        {
+                            Id = Guid.NewGuid(),
+                            Title = "Ngày 1 - Thứ Hai",
+                            Note = "Ưu tiên hoạt động nhẹ và tạo cảm giác an toàn cho bé trong tuần đầu.",
+                            Sections =
+                            [
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Sinh hoạt sáng",
+                                    Items = ["Đón trẻ và trò chuyện đầu giờ", "Điểm danh, quan sát cảm xúc của bé"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Giờ học",
+                                    Items = ["Bé giới thiệu tên mình", "Làm quen góc học tập trong lớp"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "HĐVC trong lớp",
+                                    Items = ["Xếp hình khuôn mặt", "Chơi theo nhóm nhỏ"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Giờ ăn",
+                                    Items = ["Rèn bé tự lấy muỗng", "Nhắc bé ngồi đúng tư thế"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Nhận xét cuối ngày",
+                                    Items = ["Bé hòa nhập tốt, cần nhắc thêm khi xếp dép đúng vị trí"]
+                                }
+                            ]
+                        },
+                        new TeachingDay
+                        {
+                            Id = Guid.NewGuid(),
+                            Title = "Ngày 2 - Thứ Ba",
+                            Note = "Tập trung vào giao tiếp và nề nếp chào hỏi.",
+                            Sections =
+                            [
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Sinh hoạt sáng",
+                                    Items = ["Trò chuyện với phụ huynh", "Cho bé tự cất balo"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Giờ học",
+                                    Items = ["Kể chuyện theo tranh", "Nhận biết bạn trai - bạn gái"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Sinh hoạt chiều",
+                                    Items = ["Ôn kỹ năng chào hỏi", "Chơi vận động nhẹ"]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                new TeachingWeek
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Tuần 2 - Cơ thể của bé",
+                    Overview = "Lồng ghép nhận biết bộ phận cơ thể và thói quen vệ sinh cá nhân.",
+                    Days =
+                    [
+                        new TeachingDay
+                        {
+                            Id = Guid.NewGuid(),
+                            Title = "Ngày 1 - Thứ Tư",
+                            Sections =
+                            [
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Giờ học",
+                                    Items = ["Nhận biết mắt, mũi, tai", "Thực hành rửa tay đúng bước"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "HĐVC ngoài trời",
+                                    Items = ["Quan sát bóng nắng", "Chơi theo vạch"]
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Giờ ngủ",
+                                    Items = []
+                                },
+                                new TeachingSection
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Title = "Nhận xét cuối ngày",
+                                    Items = ["Bé tham gia tốt, cần nhắc thêm khi xếp hàng"]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+    }
+
+    private sealed class TeachingPlanDocument
+    {
+        public string SourceLabel { get; set; } = "Chưa có dữ liệu";
+        public List<TeachingWeek> Weeks { get; set; } = [];
+    }
+
+    private sealed class TeachingWeek
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Overview { get; set; } = string.Empty;
+        public List<TeachingDay> Days { get; set; } = [];
+    }
+
+    private sealed class TeachingDay
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Note { get; set; } = string.Empty;
+        public List<TeachingSection> Sections { get; set; } = [];
+    }
+
+    private sealed class TeachingSection
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public List<string> Items { get; set; } = [];
+    }
+
+    private sealed class WeekEditorModel
+    {
+        public Guid WeekId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Overview { get; set; } = string.Empty;
+    }
+
+    private sealed class DayEditorModel
+    {
+        public Guid WeekId { get; set; }
+        public Guid DayId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Note { get; set; } = string.Empty;
+        public string RawBody { get; set; } = string.Empty;
+    }
+
+    private sealed class TeachingPlanImportException(string message) : Exception(message);
+}

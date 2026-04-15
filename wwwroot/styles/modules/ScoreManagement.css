@@ -1,0 +1,697 @@
+@charset "UTF-8";
+
+:root {
+  --score-primary: var(--kg-primary);
+  --score-primary-strong: var(--kg-primary-strong);
+  --score-primary-soft: var(--kg-primary-soft);
+  --score-secondary: var(--kg-secondary);
+  --score-secondary-soft: var(--kg-secondary-soft);
+  --score-accent: var(--kg-accent);
+  --score-accent-soft: var(--kg-accent-soft);
+  --score-success: var(--kg-success);
+  --score-success-soft: var(--kg-success-soft);
+  --score-danger: var(--kg-danger);
+  --score-danger-soft: var(--kg-danger-soft);
+  --score-surface: var(--kg-bg-card);
+  --score-surface-alt: var(--kg-bg-subtle);
+  --score-surface-soft: color-mix(
+    in srgb,
+    var(--kg-primary-soft) 42%,
+    var(--kg-bg-card)
+  );
+  --score-border: var(--kg-border);
+  --score-text: var(--kg-text-main);
+  --score-text-muted: var(--kg-text-muted);
+  --score-shadow: 0 18px 40px
+    color-mix(in srgb, var(--kg-primary) 10%, transparent);
+  --score-radius-lg: 28px;
+  --score-radius-md: 20px;
+  --score-radius-sm: 14px;
+}
+
+.score-module,
+.score-admin-page,
+.score-attendance-page,
+.score-grade-page,
+.score-grade-view,
+.score-sheet-page {
+  color: var(--score-text);
+  font-family: var(--font-body);
+}
+
+.score-module {
+  padding: 1.5rem;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--score-primary-soft) 46%, transparent) 0%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      color-mix(in srgb, var(--score-secondary-soft) 52%, transparent) 0%,
+      transparent 24%
+    ),
+    var(--kg-bg-page);
+}
+
+.score-module__content {
+  gap: 1.4rem;
+}
+
+.score-module__toolbar,
+.score-module__section {
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-lg);
+  background: color-mix(in srgb, var(--score-surface) 94%, white);
+  box-shadow: var(--score-shadow);
+}
+
+.score-module__toolbar {
+  padding: 1.35rem 1.45rem;
+}
+
+.score-module__title-icon {
+  color: var(--score-primary);
+}
+
+.score-module__intro p {
+  max-width: 720px;
+}
+
+.score-module__filter {
+  min-width: 240px;
+  padding: 0.95rem 1rem;
+  border-radius: var(--score-radius-md);
+  border: 1px solid var(--score-border);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--score-primary-soft) 46%, white) 0%,
+    var(--score-surface) 100%
+  );
+}
+
+.score-module__filter label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--score-text-muted);
+}
+
+.score-module__section {
+  padding: 1.1rem;
+}
+
+.score-module__section-title {
+  margin-bottom: 1rem;
+}
+
+.score-module__card {
+  border-radius: var(--score-radius-md);
+  border: 1px solid color-mix(in srgb, var(--score-border) 84%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--score-primary-soft) 16%, var(--score-surface)) 0%,
+    var(--score-surface) 100%
+  );
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.score-module__card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(
+    in srgb,
+    var(--score-primary) 28%,
+    var(--score-border)
+  );
+  box-shadow: 0 20px 32px
+    color-mix(in srgb, var(--score-primary) 14%, transparent);
+}
+
+.score-module .v-card-body h3 {
+  color: var(--score-text);
+}
+
+.score-module .v-card-body p,
+.score-module .v-card-footer {
+  color: var(--score-text-muted);
+}
+
+.score-admin-page,
+.score-attendance-page,
+.score-grade-page,
+.score-sheet-page {
+  padding: 1.5rem;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--score-primary-soft) 34%, transparent) 0%,
+      transparent 26%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--score-surface-alt) 80%, white) 0%,
+      var(--score-surface-alt) 100%
+    );
+}
+
+.score-admin-page .page-title,
+.score-attendance-page .page-title,
+.score-grade-page .page-title,
+.score-sheet-page .st-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 1.15rem 1.35rem;
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-lg);
+  background: var(--score-surface);
+  box-shadow: var(--score-shadow);
+}
+
+.score-admin-page .page-title h4,
+.score-attendance-page .page-title h4,
+.score-grade-page .page-title h4,
+.score-sheet-page .st-page-header h4 {
+  margin: 0;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-weight: 800;
+  color: var(--score-text);
+}
+
+.score-admin-page .icon-title,
+.score-attendance-page .icon-title,
+.score-grade-page .icon-title,
+.score-sheet-page .st-title-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 24px
+    color-mix(in srgb, var(--score-primary) 16%, transparent);
+}
+
+.score-admin-page .filter-bar,
+.score-attendance-page .filter-bar,
+.score-grade-page .filter-bar,
+.score-sheet-page .st-filter-bar,
+.score-sheet-page .st-filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: end;
+  margin-bottom: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-md);
+  background: var(--score-surface);
+  box-shadow: 0 12px 26px
+    color-mix(in srgb, var(--score-primary) 8%, transparent);
+}
+
+.score-admin-page .filter-group,
+.score-attendance-page .group,
+.score-grade-page .group,
+.score-sheet-page .st-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 150px;
+}
+
+.score-admin-page .filter-group label,
+.score-attendance-page .group label,
+.score-grade-page .group label,
+.score-sheet-page .st-filter-group label {
+  margin: 0;
+  font-size: 0.77rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--score-text-muted);
+}
+
+.score-admin-page .form-select,
+.score-admin-page .form-select-sm,
+.score-attendance-page .select-highlight,
+.score-grade-page .select-highlight,
+.score-sheet-page .st-form-control,
+.score-sheet-page .st-form-select-sm {
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-sm);
+  background: var(--score-surface);
+  color: var(--score-text);
+  box-shadow: none;
+}
+
+.score-admin-page .form-select:focus,
+.score-admin-page .form-select-sm:focus,
+.score-attendance-page .select-highlight:focus,
+.score-grade-page .select-highlight:focus,
+.score-sheet-page .st-form-control:focus,
+.score-sheet-page .st-form-select-sm:focus,
+.score-sheet-page .st-check-input:focus {
+  border-color: color-mix(
+    in srgb,
+    var(--score-primary) 38%,
+    var(--score-border)
+  );
+  outline: none;
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--score-primary-soft) 70%, transparent);
+}
+
+.score-admin-page .table-container,
+.score-admin-page .sidebar-card,
+.score-admin-page .content-card,
+.score-attendance-page .table-container,
+.score-grade-page .content-area-wrapper,
+.score-grade-view .table-container,
+.score-grade-view .table-scroll-area,
+.score-sheet-page .st-panel,
+.score-sheet-page .st-table-container,
+.score-sheet-page .st-lock-wrapper {
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-lg);
+  background: var(--score-surface);
+  box-shadow: var(--score-shadow);
+}
+
+.score-admin-page .table-container,
+.score-attendance-page .table-container,
+.score-grade-view .table-container,
+.score-grade-view .table-scroll-area,
+.score-sheet-page .st-table-container,
+.score-sheet-page .st-lock-wrapper {
+  overflow: hidden;
+}
+
+.score-admin-page .custom-table,
+.score-admin-page .table,
+.score-attendance-page .excel-table,
+.score-grade-view .excel-table,
+.score-sheet-page .st-table,
+.score-sheet-page .st-excel-table {
+  width: 100%;
+}
+
+.score-admin-page table th,
+.score-attendance-page .excel-table th,
+.score-grade-view .excel-table th,
+.score-sheet-page .st-table th,
+.score-sheet-page .st-excel-table th {
+  background: color-mix(
+    in srgb,
+    var(--score-primary-soft) 28%,
+    var(--score-surface-alt)
+  );
+  color: var(--score-text-muted);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-admin-page table td,
+.score-attendance-page .excel-table td,
+.score-grade-view .excel-table td,
+.score-sheet-page .st-table td,
+.score-sheet-page .st-excel-table td {
+  color: var(--score-text);
+  background: var(--score-surface);
+}
+
+.score-admin-page tbody tr:hover td,
+.score-attendance-page .excel-table tbody tr:hover td,
+.score-grade-view .excel-table tbody tr:hover td,
+.score-sheet-page .st-table tbody tr:hover td,
+.score-sheet-page .st-excel-table tbody tr:hover td {
+  background: color-mix(
+    in srgb,
+    var(--score-primary-soft) 14%,
+    var(--score-surface)
+  );
+}
+
+.score-admin-page .btn,
+.score-attendance-page .btn-custom,
+.score-attendance-page .btn-excel,
+.score-grade-page .btn-custom,
+.score-grade-view .btn-tool,
+.score-sheet-page .st-btn {
+  min-height: 42px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.score-admin-page .btn:hover,
+.score-attendance-page .btn-custom:hover,
+.score-attendance-page .btn-excel:hover,
+.score-grade-page .btn-custom:hover,
+.score-grade-view .btn-tool:hover,
+.score-sheet-page .st-btn:hover {
+  transform: translateY(-1px);
+}
+
+.score-admin-page .btn-primary,
+.score-attendance-page .btn-primary,
+.score-grade-page .btn-primary,
+.score-grade-view .btn-print,
+.score-sheet-page .st-btn-primary {
+  background: var(--score-primary);
+  color: var(--score-surface);
+  box-shadow: 0 14px 24px
+    color-mix(in srgb, var(--score-primary) 18%, transparent);
+}
+
+.score-admin-page .btn-success,
+.score-attendance-page .btn-save,
+.score-grade-view .btn-upload,
+.score-sheet-page .st-btn-success {
+  background: var(--score-success);
+  color: var(--score-surface);
+  box-shadow: 0 14px 24px
+    color-mix(in srgb, var(--score-success) 18%, transparent);
+}
+
+.score-admin-page .btn-danger,
+.score-grade-view .btn-submit,
+.score-sheet-page .st-btn-warning {
+  background: var(--score-accent);
+  color: var(--score-text);
+}
+
+.score-admin-page .btn-outline-secondary,
+.score-admin-page .btn-outline-primary,
+.score-grade-page .btn-outline,
+.score-grade-view .btn-excel,
+.score-sheet-page .st-btn-outline {
+  background: var(--score-surface);
+  color: var(--score-text);
+  border-color: var(--score-border);
+}
+
+.score-admin-page .btn-outline-secondary:hover,
+.score-admin-page .btn-outline-primary:hover,
+.score-grade-page .btn-outline:hover,
+.score-grade-view .btn-excel:hover,
+.score-sheet-page .st-btn-outline:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--score-primary) 34%,
+    var(--score-border)
+  );
+  color: var(--score-primary);
+  background: var(--score-surface-soft);
+}
+
+.score-admin-page .badge,
+.score-admin-page .bg-light,
+.score-grade-view .badge-mini,
+.score-sheet-page .st-badge {
+  border-radius: 999px;
+}
+
+.score-attendance-page .header-section,
+.score-grade-page .content-area-wrapper,
+.score-grade-view .view-container,
+.score-sheet-page .st-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.score-grade-page .content-area-wrapper {
+  padding: 1rem;
+}
+
+.score-grade-view .class-info-bar,
+.score-attendance-page .class-info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--score-primary-soft) 26%, var(--score-surface)) 0%,
+    var(--score-surface) 100%
+  );
+}
+
+.score-grade-view .action-bar,
+.score-attendance-page .actions-group,
+.score-grade-page .actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.score-grade-view .lock-banner,
+.score-sheet-page .st-alert,
+.score-admin-page .alert-box,
+.score-attendance-page .alert-box {
+  border-radius: var(--score-radius-md);
+  border: 1px solid
+    color-mix(in srgb, var(--score-accent) 28%, var(--score-border));
+  background: color-mix(
+    in srgb,
+    var(--score-accent-soft) 62%,
+    var(--score-surface)
+  );
+}
+
+.score-grade-view .toolbar-actions,
+.score-grade-view .quick-fill-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.score-grade-view .quick-fill-panel {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-md);
+  background: color-mix(
+    in srgb,
+    var(--score-primary-soft) 22%,
+    var(--score-surface)
+  );
+}
+
+.score-grade-view .q-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-weight: 700;
+  color: var(--score-text);
+}
+
+.score-grade-view .q-group button {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.8rem;
+  border: 1px solid var(--score-border);
+  border-radius: 999px;
+  background: var(--score-surface);
+  color: var(--score-primary);
+  font-weight: 800;
+}
+
+.score-attendance-page .seamless-input,
+.score-sheet-page .st-inp,
+.score-grade-view .inp-m,
+.score-grade-view .inp-nd {
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--score-surface-alt) 70%, white);
+}
+
+.score-attendance-page .seamless-input:focus,
+.score-sheet-page .st-inp:focus,
+.score-grade-view .inp-m:focus,
+.score-grade-view .inp-nd:focus {
+  border-color: color-mix(
+    in srgb,
+    var(--score-primary) 40%,
+    var(--score-border)
+  );
+  outline: none;
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--score-primary-soft) 66%, transparent);
+  background: var(--score-surface);
+}
+
+.score-admin-page .content-header,
+.score-admin-page .sidebar-header,
+.score-admin-page .sidebar-content,
+.score-admin-page .content-body {
+  padding: 1rem 1.1rem;
+}
+
+.score-admin-page .class-item {
+  border-radius: 16px;
+  border: 1px solid var(--score-border);
+  background: var(--score-surface);
+}
+
+.score-admin-page .class-item.active,
+.score-admin-page .class-item:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--score-primary) 32%,
+    var(--score-border)
+  );
+  background: color-mix(
+    in srgb,
+    var(--score-primary-soft) 24%,
+    var(--score-surface)
+  );
+}
+
+.score-sheet-page .st-modal-content,
+.score-grade-view .modal-content-custom {
+  border: 1px solid var(--score-border);
+  border-radius: var(--score-radius-lg);
+  box-shadow: 0 24px 50px color-mix(in srgb, black 18%, transparent);
+}
+
+.score-sheet-page .st-modal-header,
+.score-grade-view .modal-header-custom {
+  background: linear-gradient(
+    135deg,
+    var(--score-primary) 0%,
+    var(--score-primary-strong) 100%
+  );
+}
+
+.score-sheet-page .st-footer,
+.score-grade-view .modal-footer-custom,
+.score-sheet-page .st-modal-footer {
+  border-top: 1px solid var(--score-border);
+  background: color-mix(in srgb, var(--score-surface-alt) 54%, white);
+}
+
+.score-sheet-page .st-lock-wrapper,
+.score-sheet-page .st-panel,
+.score-sheet-page .st-table-container {
+  padding: 0.85rem;
+}
+
+.score-sheet-page .st-filter-toolbar .st-search-group {
+  min-width: 260px;
+}
+
+.score-sheet-page .st-progress-track {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--score-border) 72%, white);
+}
+
+.score-sheet-page .st-progress-bar {
+  border-radius: inherit;
+}
+
+.score-sheet-page .st-btn-icon,
+.score-admin-page .icon-btn {
+  border-radius: 12px;
+}
+
+.score-grade-view .toast-message {
+  border-radius: 18px;
+  border: 1px solid var(--score-border);
+  box-shadow: var(--score-shadow);
+}
+
+@media (max-width: 992px) {
+  .score-module,
+  .score-admin-page,
+  .score-attendance-page,
+  .score-grade-page,
+  .score-sheet-page {
+    padding: 1rem;
+  }
+
+  .score-module__toolbar,
+  .score-module__section,
+  .score-admin-page .page-title,
+  .score-attendance-page .page-title,
+  .score-grade-page .page-title,
+  .score-sheet-page .st-page-header {
+    border-radius: 22px;
+  }
+
+  .score-module__filter,
+  .score-admin-page .filter-bar,
+  .score-attendance-page .filter-bar,
+  .score-grade-page .filter-bar,
+  .score-sheet-page .st-filter-bar,
+  .score-sheet-page .st-filter-toolbar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .score-module,
+  .score-admin-page,
+  .score-attendance-page,
+  .score-grade-page,
+  .score-sheet-page {
+    padding: 0.85rem;
+  }
+
+  .score-module__toolbar,
+  .score-module__section,
+  .score-admin-page .page-title,
+  .score-attendance-page .page-title,
+  .score-grade-page .page-title,
+  .score-sheet-page .st-page-header,
+  .score-admin-page .filter-bar,
+  .score-attendance-page .filter-bar,
+  .score-grade-page .filter-bar,
+  .score-sheet-page .st-filter-bar,
+  .score-sheet-page .st-filter-toolbar,
+  .score-admin-page .table-container,
+  .score-attendance-page .table-container,
+  .score-grade-page .content-area-wrapper,
+  .score-sheet-page .st-panel,
+  .score-sheet-page .st-table-container {
+    border-radius: 18px;
+  }
+
+  .score-module__card,
+  .score-admin-page .btn,
+  .score-attendance-page .btn-custom,
+  .score-grade-page .btn-custom,
+  .score-grade-view .btn-tool,
+  .score-sheet-page .st-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .score-grade-view .class-info-bar,
+  .score-attendance-page .class-info-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

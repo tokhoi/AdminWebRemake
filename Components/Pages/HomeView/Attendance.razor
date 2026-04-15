@@ -42,11 +42,11 @@
                     @if (_showExportMenu)
                     {
                         <div class="dropdown-menu">
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
-                            <div style="border-top:1px solid #eee; margin:4px 0;"></div>
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#f97316;">person_off</span> Xuất Excel vắng mặt </button>
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">dataset</span> Xuất Excel thống kê </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-primary);">save</span> Lưu thay đổi</button>
+                            <div style="border-top:1px solid var(--kg-border); margin:4px 0;"></div>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-success);">table_view</span> Xuất Excel điểm danh </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-warning);">person_off</span> Xuất Excel vắng mặt </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-primary);">dataset</span> Xuất Excel thống kê </button>
                         </div>
                         <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
                     }
@@ -66,16 +66,16 @@
                 Danh sách học sinh - <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Tổng số: @FilteredStudents.Count</span>
             </div>
             <div class="att-legend">
-                <span class="status-badge" style="background: #d1fae5; color: #065f46; gap: 8px;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                <span class="status-badge" style="background: var(--kg-success-soft); color: var(--kg-success); gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--kg-success);"></span>
                     <span>Có mặt: <b>@CountPresent</b></span>
                 </span>
-                <span class="status-badge" style="background: #fef9c3; color: #854d0e; gap: 8px;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #eab308;"></span>
+                <span class="status-badge" style="background: var(--kg-accent-soft); color: var(--kg-warning); gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--kg-accent);"></span>
                     <span>Muộn: <b>@CountLate</b></span>
                 </span>
-                <span class="status-badge" style="background: #fee2e2; color: #991b1b; gap: 8px;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #dc2626;"></span>
+                <span class="status-badge" style="background: var(--kg-danger-soft); color: var(--kg-danger); gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--kg-danger);"></span>
                     <span>Vắng: <b>@CountAbsent</b></span>
                 </span>
             </div>
@@ -96,7 +96,7 @@
                     <col style="width: 80px;">
                 </colgroup>
                 <thead>
-                    <tr style="background-color: #f8fafc;">
+                    <tr style="background-color: var(--kg-bg-subtle);">
                         <th class="text-center col-fit">STT</th>
                         <th style="text-align: left;" class="col-fit">Mã HS</th>
                         <th style="text-align: left;">Tên học sinh</th>
@@ -118,10 +118,10 @@
                             index++;
                             <tr>
                                 <td class="text-center text-muted" style="font-weight: 500;">@index</td>
-                                <td style="font-family: monospace; color: var(--primary); font-weight: 600;">@s.Code</td>
+                                <td style="font-family: var(--font-body); color: var(--primary); font-weight: 600;">@s.Code</td>
                                 <td style="font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis;">@s.Name</td>
                                 <td class="text-center">
-                                    <span class="att-badge" style="background: #eff6ff; color: #1e40af; font-weight: 600;">
+                                    <span class="att-badge" style="background: var(--kg-primary-soft); color: var(--kg-primary); font-weight: 600;">
                                         @s.Class
                                     </span>
                                 </td>
@@ -133,8 +133,8 @@
                                         @GetStatusIcon(s.AmStatus) @s.AmStatus
                                     </span>
                                 </td>
-                                <td class="text-center" style="color: #ef4444; font-weight: 600; font-size: 0.9rem;">@(s.TimeIn ?? "-")</td>
-                                <td class="text-center" style="color: #0ea5e9; font-weight: 600; font-size: 0.9rem;">@(s.TimeOut ?? "-")</td>
+                                <td class="text-center" style="color: var(--kg-danger); font-weight: 600; font-size: 0.9rem;">@(s.TimeIn ?? "-")</td>
+                                <td class="text-center" style="color: var(--kg-primary); font-weight: 600; font-size: 0.9rem;">@(s.TimeOut ?? "-")</td>
                                 <td class="text-center">
                                     <span class="att-status-badge @GetStatusClass(s.PmStatus)" 
                                           style="cursor:pointer;" 
@@ -152,7 +152,7 @@
                     {
                         <tr>
                             <td colspan="11" class="text-center" style="padding: 4rem;">
-                                <span class="material-icons-round" style="font-size: 48px; color: #e2e8f0;">manage_search</span>
+                                <span class="material-icons-round" style="font-size: 48px; color: var(--kg-border);">manage_search</span>
                                 <div style="margin-top:8px; color: var(--text-muted);">Không tìm thấy dữ liệu</div>
                             </td>
                         </tr>
@@ -255,3 +255,6 @@
         _ => "●" 
     };
 }
+
+
+

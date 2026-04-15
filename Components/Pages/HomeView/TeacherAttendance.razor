@@ -39,11 +39,11 @@
                     @if (_showExportMenu)
                     {
                         <div class="dropdown-menu">
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">save</span> Lưu thay đổi</button>
-                            <div style="border-top:1px solid #eee; margin:4px 0;"></div>
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1D6F42;">table_view</span> Xuất Excel điểm danh </button>
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#f97316;">person_off</span> Xuất Excel vắng mặt </button>
-                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:#1b6ec2;">dataset</span> Xuất Excel thống kê </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-primary);">save</span> Lưu thay đổi</button>
+                            <div style="border-top:1px solid var(--kg-border); margin:4px 0;"></div>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-success);">table_view</span> Xuất Excel điểm danh </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-warning);">person_off</span> Xuất Excel vắng mặt </button>
+                            <button class="dropdown-item-btn"><span class="material-icons-round" style="color:var(--kg-primary);">dataset</span> Xuất Excel thống kê </button>
                         </div>
                         <div style="position:fixed; inset:0; z-index:40;" @onclick="ToggleExportMenu"></div>
                     }
@@ -60,14 +60,14 @@
             </div>
             
             <div class="tea-legend">
-                <span class="status-badge" style="background: #d1fae5; color: #065f46;">
-                    <span class="dot" style="background: #10b981;"></span> Có mặt: <b>@FilteredTeachers.Count(t => t.AmStatus == "Có mặt")</b>
+                <span class="status-badge" style="background: var(--kg-success-soft); color: var(--kg-success);">
+                    <span class="dot" style="background: var(--kg-success);"></span> Có mặt: <b>@FilteredTeachers.Count(t => t.AmStatus == "Có mặt")</b>
                 </span>
-                <span class="status-badge" style="background: #fef9c3; color: #854d0e;">
-                    <span class="dot" style="background: #eab308;"></span> Đi muộn: <b>@FilteredTeachers.Count(t => t.AmStatus == "Đi muộn")</b>
+                <span class="status-badge" style="background: var(--kg-accent-soft); color: var(--kg-warning);">
+                    <span class="dot" style="background: var(--kg-accent);"></span> Đi muộn: <b>@FilteredTeachers.Count(t => t.AmStatus == "Đi muộn")</b>
                 </span>
-                <span class="status-badge" style="background: #fee2e2; color: #991b1b;">
-                    <span class="dot" style="background: #dc2626;"></span> Vắng: <b>@FilteredTeachers.Count(t => t.AmStatus == "Vắng mặt")</b>
+                <span class="status-badge" style="background: var(--kg-danger-soft); color: var(--kg-danger);">
+                    <span class="dot" style="background: var(--kg-danger);"></span> Vắng: <b>@FilteredTeachers.Count(t => t.AmStatus == "Vắng mặt")</b>
                 </span>
             </div>
         </div>
@@ -85,7 +85,7 @@
                     <col style="width: 80px;">
                 </colgroup>
                 <thead>
-                    <tr style="background-color: #f8fafc;">
+                    <tr style="background-color: var(--kg-bg-subtle);">
                         <th class="text-center col-fit">STT</th>
                         <th class="col-fit">Mã GV</th>
                         <th style="text-align: left;">Họ tên</th>
@@ -105,15 +105,15 @@
                             index++;
                             <tr>
                                 <td class="text-center text-muted" style="font-weight: 500;">@index</td>
-                                <td style="font-family: monospace; color: var(--primary); font-weight: 600;">@t.Code</td>
+                                <td style="font-family: var(--font-body); color: var(--primary); font-weight: 600;">@t.Code</td>
                                 <td style="font-weight: 600; color: var(--text-main); overflow: hidden; text-overflow: ellipsis;">@t.Name</td>
                                 <td class="text-center">
                                     <span class="att-status-badge @GetStatusClass(t.AmStatus)">
                                         @GetStatusIcon(t.AmStatus) @t.AmStatus
                                     </span>
                                 </td>
-                                <td class="text-center" style="color: #ef4444; font-weight: 600; font-size: 0.9rem;">@(t.TimeIn ?? "-")</td>
-                                <td class="text-center" style="color: #0ea5e9; font-weight: 600; font-size: 0.9rem;">@(t.TimeOut ?? "-")</td>
+                                <td class="text-center" style="color: var(--kg-danger); font-weight: 600; font-size: 0.9rem;">@(t.TimeIn ?? "-")</td>
+                                <td class="text-center" style="color: var(--kg-primary); font-weight: 600; font-size: 0.9rem;">@(t.TimeOut ?? "-")</td>
                                 <td class="text-center">
                                     <span class="att-status-badge @GetStatusClass(t.PmStatus)">
                                         @GetStatusIcon(t.PmStatus) @t.PmStatus
@@ -129,7 +129,7 @@
                     {
                         <tr>
                             <td colspan="8" class="text-center" style="padding: 3rem;">
-                                <span class="material-icons-round" style="font-size: 48px; color: #e2e8f0;">person_off</span>
+                                <span class="material-icons-round" style="font-size: 48px; color: var(--kg-border);">person_off</span>
                                 <div style="margin-top:8px; color: var(--text-muted);">Không tìm thấy giáo viên</div>
                             </td>
                         </tr>
@@ -223,3 +223,6 @@
         _ => "●" 
     };
 }
+
+
+

@@ -33,7 +33,7 @@
                     <div class="set-info-layout">
                         <div class="set-logo-col">
                             <div class="set-logo-box">
-                                <span class="material-icons-round" style="font-size: 64px; color: #cbd5e1;">school</span>
+                                <span class="material-icons-round u-font-64-muted">school</span>
                                 <div>LOGO TRƯỜNG</div>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                                     }
                                 </div>
                                 <div>
-                                    <label class="set-label">Hiệu trưởng</label>
+                                    <label class="set-label">Hiệu trường</label>
                                     @if (IsEditingInfo)
                                     {
                                         <input class="set-input" @bind="PrincipalName" />
@@ -64,7 +64,7 @@
                                         <div class="set-value">@PrincipalName</div>
                                     }
                                 </div>
-                                <div style="grid-column: span 2;">
+                                <div class="u-grid-span-2">
                                     <label class="set-label">Địa chỉ</label>
                                     @if (IsEditingInfo)
                                     {
@@ -114,8 +114,8 @@
                 </div>
                 <div class="set-body">
                     <div class="set-grid-2">
-                        <div class="set-time-box" style="background: #fffbeb; border-color: #fcd34d;">
-                            <h3 style="color:#d97706; display:flex; align-items:center; gap:8px;"><span class="material-icons-round">wb_sunny</span> Buổi Sáng</h3>
+                        <div class="set-time-box u-bg-primary-soft-border">
+                            <h3 class="u-heading-warning"><span class="material-icons-round">wb_sunny</span> Buổi Sáng</h3>
                             <div class="set-input-group mt-3">
                                 <label class="set-label">Bắt đầu</label>
                                 <input type="time" class="set-input" @bind="MorningStart" />
@@ -125,8 +125,8 @@
                                 <input type="time" class="set-input" @bind="MorningEnd" />
                             </div>
                         </div>
-                        <div class="set-time-box" style="background: #eff6ff; border-color: #bfdbfe;">
-                            <h3 style="color:#1d4ed8; display:flex; align-items:center; gap:8px;"><span class="material-icons-round">nights_stay</span> Buổi Chiều</h3>
+                        <div class="set-time-box u-bg-primary-soft-border">
+                            <h3 class="u-heading-secondary"><span class="material-icons-round">nights_stay</span> Buổi Chiều</h3>
                             <div class="set-input-group mt-3">
                                 <label class="set-label">Bắt đầu</label>
                                 <input type="time" class="set-input" @bind="AfternoonStart" />
@@ -137,11 +137,11 @@
                             </div>
                         </div>
                     </div>
-                    <div style="text-align: right; margin-top: 20px;">
+                    <div class="u-text-right-mt20">
                         <button class="set-btn set-btn-primary" @onclick="SaveTimeConfig"><span class="material-icons-round">save</span> Lưu cấu hình</button>
                         @if (ShowSavedMessage)
                         {
-                            <span style="color: green; margin-left: 10px; font-weight: bold;">Đã lưu thành công!</span>
+                            <span class="u-green-ok">Đã lưu thành công!</span>
                         }
                     </div>
                 </div>
@@ -156,7 +156,7 @@
                 </div>
                 <div class="set-table-wrap">
                     <table class="set-table">
-                        <thead><tr><th>#</th><th>Tên Thiết Bị</th><th>Mã Thiết Bị</th><th style="text-align:center;">Trạng Thái</th><th style="text-align:center;">Thao tác</th></tr></thead>
+                        <thead><tr><th>#</th><th>Tên Thiết Bị</th><th>Mã Thiết Bị</th><th class="u-text-center">Trạng Thái</th><th class="u-text-center">Thao tác</th></tr></thead>
                         <tbody>
                             @for (int i = 0; i < Cameras.Count; i++)
                             {
@@ -165,7 +165,7 @@
                                     <td>@(i + 1)</td>
                                     <td class="fw-bold">@cam.Name</td>
                                     <td><span class="set-tag">@cam.Id</span></td>
-                                    <td style="text-align:center;">
+                                    <td class="u-text-center">
                                         @if (cam.IsOnline)
                                         {
                                             <span class="set-tag set-tag-success">Online</span>
@@ -176,7 +176,7 @@
                                             <span class="set-tag set-tag-danger">Offline</span>
                                         }
                                     </td>
-                                    <td style="text-align:center;">
+                                    <td class="u-text-center">
                                         <button class="set-btn-icon" @onclick="() => ToggleCamera(cam)"><span class="material-icons-round">power_settings_new</span></button>
                                     </td>
                                 </tr>
@@ -203,7 +203,7 @@
     private void ToggleEditInfo() { IsEditingInfo = !IsEditingInfo; }
 
     // ========================================================
-    // ĐÃ SỬA LỖI TIMEONLY Ở ĐÂY (Thay string bằng TimeOnly?)
+    // TimeOnly dùng cho cấu hình giờ điểm danh
     // ========================================================
     private TimeOnly? MorningStart = new TimeOnly(6, 30);
     private TimeOnly? MorningEnd = new TimeOnly(11, 0);
@@ -230,227 +230,5 @@
 
     private void ToggleCamera(CameraDevice cam) { cam.IsOnline = !cam.IsOnline; }
 }
-<style>
-    /* Prefix: set- */
-    .set-container {
-        display: flex;
-        height: calc(100vh - 100px);
-        background: #f4f7f9;
-        margin: 1rem;
-        border-radius: 12px;
-        overflow: hidden;
-        flex-direction: row; !important
-        border: 1px solid var(--border);
-        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
-    }
 
-    .set-sidebar {
-        width: 250px;
-        background: white;
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-    }
 
-    .set-sidebar-title {
-        padding: 1.5rem;
-        margin: 0;
-        font-size: 1.2rem;
-        font-weight: 800;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .set-nav {
-        list-style: none;
-        padding: 1rem 0;
-        margin: 0;
-    }
-
-    .set-nav-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 1.5rem;
-        cursor: pointer;
-        color: var(--text-muted);
-        font-weight: 500;
-        transition: 0.2s;
-        border-left: 3px solid transparent;
-    }
-
-        .set-nav-item:hover {
-            background: #f8fafc;
-            color: var(--primary);
-        }
-
-        .set-nav-item.active {
-            background: #eff6ff;
-            color: var(--primary);
-            border-left-color: var(--primary);
-            font-weight: 700;
-        }
-
-    .set-nav-icon {
-        font-size: 20px;
-    }
-
-    .set-content {
-        flex: 1;
-        padding: 2rem;
-        overflow-y: auto;
-        background: #f4f7f9;
-    }
-
-    .set-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        overflow: hidden;
-    }
-
-    .set-header {
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .set-title {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 700;
-    }
-
-    .set-body {
-        padding: 1.5rem;
-    }
-
-    .set-info-layout {
-        display: grid;
-        grid-template-columns: 200px 1fr;
-        gap: 2rem;
-    }
-
-    .set-logo-box {
-        width: 100%;
-        aspect-ratio: 1;
-        border: 1px dashed #cbd5e1;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: #f8fafc;
-        font-weight: bold;
-        color: #94a3b8;
-    }
-
-    .set-group-title {
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        color: var(--primary);
-        border-bottom: 2px solid var(--border);
-        padding-bottom: 8px;
-        margin-bottom: 1rem;
-    }
-
-    .set-grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem 2rem;
-    }
-
-    .set-label {
-        display: block;
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        margin-bottom: 4px;
-    }
-
-    .set-value {
-        font-size: 0.95rem;
-        color: var(--text-main);
-    }
-
-    .set-time-box {
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid transparent;
-    }
-
-    .set-input {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        outline: none;
-    }
-
-        .set-input:focus {
-            border-color: var(--primary);
-        }
-
-    .mt-3 {
-        margin-top: 1rem;
-    }
-
-    .set-table-wrap {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .set-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        .set-table th {
-            background: #f8fafc;
-            padding: 12px 1rem;
-            text-align: left;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .set-table td {
-            padding: 12px 1rem;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-    .set-tag {
-        display: inline-block;
-        padding: 4px 10px;
-        background: #f1f5f9;
-        border-radius: 6px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        font-family: monospace;
-    }
-
-    .set-tag-success {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .set-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .set-btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .flex-between {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-</style>

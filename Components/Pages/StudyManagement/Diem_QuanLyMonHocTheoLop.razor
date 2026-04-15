@@ -1,10 +1,10 @@
 ﻿@page "/learning/lop-mon"
 @inject IJSRuntime JS
 
-<div class="dashboard-container">
+<div class="dashboard-container score-admin-page score-admin-page--class-subject">
     @* --- HEADER --- *@
     <div class="page-title">
-        <div class="icon-title" style="background:#20c997">
+        <div class="icon-title" style="background:var(--kg-success)">
             <i class="fa-solid fa-gear"></i>
         </div>
         <h4>CẤU HÌNH LỚP - MÔN HỌC</h4>
@@ -204,236 +204,6 @@
         </div>
     </div>
 }
-
-<style>
-    /* ... (GIỮ NGUYÊN CSS GỐC, KHÔNG THAY ĐỔI GÌ) ... */
-    :root {
-        --primary-color: #1b6ec2;
-        --bg-color: #f5f7fa;
-        --card-bg: #ffffff;
-        --border-color: #e2e8f0;
-        --text-main: #1e293b;
-        --text-muted: #64748b;
-    }
-
-    .dashboard-container {
-        padding: 20px;
-        background-color: var(--bg-color);
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .page-title {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-        background: var(--card-bg);
-        padding: 15px 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-    }
-
-    .icon-title {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 1.2rem;
-        margin-right: 15px;
-    }
-
-    .page-title h4 {
-        margin: 0;
-        font-weight: 700;
-        color: var(--text-main);
-        font-size: 1.2rem;
-    }
-
-    .sidebar-card, .content-card {
-        background: var(--card-bg);
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        border: 1px solid var(--border-color);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        height: 100%;
-        min-height: 600px;
-    }
-
-    .sidebar-header {
-        padding: 20px;
-        border-bottom: 1px solid var(--border-color);
-        background: #f8fafc;
-    }
-
-    .sidebar-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 10px;
-    }
-
-    .class-list {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .class-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 15px;
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: left;
-    }
-
-        .class-item:hover {
-            background: #f1f5f9;
-            border-color: var(--border-color);
-        }
-
-        .class-item.active {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-        }
-
-            .class-item.active .class-name {
-                color: var(--primary-color);
-                font-weight: 700;
-            }
-
-            .class-item.active .arrow-icon {
-                color: var(--primary-color);
-                transform: translateX(3px);
-            }
-
-    .class-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .class-name {
-        font-weight: 600;
-        color: var(--text-main);
-    }
-
-    .arrow-icon {
-        font-size: 0.8rem;
-        color: #cbd5e1;
-        transition: 0.2s;
-    }
-
-    .empty-selection {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 40px;
-        text-align: center;
-    }
-
-    .empty-icon-circle {
-        width: 80px;
-        height: 80px;
-        background: #f1f5f9;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 30px;
-        color: #94a3b8;
-        margin-bottom: 20px;
-    }
-
-    .content-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        background: #f8fafc;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-action {
-        padding: 8px 16px;
-        font-weight: 600;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        transition: 0.2s;
-    }
-
-    .content-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 24px;
-    }
-
-    .subjects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .subject-card {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s;
-        background: white;
-        gap: 15px;
-    }
-
-        .subject-card:hover {
-            border-color: #94a3b8;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            transform: translateY(-2px);
-        }
-
-        .subject-card.selected {
-            border-color: var(--primary-color);
-            background: #f0f7ff;
-            box-shadow: 0 0 0 1px var(--primary-color);
-        }
-
-    .subject-name {
-        font-weight: 600;
-        color: var(--text-main);
-    }
-
-    .custom-checkbox .form-check-input {
-        width: 1.2em;
-        height: 1.2em;
-        margin-top: 0.15em;
-        cursor: pointer;
-    }
-
-        .custom-checkbox .form-check-input:checked {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-</style>
-
 <script>
     window.showToastMessage = function (message, type) {
         let container = document.getElementById('toast-container');
@@ -444,10 +214,10 @@
             document.body.appendChild(container);
         }
         const toast = document.createElement('div');
-        const bgColors = { 'success': '#d4edda', 'error': '#f8d7da', 'warning': '#fff3cd', 'info': '#d1ecf1' };
-        const textColors = { 'success': '#155724', 'error': '#721c24', 'warning': '#856404', 'info': '#0c5460' };
-        const borderColors = { 'success': '#c3e6cb', 'error': '#f5c6cb', 'warning': '#ffeeba', 'info': '#bee5eb' };
-        toast.style.cssText = `background-color: ${bgColors[type]||bgColors.info}; color: ${textColors[type]||textColors.info}; border: 1px solid ${borderColors[type]||borderColors.info}; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: sans-serif; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; min-width: 250px; pointer-events: auto; animation: slideIn 0.3s ease forwards;`;
+        const bgColors = { 'success': 'var(--kg-success-soft)', 'error': 'var(--kg-danger-soft)', 'warning': 'var(--kg-warning-soft)', 'info': 'var(--kg-primary-soft)' };
+        const textColors = { 'success': 'var(--kg-success)', 'error': 'var(--kg-danger)', 'warning': 'var(--kg-warning)', 'info': 'var(--kg-primary)' };
+        const borderColors = { 'success': 'var(--kg-success)', 'error': 'var(--kg-danger)', 'warning': 'var(--kg-warning)', 'info': 'var(--kg-primary)' };
+        toast.style.cssText = `background-color: ${bgColors[type]||bgColors.info}; color: ${textColors[type]||textColors.info}; border: 1px solid ${borderColors[type]||borderColors.info}; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: var(--font-body); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; min-width: 250px; pointer-events: auto; animation: slideIn 0.3s ease forwards;`;
         const icons = { 'success': 'fa-check-circle', 'error': 'fa-times-circle', 'warning': 'fa-exclamation-triangle', 'info': 'fa-info-circle' };
         toast.innerHTML = `<i class="fa-solid ${icons[type]||icons.info}" style="font-size: 16px;"></i><span style="flex: 1">${message}</span><i class="fa-solid fa-times" style="cursor: pointer; opacity: 0.7;"></i>`;
         toast.querySelector('.fa-times').addEventListener('click', () => toast.remove());
@@ -621,3 +391,9 @@
         await JS.InvokeVoidAsync("showToastMessage", $"Đã sao chép cấu hình sang {targets.Count} lớp!", "success");
     }
 }
+
+
+
+
+
+

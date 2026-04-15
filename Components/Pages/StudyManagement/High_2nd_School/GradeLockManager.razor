@@ -1,10 +1,10 @@
 ﻿@page "/learning/gradelock"
 @rendermode InteractiveServer
 
-<div class="st-page-wrapper">
+<div class="st-page-wrapper score-sheet-page score-sheet-page--grade-lock">
     @* --- HEADER --- *@
     <div class="st-page-header">
-        <div class="st-title-icon" style="background:#6f42c1">
+        <div class="st-title-icon" style="background:var(--kg-purple)">
             <span class="material-icons-round">verified_user</span>
         </div>
         <h4>TRẠNG THÁI NHẬP ĐIỂM & KHÓA SỔ</h4>
@@ -220,3 +220,5 @@
 
     string GetProgressColor(int p) => p < 50 ? "st-bg-danger" : (p < 100 ? "st-bg-warning" : "st-bg-success");
 }
+
+

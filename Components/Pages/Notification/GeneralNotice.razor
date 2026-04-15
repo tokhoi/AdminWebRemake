@@ -70,7 +70,7 @@
             }
             else
             {
-                <div style="padding:40px; text-align:center; color:#64748b;">Không tìm thấy thông báo nào.</div>
+                <div style="padding:40px; text-align:center; color:var(--kg-text-muted);">Không tìm thấy thông báo nào.</div>
             }
         </div>
     </div>
@@ -83,7 +83,7 @@
             <div class="nt-modal-content">
                 <div class="nt-modal-header">
                     <h4 class="nt-card-title" style="font-size:1.1rem;">@(isEdit ? "Cập Nhật Thông Báo" : "Tạo Thông Báo Mới")</h4>
-                    <button style="background:none; border:none; cursor:pointer; color:#64748b;" @onclick="() => showModal = false">
+                    <button style="background:none; border:none; cursor:pointer; color:var(--kg-text-muted);" @onclick="() => showModal = false">
                         <span class="material-icons-round">close</span>
                     </button>
                 </div>
@@ -205,3 +205,4 @@
         showModal = false;
     }
 }
+

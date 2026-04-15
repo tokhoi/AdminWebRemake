@@ -11,15 +11,15 @@
                 <h2 class="nt-card-title">
                     <span class="material-icons-round">restaurant_menu</span> THỰC ĐƠN TUẦN
                 </h2>
-                <div style="font-size:0.9rem; color:#6b7280; margin-top:4px; margin-left:38px;">
+                <div style="font-size:0.9rem; color:var(--kg-text-muted); margin-top:4px; margin-left:38px;">
                     Tuần 20: 19/01/2026 - 25/01/2026
                 </div>
             </div>
 
             <div style="display:flex; gap:10px;">
-                <div style="display:flex; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
-                    <button class="nt-btn nt-btn-outline" style="border:none; border-right:1px solid #e2e8f0; border-radius:0; padding:0 12px;"><span class="material-icons-round">chevron_left</span></button>
-                    <button class="nt-btn nt-btn-outline" style="border:none; border-right:1px solid #e2e8f0; border-radius:0;">Tuần này</button>
+                <div style="display:flex; border:1px solid var(--kg-border); border-radius:8px; overflow:hidden;">
+                    <button class="nt-btn nt-btn-outline" style="border:none; border-right:1px solid var(--kg-border); border-radius:0; padding:0 12px;"><span class="material-icons-round">chevron_left</span></button>
+                    <button class="nt-btn nt-btn-outline" style="border:none; border-right:1px solid var(--kg-border); border-radius:0;">Tuần này</button>
                     <button class="nt-btn nt-btn-outline" style="border:none; border-radius:0; padding:0 12px;"><span class="material-icons-round">chevron_right</span></button>
                 </div>
                 <button class="nt-btn nt-btn-outline" @onclick="ImportMenu">
@@ -44,7 +44,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="text-center"><span class="material-icons-round" style="color:#f59e0b;">wb_twilight</span><br>SÁNG</td>
+                        <td class="text-center"><span class="material-icons-round" style="color:var(--kg-warning);">wb_twilight</span><br>SÁNG</td>
                         @for (int i = 0; i < 5; i++)
                         {
                             <td>
@@ -60,7 +60,7 @@
                         }
                     </tr>
                     <tr>
-                        <td class="text-center"><span class="material-icons-round" style="color:#ef4444;">wb_sunny</span><br>TRƯA</td>
+                        <td class="text-center"><span class="material-icons-round" style="color:var(--kg-danger);">wb_sunny</span><br>TRƯA</td>
                         @for (int i = 0; i < 5; i++)
                         {
                             <td>
@@ -80,7 +80,7 @@
                         }
                     </tr>
                     <tr>
-                        <td class="text-center"><span class="material-icons-round" style="color:#3b82f6;">bakery_dining</span><br>XẾ</td>
+                        <td class="text-center"><span class="material-icons-round" style="color:var(--kg-primary);">bakery_dining</span><br>XẾ</td>
                         @for (int i = 0; i < 5; i++)
                         {
                             <td>
@@ -140,3 +140,4 @@
         await JSRuntime.InvokeVoidAsync("alert", "Tính năng Import Excel sẽ mở hộp thoại chọn file.");
     }
 }
+

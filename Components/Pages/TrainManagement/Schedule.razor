@@ -24,9 +24,9 @@
                     </button>
                 }
 
-                <div style="display:flex; border:1px solid #e5e7eb; border-radius:6px; overflow:hidden;">
-                    <button class="lm-btn lm-btn-white" style="border:none; border-right:1px solid #e5e7eb; border-radius:0; padding:0 12px;" @onclick="PreviousWeek"><span class="material-icons-round">chevron_left</span></button>
-                    <button class="lm-btn lm-btn-white" style="border:none; border-right:1px solid #e5e7eb; border-radius:0;" @onclick="SetCurrentWeek">Tuần này</button>
+                <div style="display:flex; border:1px solid var(--kg-border); border-radius:6px; overflow:hidden;">
+                    <button class="lm-btn lm-btn-white" style="border:none; border-right:1px solid var(--kg-border); border-radius:0; padding:0 12px;" @onclick="PreviousWeek"><span class="material-icons-round">chevron_left</span></button>
+                    <button class="lm-btn lm-btn-white" style="border:none; border-right:1px solid var(--kg-border); border-radius:0;" @onclick="SetCurrentWeek">Tuần này</button>
                     <button class="lm-btn lm-btn-white" style="border:none; border-radius:0; padding:0 12px;" @onclick="NextWeek"><span class="material-icons-round">chevron_right</span></button>
                 </div>
 
@@ -119,7 +119,7 @@
                                 // QUAN TRỌNG: Sử dụng _filteredData thay vì MockData
                                 var cellData = _filteredData.Where(x => x.Thu == dayIndex && x.Tiet == period.Index).ToList();
 
-                                <td style="vertical-align: top; height: 120px; min-width: 180px; background-color: @(isToday ? "#f0f9ff" : "inherit");">
+                                <td style="vertical-align: top; height: 120px; min-width: 180px; background-color: @(isToday ? "var(--kg-primary-soft)" : "inherit");">
                                     @if (cellData.Any())
                                     {
                                         @foreach (var item in cellData)
@@ -287,8 +287,8 @@
 
     private string GetSubjectColor(string name)
     {
-        string[] colors = { "#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4" };
-        if (string.IsNullOrEmpty(name)) return "#ccc";
+        string[] colors = { "var(--kg-primary)", "var(--kg-success)", "var(--kg-warning)", "var(--kg-danger)", "var(--kg-purple)", "var(--kg-primary-strong)" };
+        if (string.IsNullOrEmpty(name)) return "var(--kg-border)";
         return colors[Math.Abs(name.GetHashCode()) % colors.Length];
     }
 
@@ -327,3 +327,6 @@
 
     string searchSubject = ""; string searchTeacher = "";
 }
+
+
+

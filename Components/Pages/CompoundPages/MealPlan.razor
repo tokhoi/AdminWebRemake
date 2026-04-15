@@ -1,0 +1,838 @@
+@page "/school/meal-plan"
+@rendermode InteractiveServer
+@using System.Globalization
+@using System.Text
+@using System.Text.RegularExpressions
+@using ClosedXML.Excel
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<PageTitle>Thực đơn tuần</PageTitle>
+
+<div class="mp-page animate-fade-in">
+    <section class="mp-shell">
+        <header class="mp-header-card">
+            <div class="mp-header-copy">
+                <div class="mp-kicker">Bán trú mầm non</div>
+                <h1>Thực đơn tuần</h1>
+
+                <div class="mp-week-toolbar">
+                    <button type="button" class="mp-week-nav" @onclick="GoToPreviousWeek" aria-label="Tuần trước">
+                        <span class="material-icons-round">chevron_left</span>
+                    </button>
+
+                    <div class="mp-range">
+                        <span class="material-icons-round">calendar_month</span>
+                        <span>@CurrentWeek.DateRangeLabel</span>
+                    </div>
+
+                    <button type="button" class="mp-week-nav" @onclick="GoToNextWeek" aria-label="Tuần sau">
+                        <span class="material-icons-round">chevron_right</span>
+                    </button>
+                </div>
+
+                <p>
+                    Theo dõi thực đơn theo từng ngày, lùi hoặc tiến từng tuần để xem kế hoạch bếp ăn,
+                    đồng thời cập nhật nhanh bằng file Excel theo mẫu cột ngày - bữa.
+                </p>
+            </div>
+
+            <div class="mp-header-actions">
+                <InputFile id="meal-plan-upload"
+                           OnChange="HandleMealPlanImport"
+                           accept=".xlsx"
+                           class="mp-hidden-upload" />
+
+                <button type="button" class="mp-action-btn is-light" @onclick="DownloadTemplateAsync">
+                    <span class="material-icons-round">download</span>
+                    <span>Tải Excel mẫu</span>
+                </button>
+
+                <label for="meal-plan-upload" class="mp-action-btn is-secondary">
+                    <span class="material-icons-round">upload_file</span>
+                    <span>Import Excel</span>
+                </label>
+
+                <button type="button" class="mp-action-btn is-light" @onclick="MockPrint">
+                    <span class="material-icons-round">print</span>
+                    <span>In thực đơn</span>
+                </button>
+
+                @if (!IsEditMode)
+                {
+                    <button type="button" class="mp-action-btn is-primary" @onclick="StartEditMode">
+                        <span class="material-icons-round">edit</span>
+                        <span>Chỉnh sửa</span>
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="mp-action-btn is-light" @onclick="CancelEditMode">
+                        <span class="material-icons-round">close</span>
+                        <span>Hủy</span>
+                    </button>
+
+                    <button type="button" class="mp-action-btn is-primary" @onclick="SaveEditMode">
+                        <span class="material-icons-round">save</span>
+                        <span>Lưu thay đổi</span>
+                    </button>
+                }
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="mp-status-banner @StatusTone">
+                <span class="material-icons-round">@StatusIcon</span>
+                <span>@StatusMessage</span>
+            </div>
+        }
+
+        <div class="mp-template-note">
+            <span class="material-icons-round">info</span>
+            <span>
+                File Excel mẫu gồm hàng đầu là <strong>Bữa ăn</strong> và các cột ngày từ
+                <strong>Thứ Hai</strong> đến <strong>Thứ Bảy</strong>. Ba dòng bên dưới lần lượt là
+                <strong>Sáng</strong>, <strong>Trưa</strong>, <strong>Chiều</strong>. Mỗi ô có thể nhập nhiều dòng:
+                dòng đầu là tên món, các dòng sau là mô tả ngắn hoặc món phụ.
+            </span>
+        </div>
+
+        <section class="mp-table-card">
+            <div class="mp-table-scroll">
+                <table class="mp-table">
+                    <thead>
+                        <tr>
+                            <th class="mp-col-meal">Bữa ăn</th>
+                            @foreach (var day in CurrentWeek.Days)
+                            {
+                                <th class="mp-day-head">
+                                    <span class="mp-day-name">@day.DayLabel</span>
+                                    <span class="mp-day-date">@day.DateLabel</span>
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var mealSlot in MealSlots)
+                        {
+                            <tr>
+                                <th class="mp-meal-label">
+                                    <div class="mp-meal-badge">
+                                        <span class="material-icons-round">@mealSlot.Icon</span>
+                                        <span>@mealSlot.Label</span>
+                                    </div>
+                                </th>
+
+                                @foreach (var day in CurrentWeek.Days)
+                                {
+                                    var cell = day.Cells[mealSlot.Key];
+                                    <td class="mp-cell @(cell.IsEmpty ? "is-empty" : "")">
+                                        @if (IsEditMode)
+                                        {
+                                            <div class="mp-cell-editor">
+                                                <textarea class="mp-cell-input" @bind="cell.RawContent"></textarea>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="mp-dish-card">
+                                                @if (!cell.IsEmpty)
+                                                {
+                                                    <div class="mp-dish-visual @GetDishTone(cell.Title)">
+                                                        <span class="material-icons-round">@GetDishIcon(cell.Title)</span>
+                                                    </div>
+                                                }
+
+                                                <div class="mp-dish-copy">
+                                                    <div class="mp-dish-detail">@cell.Title</div>
+                                                    @foreach (var detail in cell.Details)
+                                                    {
+                                                        <div class="mp-dish-detail">@detail</div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mp-bottom-grid">
+            <article class="mp-info-card">
+                <div class="mp-section-title">
+                    <span class="material-icons-round">description</span>
+                    <h2>Ghi chú dinh dưỡng</h2>
+                </div>
+
+                <ul class="mp-note-list">
+                    @foreach (var note in NutritionNotes)
+                    {
+                        <li>@note</li>
+                    }
+                </ul>
+            </article>
+
+            <article class="mp-featured-card">
+                <div class="mp-featured-badge">
+                    <span class="material-icons-round">stars</span>
+                </div>
+
+                <div class="mp-section-title">
+                    <span class="material-icons-round">lunch_dining</span>
+                    <h2>Món ngon tuần này</h2>
+                </div>
+
+                <div class="mp-featured-body">
+                    <div class="mp-featured-visual @GetDishTone(FeaturedDish.Title)">
+                        <span class="material-icons-round">@GetDishIcon(FeaturedDish.Title)</span>
+                    </div>
+
+                    <div>
+                        <div class="mp-featured-title">@FeaturedDish.Title</div>
+                        <div class="mp-featured-meta">@FeaturedDish.DayLabel</div>
+                        <p>@FeaturedDish.Description</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </section>
+</div>
+
+@code {
+    private readonly IReadOnlyList<MealSlot> MealSlots =
+    [
+        new("morning", "Sáng", "wb_sunny"),
+        new("noon", "Trưa", "lunch_dining"),
+        new("afternoon", "Chiều", "dark_mode")
+    ];
+
+    private DateOnly SelectedWeekStart { get; set; } = GetWeekStart(DateOnly.FromDateTime(new DateTime(2024, 5, 15)));
+    private MealPlanWeek CurrentWeek { get; set; } = CreateDefaultWeek(GetWeekStart(DateOnly.FromDateTime(new DateTime(2024, 5, 15))));
+    private MealPlanWeek? EditSnapshot { get; set; }
+    private bool IsEditMode { get; set; }
+    private string? StatusMessage { get; set; }
+    private string StatusTone { get; set; } = "is-info";
+    private string StatusIcon { get; set; } = "info";
+
+    private IReadOnlyList<string> NutritionNotes =>
+    [
+        "Thực đơn được cân đối giữa tinh bột, đạm, rau xanh và trái cây theo nhu cầu lứa tuổi mầm non.",
+        "Ưu tiên nguyên liệu tươi trong ngày, hạn chế món chiên lặp lại nhiều lần trong tuần.",
+        "Các bữa phụ được thiết kế nhẹ, dễ tiêu hóa để bé có năng lượng ổn định suốt ngày học."
+    ];
+
+    private FeaturedDishInfo FeaturedDish
+    {
+        get
+        {
+            foreach (var day in CurrentWeek.Days)
+            {
+                if (day.Cells.TryGetValue("noon", out var lunchCell) && !lunchCell.IsEmpty)
+                {
+                    return new FeaturedDishInfo(
+                        lunchCell.Title,
+                        $"{day.DayLabel} {day.DateLabel}",
+                        lunchCell.Details.FirstOrDefault() ?? "Món được nhiều bé yêu thích trong tuần này.");
+                }
+            }
+
+            return new FeaturedDishInfo("Chưa cập nhật", "Đang chờ dữ liệu", "Hãy import file Excel để hiển thị món nổi bật.");
+        }
+    }
+
+    private async Task DownloadTemplateAsync()
+    {
+        try
+        {
+            using var workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("ThucDon");
+
+            sheet.Cell(1, 1).Value = "Bữa ăn";
+            for (var index = 0; index < CurrentWeek.Days.Count; index++)
+            {
+                var day = CurrentWeek.Days[index];
+                sheet.Cell(1, index + 2).Value = $"{day.DayLabel} {day.DateLabel}";
+            }
+
+            for (var rowIndex = 0; rowIndex < MealSlots.Count; rowIndex++)
+            {
+                var mealSlot = MealSlots[rowIndex];
+                var row = rowIndex + 2;
+                sheet.Cell(row, 1).Value = mealSlot.Label;
+
+                for (var dayIndex = 0; dayIndex < CurrentWeek.Days.Count; dayIndex++)
+                {
+                    var day = CurrentWeek.Days[dayIndex];
+                    var cell = day.Cells[mealSlot.Key];
+                    sheet.Cell(row, dayIndex + 2).Value = cell.RawContent;
+                    sheet.Cell(row, dayIndex + 2).Style.Alignment.WrapText = true;
+                }
+            }
+
+            sheet.Columns().AdjustToContents();
+            sheet.Rows().AdjustToContents();
+            sheet.SheetView.FreezeRows(1);
+            sheet.SheetView.FreezeColumns(1);
+
+            using var memoryStream = new MemoryStream();
+            workbook.SaveAs(memoryStream);
+
+            var fileName = $"thuc-don-tuan-mau-{SelectedWeekStart:yyyyMMdd}.xlsx";
+            var base64 = Convert.ToBase64String(memoryStream.ToArray());
+
+            await JS.InvokeVoidAsync(
+                "mealPlan.downloadFileFromBase64",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+
+            SetStatus("Đã tạo file Excel mẫu đúng chuẩn import.", "is-success", "check_circle");
+        }
+        catch
+        {
+            SetStatus("Không thể tạo file Excel mẫu. Vui lòng thử lại.", "is-error", "error");
+        }
+    }
+
+    private async Task HandleMealPlanImport(InputFileChangeEventArgs eventArgs)
+    {
+        var file = eventArgs.File;
+        StatusMessage = null;
+
+        if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            SetStatus("Hệ thống hiện chỉ hỗ trợ file .xlsx cho bản đầu.", "is-error", "error");
+            return;
+        }
+
+        try
+        {
+            await using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            using var workbook = new XLWorkbook(memoryStream);
+            var worksheet = workbook.Worksheets.FirstOrDefault();
+
+            if (worksheet is null)
+            {
+                SetStatus("Không tìm thấy sheet dữ liệu trong file Excel.", "is-error", "error");
+                return;
+            }
+
+            CurrentWeek = ParseWorksheet(worksheet);
+            SelectedWeekStart = CurrentWeek.StartDate;
+            IsEditMode = false;
+            EditSnapshot = null;
+            SetStatus($"Import Excel thành công: {file.Name}", "is-success", "check_circle");
+        }
+        catch (MealPlanImportException ex)
+        {
+            SetStatus(ex.Message, "is-error", "error");
+        }
+        catch
+        {
+            SetStatus("Không thể đọc file Excel. Vui lòng kiểm tra lại đúng mẫu rồi thử lại.", "is-error", "error");
+        }
+    }
+
+    private void GoToPreviousWeek()
+    {
+        ShiftWeek(-7);
+    }
+
+    private void GoToNextWeek()
+    {
+        ShiftWeek(7);
+    }
+
+    private void ShiftWeek(int dayOffset)
+    {
+        SelectedWeekStart = SelectedWeekStart.AddDays(dayOffset);
+        CurrentWeek = CreateDefaultWeek(SelectedWeekStart);
+        IsEditMode = false;
+        EditSnapshot = null;
+        SetStatus($"Đang xem {CurrentWeek.DateRangeLabel.ToLowerInvariant()}.", "is-info", "calendar_month");
+    }
+
+    private void StartEditMode()
+    {
+        EditSnapshot = CurrentWeek.Clone();
+        IsEditMode = true;
+        SetStatus("Đã bật chế độ chỉnh sửa. Bạn có thể sửa trực tiếp từng ô thực đơn.", "is-info", "edit");
+    }
+
+    private void CancelEditMode()
+    {
+        if (EditSnapshot is not null)
+        {
+            CurrentWeek = EditSnapshot.Clone();
+        }
+
+        IsEditMode = false;
+        EditSnapshot = null;
+        SetStatus("Đã hủy chỉnh sửa thực đơn.", "is-info", "info");
+    }
+
+    private void SaveEditMode()
+    {
+        NormalizeWeek(CurrentWeek);
+        IsEditMode = false;
+        EditSnapshot = null;
+        SetStatus("Đã lưu thay đổi thực đơn trên giao diện.", "is-success", "check_circle");
+    }
+
+    private MealPlanWeek ParseWorksheet(IXLWorksheet worksheet)
+    {
+        var titleCell = worksheet.Cell(1, 1).GetString().Trim();
+        if (!titleCell.Contains("bữa", StringComparison.OrdinalIgnoreCase) &&
+            !titleCell.Contains("bua", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new MealPlanImportException("Cột A1 phải là tiêu đề 'Bữa ăn' theo mẫu import.");
+        }
+
+        const int dayStartColumn = 2;
+        const int dayCount = 6;
+        const int firstMealRow = 2;
+
+        var days = new List<MealPlanDay>();
+        for (var col = dayStartColumn; col < dayStartColumn + dayCount; col++)
+        {
+            var rawHeader = worksheet.Cell(1, col).GetString().Trim();
+            if (string.IsNullOrWhiteSpace(rawHeader))
+            {
+                throw new MealPlanImportException("Tiêu đề ngày trong hàng đầu tiên không được để trống.");
+            }
+
+            days.Add(ParseDayHeader(rawHeader));
+        }
+
+        for (var rowOffset = 0; rowOffset < MealSlots.Count; rowOffset++)
+        {
+            var row = firstMealRow + rowOffset;
+            var rawMealLabel = worksheet.Cell(row, 1).GetString().Trim();
+            var expectedSlot = MealSlots[rowOffset];
+
+            if (!MealLabelMatches(rawMealLabel, expectedSlot.Key))
+            {
+                throw new MealPlanImportException($"Dòng {row} phải là bữa '{expectedSlot.Label}' theo đúng mẫu Excel.");
+            }
+
+            for (var col = 0; col < dayCount; col++)
+            {
+                var rawCell = worksheet.Cell(row, dayStartColumn + col).GetString();
+                days[col].Cells[expectedSlot.Key] = MealPlanCell.FromRaw(rawCell);
+            }
+        }
+
+        var importedWeek = new MealPlanWeek
+        {
+            StartDate = GuessWeekStart(days),
+            DateRangeLabel = BuildDateRangeLabel(days),
+            Days = days
+        };
+
+        NormalizeWeek(importedWeek);
+        return importedWeek;
+    }
+
+    private MealPlanDay ParseDayHeader(string rawHeader)
+    {
+        var normalized = Regex.Replace(rawHeader, @"\s+", " ").Trim();
+        var match = Regex.Match(normalized, @"(?<day>\d{1,2})(?:[/-](?<month>\d{1,2}))?(?:[/-](?<year>\d{2,4}))?$");
+
+        string dayLabel;
+        string dateLabel;
+        DateOnly? fullDate = null;
+
+        if (match.Success)
+        {
+            var rawDayLabel = normalized[..match.Index].Trim().Trim('-', '|', ':');
+            dayLabel = string.IsNullOrWhiteSpace(rawDayLabel) ? $"Ngày {match.Groups["day"].Value}" : rawDayLabel;
+
+            var day = int.Parse(match.Groups["day"].Value);
+            var month = match.Groups["month"].Success ? int.Parse(match.Groups["month"].Value) : SelectedWeekStart.Month;
+            var year = match.Groups["year"].Success
+                ? NormalizeYear(int.Parse(match.Groups["year"].Value))
+                : SelectedWeekStart.Year;
+
+            fullDate = new DateOnly(year, month, day);
+            dateLabel = fullDate.Value.ToString("dd/MM", CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            var lines = rawHeader
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            dayLabel = lines.ElementAtOrDefault(0) ?? normalized;
+            dateLabel = lines.ElementAtOrDefault(1) ?? "---";
+        }
+
+        return new MealPlanDay
+        {
+            DayLabel = dayLabel,
+            DateLabel = dateLabel,
+            FullDate = fullDate
+        };
+    }
+
+    private static int NormalizeYear(int year)
+    {
+        return year < 100 ? 2000 + year : year;
+    }
+
+    private static DateOnly GuessWeekStart(List<MealPlanDay> days)
+    {
+        var firstKnownDate = days.FirstOrDefault(x => x.FullDate.HasValue)?.FullDate;
+        if (firstKnownDate.HasValue)
+        {
+            return GetWeekStart(firstKnownDate.Value);
+        }
+
+        return GetWeekStart(DateOnly.FromDateTime(DateTime.Today));
+    }
+
+    private static bool MealLabelMatches(string rawLabel, string mealKey)
+    {
+        var normalized = RemoveDiacritics(rawLabel).ToLowerInvariant();
+
+        return mealKey switch
+        {
+            "morning" => normalized.Contains("sang"),
+            "noon" => normalized.Contains("trua"),
+            "afternoon" => normalized.Contains("chieu"),
+            _ => false
+        };
+    }
+
+    private static string RemoveDiacritics(string value)
+    {
+        var normalizedString = value.Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+            {
+                builder.Append(c);
+            }
+        }
+
+        return builder
+            .ToString()
+            .Replace('đ', 'd')
+            .Replace('Đ', 'D')
+            .Normalize(NormalizationForm.FormC);
+    }
+
+    private string GetDishIcon(string title)
+    {
+        var normalized = RemoveDiacritics(title).ToLowerInvariant();
+
+        if (normalized.Contains("sup") || normalized.Contains("pho") || normalized.Contains("chao"))
+        {
+            return "ramen_dining";
+        }
+
+        if (normalized.Contains("com"))
+        {
+            return "rice_bowl";
+        }
+
+        if (normalized.Contains("sua") || normalized.Contains("yaourt"))
+        {
+            return "icecream";
+        }
+
+        if (normalized.Contains("banh"))
+        {
+            return "bakery_dining";
+        }
+
+        return "restaurant";
+    }
+
+    private string GetDishTone(string title)
+    {
+        var normalized = RemoveDiacritics(title).ToLowerInvariant();
+
+        if (normalized.Contains("sup") || normalized.Contains("chao") || normalized.Contains("pho"))
+        {
+            return "tone-green";
+        }
+
+        if (normalized.Contains("com"))
+        {
+            return "tone-peach";
+        }
+
+        if (normalized.Contains("banh"))
+        {
+            return "tone-cream";
+        }
+
+        return "tone-rose";
+    }
+
+    private void MockPrint()
+    {
+        SetStatus("Chức năng in thực đơn sẽ được nối ở bước sau. Giao diện đã sẵn vị trí nút thao tác.", "is-info", "info");
+    }
+
+    private void SetStatus(string message, string tone, string icon)
+    {
+        StatusMessage = message;
+        StatusTone = tone;
+        StatusIcon = icon;
+    }
+
+    private static DateOnly GetWeekStart(DateOnly date)
+    {
+        var diff = ((int)date.DayOfWeek + 6) % 7;
+        return date.AddDays(-diff);
+    }
+
+    private static void NormalizeWeek(MealPlanWeek week)
+    {
+        foreach (var day in week.Days)
+        {
+            foreach (var cell in day.Cells.Values)
+            {
+                cell.Normalize();
+            }
+        }
+
+        if (week.StartDate == default && week.Days.Count > 0)
+        {
+            week.StartDate = GuessWeekStart(week.Days);
+        }
+
+        week.DateRangeLabel = BuildDateRangeLabel(week.Days);
+    }
+
+    private static string BuildDateRangeLabel(IReadOnlyList<MealPlanDay> days)
+    {
+        if (days.Count == 0)
+        {
+            return "Tuần chưa cập nhật";
+        }
+
+        return $"Tuần {days.First().DateLabel} - {days.Last().DateLabel}";
+    }
+
+    private static MealPlanWeek CreateDefaultWeek(DateOnly weekStart)
+    {
+        var dayDates = Enumerable.Range(0, 6).Select(offset => weekStart.AddDays(offset)).ToArray();
+
+        var week = new MealPlanWeek
+        {
+            StartDate = weekStart,
+            DateRangeLabel = $"Tuần {dayDates.First():dd/MM} - {dayDates.Last():dd/MM/yyyy}",
+            Days =
+            [
+                CreateDay(dayDates[0], new Dictionary<string, MealPlanCell>
+                {
+                    ["morning"] = MealPlanCell.Create("Súp gà ngô ngọt", "Sữa tươi", "Ba Vì"),
+                    ["noon"] = MealPlanCell.Create("Cơm tôm thơm", "Thịt kho trứng cút", "Canh cải nấu tôm"),
+                    ["afternoon"] = MealPlanCell.Create("Bữa phụ", "Sữa chua nếp cẩm", "Bánh quy bơ")
+                }),
+                CreateDay(dayDates[1], new Dictionary<string, MealPlanCell>
+                {
+                    ["morning"] = MealPlanCell.Create("Cháo yến mạch thịt bằm", "Chuối tiêu chín"),
+                    ["noon"] = MealPlanCell.Create("Cơm gạo lứt", "Cá thu sốt cà chua", "Su su xào tỏi"),
+                    ["afternoon"] = MealPlanCell.Create("Bữa phụ", "Chè đậu xanh", "Quýt ngọt")
+                }),
+                CreateDay(dayDates[2], new Dictionary<string, MealPlanCell>
+                {
+                    ["morning"] = MealPlanCell.Create("Phở bò Hà Nội", "Nước cam ép"),
+                    ["noon"] = MealPlanCell.Create("Cơm trắng", "Gà rang gừng", "Canh bí đỏ xương"),
+                    ["afternoon"] = MealPlanCell.Create("Bữa phụ", "Bánh bao sữa", "Sữa Milo")
+                }),
+                CreateDay(dayDates[3], new Dictionary<string, MealPlanCell>
+                {
+                    ["morning"] = MealPlanCell.Create("Bánh mì trứng ốp", "Sữa hạt sen"),
+                    ["noon"] = MealPlanCell.Create("Cơm tấm thơm", "Thịt bò xào súp lơ", "Canh mồng tơi"),
+                    ["afternoon"] = MealPlanCell.Create("Bữa phụ", "Caramen", "Táo đỏ")
+                }),
+                CreateDay(dayDates[4], new Dictionary<string, MealPlanCell>
+                {
+                    ["morning"] = MealPlanCell.Create("Bún mọc dọc mùng", "Đu đủ chín"),
+                    ["noon"] = MealPlanCell.Create("Cơm rang dương châu", "Tôm rim mặn ngọt", "Canh rau ngót"),
+                    ["afternoon"] = MealPlanCell.Create("Bữa phụ", "Sữa tươi trân châu", "Bánh bông lan")
+                }),
+                CreateDay(dayDates[5], new Dictionary<string, MealPlanCell>
+                {
+                    ["morning"] = MealPlanCell.Create("Gia đình tự túc"),
+                    ["noon"] = MealPlanCell.Create("Nghỉ cuối tuần"),
+                    ["afternoon"] = MealPlanCell.Create("Gia đình tự túc")
+                })
+            ]
+        };
+
+        NormalizeWeek(week);
+        return week;
+    }
+
+    private static MealPlanDay CreateDay(DateOnly date, Dictionary<string, MealPlanCell> cells)
+    {
+        return new MealPlanDay
+        {
+            FullDate = date,
+            DayLabel = GetVietnameseDayLabel(date.DayOfWeek),
+            DateLabel = date.ToString("dd/MM", CultureInfo.InvariantCulture),
+            Cells = cells
+        };
+    }
+
+    private static string GetVietnameseDayLabel(DayOfWeek dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            DayOfWeek.Monday => "Thứ Hai",
+            DayOfWeek.Tuesday => "Thứ Ba",
+            DayOfWeek.Wednesday => "Thứ Tư",
+            DayOfWeek.Thursday => "Thứ Năm",
+            DayOfWeek.Friday => "Thứ Sáu",
+            DayOfWeek.Saturday => "Thứ Bảy",
+            _ => "Ngày khác"
+        };
+    }
+
+    private sealed record MealSlot(string Key, string Label, string Icon);
+
+    private sealed class MealPlanWeek
+    {
+        public DateOnly StartDate { get; set; }
+        public string DateRangeLabel { get; set; } = string.Empty;
+        public List<MealPlanDay> Days { get; set; } = [];
+
+        public MealPlanWeek Clone()
+        {
+            return new MealPlanWeek
+            {
+                StartDate = StartDate,
+                DateRangeLabel = DateRangeLabel,
+                Days = Days.Select(day => day.Clone()).ToList()
+            };
+        }
+    }
+
+    private sealed class MealPlanDay
+    {
+        public DateOnly? FullDate { get; set; }
+        public string DayLabel { get; set; } = string.Empty;
+        public string DateLabel { get; set; } = string.Empty;
+        public Dictionary<string, MealPlanCell> Cells { get; set; } =
+            new()
+            {
+                ["morning"] = MealPlanCell.Empty(),
+                ["noon"] = MealPlanCell.Empty(),
+                ["afternoon"] = MealPlanCell.Empty()
+            };
+
+        public MealPlanDay Clone()
+        {
+            return new MealPlanDay
+            {
+                FullDate = FullDate,
+                DayLabel = DayLabel,
+                DateLabel = DateLabel,
+                Cells = Cells.ToDictionary(pair => pair.Key, pair => pair.Value.Clone())
+            };
+        }
+    }
+
+    private sealed class MealPlanCell
+    {
+        public string Title { get; set; } = "Chưa cập nhật";
+        public List<string> Details { get; set; } = [];
+        public bool IsEmpty { get; set; }
+
+        public string RawContent
+        {
+            get
+            {
+                var lines = new List<string> { Title };
+                lines.AddRange(Details);
+                return string.Join(Environment.NewLine, lines.Where(x => !string.IsNullOrWhiteSpace(x)));
+            }
+            set
+            {
+                var parsed = FromRaw(value);
+                Title = parsed.Title;
+                Details = parsed.Details;
+                IsEmpty = parsed.IsEmpty;
+            }
+        }
+
+        public MealPlanCell Clone()
+        {
+            return new MealPlanCell
+            {
+                Title = Title,
+                Details = [.. Details],
+                IsEmpty = IsEmpty
+            };
+        }
+
+        public void Normalize()
+        {
+            Title = string.IsNullOrWhiteSpace(Title) ? "Chưa cập nhật" : Title.Trim();
+            Details = Details
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim())
+                .ToList();
+            IsEmpty = Title == "Chưa cập nhật" && Details.Count == 0;
+        }
+
+        public static MealPlanCell Create(string title, params string[] details)
+        {
+            return new MealPlanCell
+            {
+                Title = title,
+                Details = details.Where(x => !string.IsNullOrWhiteSpace(x)).ToList(),
+                IsEmpty = false
+            };
+        }
+
+        public static MealPlanCell Empty()
+        {
+            return new MealPlanCell
+            {
+                Title = "Chưa cập nhật",
+                Details = [],
+                IsEmpty = true
+            };
+        }
+
+        public static MealPlanCell FromRaw(string rawCell)
+        {
+            var lines = rawCell
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+
+            if (lines.Count == 0)
+            {
+                return Empty();
+            }
+
+            return new MealPlanCell
+            {
+                Title = lines[0],
+                Details = lines.Skip(1).ToList(),
+                IsEmpty = false
+            };
+        }
+    }
+
+    private sealed record FeaturedDishInfo(string Title, string DayLabel, string Description);
+
+    private sealed class MealPlanImportException(string message) : Exception(message);
+}

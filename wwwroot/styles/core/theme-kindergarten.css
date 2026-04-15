@@ -1,0 +1,457 @@
+﻿@charset "UTF-8";
+/* ==========================================================================
+   Kindergarten Admin Theme
+   Goal: softer colors, consistent frames, and unified component visuals
+   This file is loaded after all module CSS to centralize look-and-feel.
+   ========================================================================== */
+
+:root {
+  /* Main palette inspired by "Sổ Bé Ngoan" */
+  --kg-primary: #538071;
+  --kg-primary-strong: #3a6758;
+  --kg-primary-soft: #e7efec;
+  --kg-secondary: #de98a3;
+  --kg-secondary-soft: #f3e8ea;
+  --kg-accent: #c1ab47;
+  --kg-accent-soft: #f5efd0;
+
+  /* Semantic */
+  --kg-success: #5f9f7f;
+  --kg-success-soft: #e7f3ec;
+  --kg-warning: #9c7f24;
+  --kg-warning-soft: #f7f1dc;
+  --kg-danger: #a66872;
+  --kg-danger-soft: #f7ecef;
+  --kg-purple: #9a7a9f;
+  --kg-purple-soft: #f2ebf3;
+
+  /* Surface */
+  --kg-bg-page: #f3f0eb;
+  --kg-bg-card: #ffffff;
+  --kg-bg-subtle: #fcf9f3;
+  --kg-border: #e6dfd3;
+  --kg-border-strong: #d7ccbe;
+  --kg-shadow: 0 8px 20px rgba(74, 88, 80, 0.08);
+
+  /* Text */
+  --kg-text-main: #373831;
+  --kg-text-muted: #7d7d77;
+
+  /* Radius */
+  --kg-radius-sm: 10px;
+  --kg-radius-md: 14px;
+  --kg-radius-lg: 18px;
+}
+
+/* ---------- Bridge old global tokens in app.css ---------- */
+:root {
+  --primary: var(--kg-primary);
+  --primary-dark: var(--kg-primary-strong);
+  --header-blue: var(--kg-secondary);
+  --bg-page: var(--kg-bg-page);
+  --bg-card: var(--kg-bg-card);
+  --text-main: var(--kg-text-main);
+  --text-muted: var(--kg-text-muted);
+  --border: var(--kg-border);
+
+  --c-red: var(--kg-danger);
+  --c-orange: var(--kg-warning);
+  --c-yellow: var(--kg-accent);
+  --c-green: var(--kg-success);
+  --c-blue: var(--kg-primary);
+  --c-purple: var(--kg-purple);
+
+  --grad-blue: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--kg-primary) 75%, #ffffff) 0%,
+    var(--kg-primary) 100%
+  );
+  --grad-orange: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--kg-warning) 55%, #ffffff) 0%,
+    var(--kg-warning) 100%
+  );
+  --grad-green: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--kg-success) 65%, #ffffff) 0%,
+    var(--kg-success) 100%
+  );
+  --grad-purple: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--kg-purple) 60%, #ffffff) 0%,
+    var(--kg-purple) 100%
+  );
+  --grad-red: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--kg-danger) 60%, #ffffff) 0%,
+    var(--kg-danger) 100%
+  );
+}
+
+/* ---------- Base surfaces ---------- */
+html,
+body {
+  background: var(--kg-bg-page);
+  color: var(--kg-text-main);
+}
+
+.layout-body {
+  background: var(--kg-bg-page);
+}
+
+.layout-content,
+.layout-viewport {
+  background: transparent;
+}
+
+/* ---------- Header and navigation ---------- */
+.layout-header {
+  background: var(--grad-blue);
+  box-shadow: 0 10px 24px rgba(63, 122, 104, 0.2);
+}
+
+.header-inner {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.user-info {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.year-btn {
+  color: var(--kg-primary-strong);
+}
+
+.main-nav-container {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--kg-border);
+}
+
+.nav-link {
+  color: var(--kg-text-main);
+  border-bottom-color: transparent;
+}
+
+.nav-link:hover,
+.nav-item-wrap:hover .nav-link,
+.nav-link.active {
+  background: var(--kg-primary-soft);
+  color: var(--kg-primary-strong);
+}
+
+.nav-link.active {
+  border-bottom-color: var(--kg-accent);
+}
+
+.nav-dropdown {
+  border-color: var(--kg-border);
+  border-radius: 0 0 var(--kg-radius-sm) var(--kg-radius-sm);
+}
+
+.dropdown-item {
+  color: var(--kg-text-main);
+}
+
+.dropdown-item:hover {
+  background: var(--kg-primary-soft);
+  color: var(--kg-primary-strong);
+}
+
+.sub-icon {
+  color: color-mix(in srgb, var(--kg-primary) 45%, var(--kg-text-muted));
+}
+
+/* ---------- Unified frame/card ---------- */
+.std-card,
+.sm-card,
+.lm-card,
+.nt-card,
+.rt-card {
+  background: var(--kg-bg-card);
+  border: 1px solid var(--kg-border);
+  border-radius: var(--kg-radius-md);
+  box-shadow: var(--kg-shadow);
+}
+
+.sm-card-header,
+.lm-card-header,
+.nt-card-header,
+.card-header {
+  border-bottom: 1px solid var(--kg-border);
+  background: var(--kg-bg-card);
+}
+
+.filter-container,
+.sm-toolbar,
+.lm-toolbar,
+.nt-toolbar,
+.rt-filter-box {
+  background: var(--kg-bg-subtle);
+  border: 1px solid var(--kg-border);
+  border-radius: var(--kg-radius-sm);
+}
+
+/* ---------- Inputs/selects ---------- */
+.form-input,
+.sm-form-control,
+.sm-form-select,
+.lm-input,
+.lm-select,
+.nt-input,
+.nt-select,
+.rt-input,
+.rt-select {
+  border: 1px solid var(--kg-border);
+  border-radius: 10px;
+  color: var(--kg-text-main);
+  background: var(--kg-bg-card);
+}
+
+.form-input:focus,
+.sm-form-control:focus,
+.sm-form-select:focus,
+.lm-input:focus,
+.lm-select:focus,
+.nt-input:focus,
+.nt-select:focus,
+.rt-input:focus,
+.rt-select:focus {
+  border-color: var(--kg-primary);
+  box-shadow: 0 0 0 3px rgba(95, 175, 154, 0.18);
+}
+
+.form-label,
+.sm-label,
+.lm-label,
+.nt-label,
+.rt-label {
+  color: var(--kg-text-muted);
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary,
+.sm-btn-primary,
+.lm-btn-primary,
+.nt-btn-primary,
+.rt-btn-primary {
+  background: var(--kg-primary);
+  color: var(--kg-bg-card);
+}
+
+.btn-primary:hover,
+.sm-btn-primary:hover,
+.lm-btn-primary:hover,
+.nt-btn-primary:hover,
+.rt-btn-primary:hover {
+  background: var(--kg-primary-strong);
+}
+
+.btn-outline,
+.sm-btn-outline,
+.lm-btn-outline,
+.nt-btn-outline,
+.rt-btn-outline {
+  border-color: var(--kg-border);
+  color: var(--kg-text-muted);
+  background: var(--kg-bg-card);
+}
+
+.btn-outline:hover,
+.sm-btn-outline:hover,
+.lm-btn-outline:hover,
+.nt-btn-outline:hover,
+.rt-btn-outline:hover {
+  border-color: var(--kg-border-strong);
+  background: var(--kg-bg-subtle);
+  color: var(--kg-primary-strong);
+}
+
+/* ---------- Tables ---------- */
+.table-wrapper,
+.sm-table-responsive,
+.lm-table-wrapper,
+.nt-table-responsive,
+.rt-table-wrapper {
+  border: 1px solid var(--kg-border);
+  border-radius: 0 0 var(--kg-radius-sm) var(--kg-radius-sm);
+  background: var(--kg-bg-card);
+}
+
+.data-table th,
+.sm-table th,
+.lm-table th,
+.nt-table th,
+.rt-table th {
+  background: var(--kg-bg-subtle);
+  color: var(--kg-text-muted);
+  border-bottom: 1px solid var(--kg-border);
+}
+
+.data-table td,
+.sm-table td,
+.lm-table td,
+.nt-table td,
+.rt-table td {
+  color: var(--kg-text-main);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--kg-border) 70%, var(--kg-bg-card));
+}
+
+.data-table tr:hover td,
+.sm-table tbody tr:hover td,
+.lm-table tbody tr:hover td,
+.nt-table tbody tr:hover td,
+.rt-table tbody tr:hover td {
+  background: var(--kg-bg-subtle);
+}
+
+/* ---------- Tabs / chips ---------- */
+.sub-tabs-bar,
+.session-tabs,
+.rt-tabs {
+  background: var(--kg-bg-card);
+  border: 1px solid var(--kg-border);
+  border-radius: var(--kg-radius-sm);
+}
+
+.sub-tab-link:hover,
+.session-tabs span:hover:not(.active),
+.rt-tab:hover {
+  background: var(--kg-bg-subtle);
+}
+
+.sub-tab-link.active,
+.session-tabs span.active,
+.rt-tab.active {
+  background: var(--kg-primary-soft);
+  color: var(--kg-primary-strong);
+  border-color: var(--kg-border);
+}
+
+/* ---------- Status colors ---------- */
+.bg-blue-light {
+  background: var(--kg-secondary-soft);
+  color: var(--kg-secondary);
+}
+
+.bg-green-light {
+  background: var(--kg-success-soft);
+  color: var(--kg-success);
+}
+
+.bg-yellow-light {
+  background: var(--kg-accent-soft);
+  color: var(--kg-warning);
+}
+
+.bg-orange-light {
+  background: var(--kg-accent-soft);
+  color: var(--kg-warning);
+}
+
+.bg-red-light {
+  background: var(--kg-danger-soft);
+  color: var(--kg-danger);
+}
+
+.bg-purple-light {
+  background: var(--kg-purple-soft);
+  color: var(--kg-purple);
+}
+
+.status-present {
+  background: var(--kg-success-soft);
+  color: var(--kg-success);
+}
+
+.status-late {
+  background: var(--kg-accent-soft);
+  color: var(--kg-warning);
+}
+
+.status-absent {
+  background: var(--kg-danger-soft);
+  color: var(--kg-danger);
+}
+
+/* ---------- Module var remap (sm/lm/nt/rt) ---------- */
+:root {
+  --sm-primary: var(--kg-primary);
+  --sm-primary-hover: var(--kg-primary-strong);
+  --sm-primary-soft: var(--kg-primary-soft);
+  --sm-success: var(--kg-success);
+  --sm-success-soft: var(--kg-success-soft);
+  --sm-warning: var(--kg-warning);
+  --sm-warning-soft: var(--kg-warning-soft);
+  --sm-danger: var(--kg-danger);
+  --sm-danger-soft: var(--kg-danger-soft);
+  --sm-purple: var(--kg-purple);
+  --sm-purple-soft: var(--kg-purple-soft);
+  --sm-text-main: var(--kg-text-main);
+  --sm-text-muted: var(--kg-text-muted);
+  --sm-bg-body: var(--kg-bg-page);
+  --sm-bg-white: var(--kg-bg-card);
+  --sm-border: var(--kg-border);
+  --sm-radius: var(--kg-radius-sm);
+
+  --lm-primary: var(--kg-primary);
+  --lm-primary-hover: var(--kg-primary-strong);
+  --lm-primary-soft: var(--kg-primary-soft);
+  --lm-success: var(--kg-success);
+  --lm-success-soft: var(--kg-success-soft);
+  --lm-warning: var(--kg-warning);
+  --lm-warning-soft: var(--kg-warning-soft);
+  --lm-danger: var(--kg-danger);
+  --lm-danger-soft: var(--kg-danger-soft);
+  --lm-text-main: var(--kg-text-main);
+  --lm-text-muted: var(--kg-text-muted);
+  --lm-bg-body: var(--kg-bg-page);
+  --lm-bg-white: var(--kg-bg-card);
+  --lm-border: var(--kg-border);
+
+  --nt-primary: var(--kg-primary);
+  --nt-primary-hover: var(--kg-primary-strong);
+  --nt-primary-soft: var(--kg-primary-soft);
+  --nt-success: var(--kg-success);
+  --nt-warning: var(--kg-warning);
+  --nt-danger: var(--kg-danger);
+  --nt-danger-soft: var(--kg-danger-soft);
+  --nt-text-main: var(--kg-text-main);
+  --nt-text-muted: var(--kg-text-muted);
+  --nt-bg-body: var(--kg-bg-page);
+  --nt-bg-white: var(--kg-bg-card);
+  --nt-border: var(--kg-border);
+
+  --rt-primary: var(--kg-primary);
+  --rt-success: var(--kg-success);
+  --rt-warning: var(--kg-warning);
+  --rt-danger: var(--kg-danger);
+  --rt-light: var(--kg-bg-subtle);
+  --rt-border: var(--kg-border);
+  --rt-bg: var(--kg-bg-page);
+}
+
+/* ---------- Mobile drawer color sync ---------- */
+@media (max-width: 1024px) {
+  .drawer-header,
+  .drawer-body {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--kg-primary) 85%, #ffffff) 0%,
+      var(--kg-primary) 100%
+    );
+  }
+
+  .drawer-item-group.expanded .drawer-link-parent {
+    background: var(--kg-primary-soft);
+  }
+
+  .drawer-sub-panel {
+    border-color: var(--kg-border);
+    background: var(--kg-bg-subtle);
+  }
+}

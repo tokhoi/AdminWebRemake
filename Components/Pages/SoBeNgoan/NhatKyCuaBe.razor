@@ -1,0 +1,166 @@
+@page "/nhat-ky-cua-be"
+@rendermode InteractiveServer
+@inject NavigationManager NavManager
+
+<PageTitle>Nhật Ký Của Bé</PageTitle>
+
+<div class="child-journal-page animate-fade-in">
+    <section class="child-journal-shell">
+        <div class="child-journal-header">
+            <div>
+                <div class="child-journal-kicker">Nhật ký của bé</div>
+                <h1>Danh sách học sinh toàn trường</h1>
+                <p>Chọn một bé để xem trang nhật ký chi tiết, theo dõi sổ bé ngoan, sức khỏe và dinh dưỡng.</p>
+            </div>
+            <div class="child-journal-summary">
+                <span class="material-icons-round">groups</span>
+                <strong>@FilteredStudents.Count</strong>
+                <span>bé đang hiển thị</span>
+            </div>
+        </div>
+
+        <div class="child-journal-toolbar">
+            <div class="child-journal-filter">
+                <label>Khối</label>
+                <select @bind="SelectedGrade">
+                    <option value="">Tất cả khối</option>
+                    @foreach (var grade in Grades)
+                    {
+                        <option value="@grade">@grade</option>
+                    }
+                </select>
+            </div>
+
+            <div class="child-journal-filter">
+                <label>Lớp</label>
+                <select @bind="SelectedClass">
+                    <option value="">Tất cả lớp</option>
+                    @foreach (var className in AvailableClasses)
+                    {
+                        <option value="@className">@className</option>
+                    }
+                </select>
+            </div>
+
+            <div class="child-journal-filter search">
+                <label>Tìm kiếm</label>
+                <input type="text"
+                       placeholder="Nhập tên hoặc mã học sinh..."
+                       @bind="SearchTerm"
+                       @bind:event="oninput" />
+            </div>
+        </div>
+
+        <div class="child-journal-table-wrap">
+            <table class="child-journal-table">
+                <thead>
+                    <tr>
+                        <th>Học sinh</th>
+                        <th>Mã bé</th>
+                        <th>Khối</th>
+                        <th>Lớp</th>
+                        <th>Giáo viên</th>
+                        <th class="text-center">Nhật ký</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in FilteredStudents)
+                    {
+                        <tr>
+                            <td>
+                                <div class="child-journal-student">
+                                    <div class="child-journal-avatar">@student.Initials</div>
+                                    <div>
+                                        <div class="child-journal-name">@student.Name</div>
+                                        <div class="child-journal-note">Niên khóa 2025-2026</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="child-journal-badge">@student.Code</span></td>
+                            <td>@student.Grade</td>
+                            <td>@student.ClassName</td>
+                            <td>@student.TeacherName</td>
+                            <td class="text-center">
+                                <button class="child-journal-open"
+                                        @onclick="@(() => OpenJournal(student))">
+                                    <span class="material-icons-round">visibility</span>
+                                    <span>Xem nhật ký</span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!FilteredStudents.Any())
+            {
+                <div class="child-journal-empty">
+                    <span class="material-icons-round">search_off</span>
+                    <strong>Không tìm thấy học sinh phù hợp</strong>
+                    <p>Hãy đổi bộ lọc khối, lớp hoặc từ khóa tìm kiếm.</p>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private string SearchTerm { get; set; } = string.Empty;
+    private string SelectedGrade { get; set; } = string.Empty;
+    private string SelectedClass { get; set; } = string.Empty;
+
+    private readonly List<StudentJournalItem> Students =
+    [
+        new("HS-MN-001", "Nguyễn Minh Anh", "Mầm 3", "Mầm 3A", "Cô Mai Lan"),
+        new("HS-MN-002", "Trần Gia Hân", "Mầm 3", "Mầm 3A", "Cô Mai Lan"),
+        new("HS-MN-003", "Lê Bảo Ngọc", "Mầm 4", "Mầm 4B", "Cô Thu Hà"),
+        new("HS-MN-004", "Phạm Quốc Bảo", "Mầm 4", "Mầm 4B", "Cô Thu Hà"),
+        new("HS-MN-005", "Võ Khánh Linh", "Chồi 1", "Chồi 1", "Cô Thanh Vy"),
+        new("HS-MN-006", "Hoàng Tuấn Kiệt", "Chồi 1", "Chồi 1", "Cô Thanh Vy"),
+        new("HS-MN-007", "Phan Minh Khang", "Lá 2", "Lá 2A", "Cô Bích Ngọc"),
+        new("HS-MN-008", "Ngô Hà My", "Lá 2", "Lá 2A", "Cô Bích Ngọc")
+    ];
+
+    private IEnumerable<string> Grades => Students.Select(x => x.Grade).Distinct().OrderBy(x => x);
+
+    private IEnumerable<string> AvailableClasses =>
+        Students.Where(x => string.IsNullOrWhiteSpace(SelectedGrade) || x.Grade == SelectedGrade)
+            .Select(x => x.ClassName)
+            .Distinct()
+            .OrderBy(x => x);
+
+    private List<StudentJournalItem> FilteredStudents =>
+        Students.Where(x =>
+                (string.IsNullOrWhiteSpace(SelectedGrade) || x.Grade == SelectedGrade) &&
+                (string.IsNullOrWhiteSpace(SelectedClass) || x.ClassName == SelectedClass) &&
+                (string.IsNullOrWhiteSpace(SearchTerm) ||
+                 x.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                 x.Code.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+    private void OpenJournal(StudentJournalItem student)
+    {
+        var target =
+            $"/so-be-ngoan?student={Uri.EscapeDataString(student.Name)}&class={Uri.EscapeDataString(student.ClassName)}&code={Uri.EscapeDataString(student.Code)}";
+        NavManager.NavigateTo(target);
+    }
+
+    private sealed class StudentJournalItem
+    {
+        public StudentJournalItem(string code, string name, string grade, string className, string teacherName)
+        {
+            Code = code;
+            Name = name;
+            Grade = grade;
+            ClassName = className;
+            TeacherName = teacherName;
+        }
+
+        public string Code { get; }
+        public string Name { get; }
+        public string Grade { get; }
+        public string ClassName { get; }
+        public string TeacherName { get; }
+        public string Initials => string.Concat(Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).TakeLast(2).Select(x => x[0])).ToUpperInvariant();
+    }
+}

@@ -1,10 +1,10 @@
 ﻿@page "/learning/period"
 @rendermode InteractiveServer
 
-<div class="st-page-wrapper">
+<div class="st-page-wrapper score-sheet-page score-sheet-page--periods">
     @* --- HEADER --- *@
     <div class="st-page-header">
-        <div class="st-title-icon" style="background:#dc3545">
+        <div class="st-title-icon" style="background:var(--kg-danger)">
             <span class="material-icons-round">manage_history</span>
         </div>
         <h4>QUẢN LÝ ĐỢT NHẬP ĐIỂM</h4>
@@ -29,8 +29,8 @@
                 @foreach (var p in listPeriods)
                 {
                     <tr>
-                        <td class="st-fw-bold" style="color:#005b9f">@p.Name</td>
-                        <td><span class="st-badge" style="background:#e9ecef; color:#444; border:1px solid #ccc">HK @p.Semester - Năm @p.Year</span></td>
+                        <td class="st-fw-bold" style="color:var(--kg-primary-strong)">@p.Name</td>
+                        <td><span class="st-badge" style="background:var(--kg-bg-subtle); color:var(--kg-text-main); border:1px solid var(--kg-border)">HK @p.Semester - Năm @p.Year</span></td>
                         <td>
                             <div style="font-weight:600">
                                 @p.FromDate.ToString("dd/MM/yyyy")
@@ -186,3 +186,6 @@
 
     void ToggleStatus(GradePeriod p) => p.IsActive = !p.IsActive;
 }
+
+
+

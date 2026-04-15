@@ -1,0 +1,572 @@
+@page "/school/up-menu"
+@rendermode InteractiveServer
+@using System.Globalization
+
+<PageTitle>Quản lý thực đơn</PageTitle>
+
+<div class="upm-page animate-fade-in">
+    <section class="upm-shell">
+        <header class="upm-header-card">
+            <div class="upm-header-copy">
+                <div class="upm-kicker">Miniapp thực đơn</div>
+                <h1>Quản lý thực đơn</h1>
+                <p>
+                    Tạo cuốn menu món ăn cho phụ huynh chọn trên miniapp, quản lý tuần áp dụng, ngày chốt
+                    và trạng thái hiển thị của từng món trước khi phát hành.
+                </p>
+
+                <div class="upm-meta-strip">
+                    <div class="upm-meta-pill">
+                        <span class="material-icons-round">calendar_month</span>
+                        <span>@SelectedWeekLabel</span>
+                    </div>
+                    <div class="upm-meta-pill">
+                        <span class="material-icons-round">event_available</span>
+                        <span>Chốt món: @CutoffDateLabel</span>
+                    </div>
+                    <div class="upm-meta-pill is-accent">
+                        <span class="material-icons-round">local_dining</span>
+                        <span>@PublishedMenuItems.Count món đang bán</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upm-header-actions">
+                <button type="button" class="upm-action-btn is-primary" @onclick="OpenCreateEditor">
+                    <span class="material-icons-round">add_circle</span>
+                    <span>Thêm món mới</span>
+                </button>
+                <button type="button" class="upm-action-btn is-light" @onclick="GoToPreviousWeek">
+                    <span class="material-icons-round">chevron_left</span>
+                    <span>Tuần trước</span>
+                </button>
+                <button type="button" class="upm-action-btn is-light" @onclick="GoToCurrentWeek">
+                    <span class="material-icons-round">today</span>
+                    <span>Tuần hiện tại</span>
+                </button>
+                <button type="button" class="upm-action-btn is-light" @onclick="GoToNextWeek">
+                    <span class="material-icons-round">chevron_right</span>
+                    <span>Tuần sau</span>
+                </button>
+                <button type="button" class="upm-action-btn is-secondary" @onclick="DuplicatePreviousMenu">
+                    <span class="material-icons-round">content_copy</span>
+                    <span>Nhân bản tuần trước</span>
+                </button>
+                <button type="button" class="upm-action-btn is-secondary" @onclick="PublishMenu">
+                    <span class="material-icons-round">publish</span>
+                    <span>Phát hành menu</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="upm-summary-grid">
+            <article class="upm-summary-card">
+                <span class="material-icons-round">restaurant_menu</span>
+                <div>
+                    <div class="upm-summary-label">Tổng món trong tuần</div>
+                    <div class="upm-summary-value">@FilteredMenuItems.Count</div>
+                </div>
+            </article>
+
+            <article class="upm-summary-card">
+                <span class="material-icons-round">sell</span>
+                <div>
+                    <div class="upm-summary-label">Giá trung bình</div>
+                    <div class="upm-summary-value">@AveragePriceLabel</div>
+                </div>
+            </article>
+
+            <article class="upm-summary-card">
+                <span class="material-icons-round">verified</span>
+                <div>
+                    <div class="upm-summary-label">Đang hiển thị</div>
+                    <div class="upm-summary-value">@PublishedMenuItems.Count</div>
+                </div>
+            </article>
+
+            <article class="upm-summary-card">
+                <span class="material-icons-round">schedule_send</span>
+                <div>
+                    <div class="upm-summary-label">Ngày chốt món</div>
+                    <div class="upm-summary-value upm-summary-value--small">@CutoffDateLabel</div>
+                </div>
+            </article>
+        </section>
+
+        <section class="upm-toolbar-card">
+            <div class="upm-toolbar-grid">
+                <div class="upm-filter-group">
+                    <label class="upm-label">Nhóm bữa</label>
+                    <select class="upm-select" @bind="SelectedMealGroup">
+                        <option value="">Tất cả nhóm bữa</option>
+                        @foreach (var group in MealGroups)
+                        {
+                            <option value="@group.Key">@group.Label</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="upm-filter-group">
+                    <label class="upm-label">Trạng thái món</label>
+                    <select class="upm-select" @bind="SelectedStatus">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="published">Đang bán</option>
+                        <option value="draft">Bản nháp</option>
+                        <option value="hidden">Đã ẩn</option>
+                    </select>
+                </div>
+
+                <div class="upm-filter-group">
+                    <label class="upm-label">Tìm món ăn</label>
+                    <input class="upm-input" @bind="SearchTerm" placeholder="Tên món, mô tả, tag..." />
+                </div>
+            </div>
+        </section>
+
+        <section class="upm-content-grid">
+            <article class="upm-panel">
+                <div class="upm-panel-header">
+                    <div>
+                        <h2>Sổ menu tuần</h2>
+                        <p>Quản lý danh sách món phụ huynh sẽ nhìn thấy trên miniapp trước khi chốt thực đơn cho bé.</p>
+                    </div>
+                </div>
+
+                <div class="upm-group-stack">
+                    @foreach (var group in GroupedMenuItems)
+                    {
+                        <section class="upm-group-card">
+                            <div class="upm-group-head">
+                                <div>
+                                    <div class="upm-group-title">@group.GroupLabel</div>
+                                    <div class="upm-group-meta">@group.Items.Count món đang hiển thị trong nhóm này</div>
+                                </div>
+                            </div>
+
+                            <div class="upm-menu-grid">
+                                @foreach (var item in group.Items)
+                                {
+                                    <article class="upm-menu-card">
+                                        <div class="upm-menu-visual @item.ToneClass">
+                                            <span class="material-icons-round">@item.Icon</span>
+                                        </div>
+
+                                        <div class="upm-menu-body">
+                                            <div class="upm-menu-head">
+                                                <div>
+                                                    <h3>@item.Name</h3>
+                                                    <p>@item.Description</p>
+                                                </div>
+                                                <span class="upm-status-badge @item.StatusClass">@item.StatusLabel</span>
+                                            </div>
+
+                                            <div class="upm-menu-tags">
+                                                @foreach (var tag in item.Tags)
+                                                {
+                                                    <span class="upm-tag">@tag</span>
+                                                }
+                                            </div>
+
+                                            <div class="upm-menu-footer">
+                                                <div>
+                                                    <div class="upm-price-label">Đơn giá</div>
+                                                    <div class="upm-price-value">@item.Price.ToString("N0", CultureInfo.InvariantCulture) đ</div>
+                                                </div>
+
+                                                <div class="upm-menu-actions">
+                                                    <button type="button" class="upm-icon-btn" title="Sửa món" @onclick="() => OpenEditEditor(item.Id)">
+                                                        <span class="material-icons-round">edit</span>
+                                                    </button>
+                                                    <button type="button" class="upm-icon-btn" title="Đổi trạng thái món" @onclick="() => ToggleItemVisibility(item.Id)">
+                                                        <span class="material-icons-round">@(item.StatusKey == "hidden" ? "visibility" : "visibility_off")</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        </section>
+                    }
+                </div>
+            </article>
+
+            <aside class="upm-side-stack">
+                <article class="upm-panel">
+                    <div class="upm-panel-header">
+                        <div>
+                            <h2>Kỳ áp dụng</h2>
+                            <p>Thông tin tuần phát hành để phụ huynh chọn món cho con.</p>
+                        </div>
+                    </div>
+
+                    <dl class="upm-meta-list">
+                        <div>
+                            <dt>Tuần áp dụng</dt>
+                            <dd>@SelectedWeekLabel</dd>
+                        </div>
+                        <div>
+                            <dt>Ngày chốt</dt>
+                            <dd>@CutoffDateLabel</dd>
+                        </div>
+                        <div>
+                            <dt>Khối áp dụng</dt>
+                            <dd>Toàn trường</dd>
+                        </div>
+                        <div>
+                            <dt>Trạng thái phát hành</dt>
+                            <dd>@MenuPublishStatus</dd>
+                        </div>
+                    </dl>
+                </article>
+
+                <article class="upm-panel">
+                    <div class="upm-panel-header">
+                        <div>
+                            <h2>Checklist vận hành</h2>
+                            <p>Các bước nên kiểm tra trước khi mở chọn món trên miniapp.</p>
+                        </div>
+                    </div>
+
+                    <ul class="upm-check-list">
+                        <li>Kiểm tra giá tiền từng món và loại bữa.</li>
+                        <li>Ẩn các món tạm dừng bán hoặc chưa đủ nguyên liệu.</li>
+                        <li>Kiểm tra ngày chốt món cho tuần kế tiếp.</li>
+                        <li>Phát hành menu trước khi gửi sang miniapp.</li>
+                    </ul>
+                </article>
+            </aside>
+        </section>
+    </section>
+</div>
+
+@if (MenuEditor is not null)
+{
+    <div class="upm-modal-backdrop" @onclick="CloseEditor">
+        <div class="upm-modal" @onclick:stopPropagation>
+            <div class="upm-modal-header">
+                <div>
+                    <h3>@(MenuEditor.IsNew ? "Thêm món mới" : "Chỉnh sửa món")</h3>
+                    <p>Quản lý thông tin món trước khi phát hành cho phụ huynh chọn trên miniapp.</p>
+                </div>
+                <button type="button" class="upm-icon-btn" @onclick="CloseEditor">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <div class="upm-modal-body">
+                <div class="upm-form-grid">
+                    <div class="upm-filter-group">
+                        <label class="upm-label">Tên món</label>
+                        <input class="upm-input" @bind="MenuEditor.Name" />
+                    </div>
+
+                    <div class="upm-filter-group">
+                        <label class="upm-label">Nhóm bữa</label>
+                        <select class="upm-select" @bind="MenuEditor.GroupKey">
+                            @foreach (var group in MealGroups)
+                            {
+                                <option value="@group.Key">@group.Label</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="upm-filter-group">
+                        <label class="upm-label">Đơn giá</label>
+                        <input class="upm-input" type="number" min="0" step="1000" @bind="MenuEditor.Price" />
+                    </div>
+
+                    <div class="upm-filter-group">
+                        <label class="upm-label">Trạng thái</label>
+                        <select class="upm-select" @bind="MenuEditor.StatusKey">
+                            <option value="published">Đang bán</option>
+                            <option value="draft">Bản nháp</option>
+                            <option value="hidden">Đã ẩn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="upm-filter-group">
+                    <label class="upm-label">Mô tả ngắn</label>
+                    <textarea class="upm-textarea" @bind="MenuEditor.Description"></textarea>
+                </div>
+
+                <div class="upm-form-grid">
+                    <div class="upm-filter-group">
+                        <label class="upm-label">Icon</label>
+                        <select class="upm-select" @bind="MenuEditor.Icon">
+                            <option value="local_dining">local_dining</option>
+                            <option value="lunch_dining">lunch_dining</option>
+                            <option value="ramen_dining">ramen_dining</option>
+                            <option value="emoji_food_beverage">emoji_food_beverage</option>
+                            <option value="icecream">icecream</option>
+                            <option value="bakery_dining">bakery_dining</option>
+                            <option value="dinner_dining">dinner_dining</option>
+                            <option value="egg">egg</option>
+                        </select>
+                    </div>
+
+                    <div class="upm-filter-group">
+                        <label class="upm-label">Tone màu</label>
+                        <select class="upm-select" @bind="MenuEditor.ToneClass">
+                            <option value="tone-sun">tone-sun</option>
+                            <option value="tone-peach">tone-peach</option>
+                            <option value="tone-mint">tone-mint</option>
+                            <option value="tone-honey">tone-honey</option>
+                            <option value="tone-berry">tone-berry</option>
+                            <option value="tone-lilac">tone-lilac</option>
+                            <option value="tone-coral">tone-coral</option>
+                            <option value="tone-sage">tone-sage</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="upm-filter-group">
+                    <label class="upm-label">Tag món ăn</label>
+                    <input class="upm-input" @bind="MenuEditor.TagText" placeholder="Cách nhau bằng dấu phẩy" />
+                </div>
+            </div>
+
+            <div class="upm-modal-footer">
+                <button type="button" class="upm-action-btn is-light" @onclick="CloseEditor">Hủy</button>
+                <button type="button" class="upm-action-btn is-primary" @onclick="SaveEditor">Lưu món ăn</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private readonly IReadOnlyList<MealGroupOption> MealGroups =
+    [
+        new("morning", "Bữa sáng"),
+        new("lunch", "Bữa trưa"),
+        new("snack", "Bữa xế")
+    ];
+
+    private DateOnly SelectedWeekStart { get; set; } = GetWeekStart(DateOnly.FromDateTime(new DateTime(2026, 4, 13)));
+    private string SelectedMealGroup { get; set; } = string.Empty;
+    private string SelectedStatus { get; set; } = string.Empty;
+    private string SearchTerm { get; set; } = string.Empty;
+    private bool IsPublished { get; set; }
+    private List<UpMenuItem> MenuCatalog { get; set; } = CreateSeedMenuItems();
+    private MenuEditorModel? MenuEditor { get; set; }
+
+    private string SelectedWeekLabel => $"Tuần từ {SelectedWeekStart:dd/MM} - {SelectedWeekStart.AddDays(6):dd/MM/yyyy}";
+    private string CutoffDateLabel => SelectedWeekStart.AddDays(-2).ToString("dddd, dd/MM/yyyy", new CultureInfo("vi-VN"));
+    private string MenuPublishStatus => IsPublished ? "Đã phát hành cho miniapp" : "Đang ở bản nháp";
+
+    private List<UpMenuItem> FilteredMenuItems =>
+        MenuCatalog
+            .Where(item => string.IsNullOrWhiteSpace(SelectedMealGroup) || item.GroupKey == SelectedMealGroup)
+            .Where(item => string.IsNullOrWhiteSpace(SelectedStatus) || item.StatusKey == SelectedStatus)
+            .Where(item => string.IsNullOrWhiteSpace(SearchTerm) ||
+                           item.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                           item.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                           item.Tags.Any(tag => tag.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+    private List<UpMenuItem> PublishedMenuItems =>
+        MenuCatalog.Where(item => item.StatusKey == "published").ToList();
+
+    private decimal AveragePrice =>
+        FilteredMenuItems.Count == 0 ? 0 : FilteredMenuItems.Average(item => item.Price);
+
+    private string AveragePriceLabel => $"{AveragePrice.ToString("N0", CultureInfo.InvariantCulture)} đ";
+
+    private IEnumerable<UpMenuGroupViewModel> GroupedMenuItems =>
+        MealGroups
+            .Select(group => new UpMenuGroupViewModel(
+                group.Label,
+                FilteredMenuItems.Where(item => item.GroupKey == group.Key).ToList()))
+            .Where(group => group.Items.Count > 0);
+
+    private void GoToPreviousWeek()
+    {
+        SelectedWeekStart = SelectedWeekStart.AddDays(-7);
+    }
+
+    private void GoToCurrentWeek()
+    {
+        SelectedWeekStart = GetWeekStart(DateOnly.FromDateTime(DateTime.Today));
+    }
+
+    private void GoToNextWeek()
+    {
+        SelectedWeekStart = SelectedWeekStart.AddDays(7);
+    }
+
+    private void DuplicatePreviousMenu()
+    {
+        IsPublished = false;
+    }
+
+    private void PublishMenu()
+    {
+        IsPublished = true;
+    }
+
+    private void OpenCreateEditor()
+    {
+        MenuEditor = new MenuEditorModel
+        {
+            Id = Guid.NewGuid(),
+            IsNew = true,
+            GroupKey = MealGroups.First().Key,
+            StatusKey = "draft",
+            Icon = "local_dining",
+            ToneClass = "tone-sun",
+            Price = 25000m
+        };
+    }
+
+    private void OpenEditEditor(Guid itemId)
+    {
+        var item = MenuCatalog.FirstOrDefault(entry => entry.Id == itemId);
+        if (item is null)
+        {
+            return;
+        }
+
+        MenuEditor = new MenuEditorModel
+        {
+            Id = item.Id,
+            IsNew = false,
+            Name = item.Name,
+            GroupKey = item.GroupKey,
+            Description = item.Description,
+            Price = item.Price,
+            StatusKey = item.StatusKey,
+            Icon = item.Icon,
+            ToneClass = item.ToneClass,
+            TagText = string.Join(", ", item.Tags)
+        };
+    }
+
+    private void ToggleItemVisibility(Guid itemId)
+    {
+        var item = MenuCatalog.FirstOrDefault(entry => entry.Id == itemId);
+        if (item is null)
+        {
+            return;
+        }
+
+        item.StatusKey = item.StatusKey == "hidden" ? "draft" : "hidden";
+    }
+
+    private void SaveEditor()
+    {
+        if (MenuEditor is null || string.IsNullOrWhiteSpace(MenuEditor.Name))
+        {
+            return;
+        }
+
+        var tags = MenuEditor.TagText
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var existingItem = MenuCatalog.FirstOrDefault(entry => entry.Id == MenuEditor.Id);
+        if (existingItem is null)
+        {
+            MenuCatalog.Insert(0, new UpMenuItem
+            {
+                Id = MenuEditor.Id,
+                Name = MenuEditor.Name.Trim(),
+                GroupKey = MenuEditor.GroupKey,
+                Description = MenuEditor.Description.Trim(),
+                Price = MenuEditor.Price,
+                StatusKey = MenuEditor.StatusKey,
+                Icon = MenuEditor.Icon,
+                ToneClass = MenuEditor.ToneClass,
+                Tags = tags
+            });
+        }
+        else
+        {
+            existingItem.Name = MenuEditor.Name.Trim();
+            existingItem.GroupKey = MenuEditor.GroupKey;
+            existingItem.Description = MenuEditor.Description.Trim();
+            existingItem.Price = MenuEditor.Price;
+            existingItem.StatusKey = MenuEditor.StatusKey;
+            existingItem.Icon = MenuEditor.Icon;
+            existingItem.ToneClass = MenuEditor.ToneClass;
+            existingItem.Tags = tags;
+        }
+
+        MenuEditor = null;
+    }
+
+    private void CloseEditor()
+    {
+        MenuEditor = null;
+    }
+
+    private static DateOnly GetWeekStart(DateOnly date)
+    {
+        var offset = ((int)date.DayOfWeek + 6) % 7;
+        return date.AddDays(-offset);
+    }
+
+    private static List<UpMenuItem> CreateSeedMenuItems()
+    {
+        return
+        [
+            new() { Id = Guid.NewGuid(), Name = "Phở bò mini", GroupKey = "lunch", Description = "Món nước ấm bụng, vị dịu, phù hợp cho bé ăn trưa.", Price = 32000m, StatusKey = "published", Icon = "local_dining", ToneClass = "tone-sun", Tags = ["Nước dùng", "Đạm bò", "Bán chạy"] },
+            new() { Id = Guid.NewGuid(), Name = "Cơm gà áp chảo", GroupKey = "lunch", Description = "Suất cơm đầy đủ tinh bột, đạm và rau củ hấp mềm.", Price = 35000m, StatusKey = "published", Icon = "lunch_dining", ToneClass = "tone-peach", Tags = ["Cơm chính", "Rau củ", "No lâu"] },
+            new() { Id = Guid.NewGuid(), Name = "Cháo cá hồi bí đỏ", GroupKey = "morning", Description = "Dễ tiêu hóa, giàu dưỡng chất và phù hợp cho bữa sáng.", Price = 28000m, StatusKey = "draft", Icon = "ramen_dining", ToneClass = "tone-mint", Tags = ["Bữa sáng", "Dễ ăn"] },
+            new() { Id = Guid.NewGuid(), Name = "Súp ngô gà non", GroupKey = "morning", Description = "Món nhẹ cho bé đầu ngày, tăng năng lượng trước giờ học.", Price = 26000m, StatusKey = "published", Icon = "emoji_food_beverage", ToneClass = "tone-honey", Tags = ["Mềm", "Ấm"] },
+            new() { Id = Guid.NewGuid(), Name = "Sữa chua trái cây", GroupKey = "snack", Description = "Bữa xế mát nhẹ với trái cây cắt hạt lựu.", Price = 18000m, StatusKey = "published", Icon = "icecream", ToneClass = "tone-berry", Tags = ["Bữa xế", "Mát nhẹ"] },
+            new() { Id = Guid.NewGuid(), Name = "Bánh flan caramel", GroupKey = "snack", Description = "Món tráng miệng mềm mịn, đang tạm ẩn để điều chỉnh giá.", Price = 20000m, StatusKey = "hidden", Icon = "bakery_dining", ToneClass = "tone-lilac", Tags = ["Tráng miệng", "Tạm ẩn"] },
+            new() { Id = Guid.NewGuid(), Name = "Mì Ý sốt bò bằm", GroupKey = "lunch", Description = "Món Âu được nhiều bé yêu thích, có thể mở theo đợt.", Price = 36000m, StatusKey = "draft", Icon = "dinner_dining", ToneClass = "tone-coral", Tags = ["Món đặc biệt"] },
+            new() { Id = Guid.NewGuid(), Name = "Bánh mì trứng cuộn", GroupKey = "morning", Description = "Suất sáng gọn nhẹ, phù hợp cho bé ăn tại lớp.", Price = 24000m, StatusKey = "published", Icon = "egg", ToneClass = "tone-sage", Tags = ["Nhanh gọn", "Phổ biến"] }
+        ];
+    }
+
+    private sealed record MealGroupOption(string Key, string Label);
+
+    private sealed class UpMenuItem
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string GroupKey { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string StatusKey { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string ToneClass { get; set; } = string.Empty;
+        public IReadOnlyList<string> Tags { get; set; } = [];
+
+        public string StatusLabel => StatusKey switch
+        {
+            "published" => "Đang bán",
+            "draft" => "Bản nháp",
+            "hidden" => "Đã ẩn",
+            _ => "Không rõ"
+        };
+
+        public string StatusClass => StatusKey switch
+        {
+            "published" => "is-published",
+            "draft" => "is-draft",
+            "hidden" => "is-hidden",
+            _ => string.Empty
+        };
+    }
+
+    private sealed record UpMenuGroupViewModel(string GroupLabel, List<UpMenuItem> Items);
+
+    private sealed class MenuEditorModel
+    {
+        public Guid Id { get; set; }
+        public bool IsNew { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string GroupKey { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string StatusKey { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string ToneClass { get; set; } = string.Empty;
+        public string TagText { get; set; } = string.Empty;
+    }
+}

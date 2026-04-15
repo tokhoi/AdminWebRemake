@@ -1,6 +1,6 @@
 ﻿@page "/learning/ratingsubject"
 
-<div class="point-page">
+<div class="point-page score-grade-page score-grade-page--subject">
     @* --- HEADER SECTION --- *@
     <div class="page-title">
         <div class="icon-title"><i class="fa-solid fa-table-cells"></i></div>
@@ -48,7 +48,7 @@
 
         <div class="group">
             <label>Lớp: @if (IsGiaoVienChuNhiem) {
-            <span class="badge-mini ms-1" style="background:#198754; color:white; border:none;">Chủ nhiệm</span>
+            <span class="badge-mini ms-1" style="background:var(--kg-success); color:var(--kg-bg-card); border:none;">Chủ nhiệm</span>
                         }
 </label>
             <select class="select-highlight" @bind="SelectedLop" disabled="@IsGiaoVienChuNhiem">
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <div class="content-area-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; border: none;">
+    <div class="content-area-wrapper score-grade-page__content" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; border: none;">
         @if (CurrentView == "GK")
         {
             <DGDK_MonHoc_HoatDong_GKView SelectedNamHoc="@SelectedNamHoc"
@@ -107,159 +107,6 @@
         }
     </div>
 </div>
-
-<style>
-    /* CSS CORE */
-    .point-page {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        padding: 10px;
-        background-color: #f5f7fa;
-        font-family: 'Segoe UI', sans-serif;
-        font-size: 13px;
-        overflow: scroll;
-    }
-
-    .page-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-        flex-shrink: 0;
-    }
-
-    .icon-title {
-        width: 32px;
-        height: 32px;
-        background: #1b6ec2;
-        color: white;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-    }
-
-    .page-title h4 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: #444;
-    }
-
-    .alert-box.info {
-        background: #e7f5ff;
-        border: 1px solid #b3d7ff;
-        padding: 8px 12px;
-        border-radius: 4px;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        color: #004085;
-        font-size: 13px;
-    }
-
-    .filter-bar {
-        background: white;
-        border: 1px solid #ddd;
-        padding: 8px 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border-radius: 6px;
-        margin-bottom: 8px;
-        flex-wrap: wrap;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        flex-shrink: 0;
-    }
-
-    .group {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-weight: 600;
-        color: #444;
-    }
-
-    .select-highlight {
-        padding: 5px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        outline: none;
-        font-size: 13px;
-        min-width: 140px;
-        transition: all 0.2s;
-    }
-
-        .select-highlight:focus {
-            border-color: #1b6ec2;
-            box-shadow: 0 0 0 3px rgba(27, 110, 194, 0.1);
-        }
-
-        .select-highlight:disabled {
-            background: #f9f9f9;
-            color: #999;
-            cursor: not-allowed;
-        }
-
-    .actions-group {
-        display: flex;
-        gap: 5px;
-        align-items: center;
-    }
-
-    .ms-auto {
-        margin-left: auto;
-    }
-
-    .btn-custom {
-        padding: 5px 12px;
-        border-radius: 4px;
-        font-weight: 600;
-        font-size: 13px;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        transition: 0.2s;
-    }
-
-        .btn-custom:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-    .btn-primary {
-        background: #1b6ec2;
-        color: white;
-    }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #155a9e;
-        }
-
-    .btn-outline {
-        border: 1px solid #1b6ec2;
-        color: #1b6ec2;
-        background: white;
-        font-weight: 600;
-    }
-
-        .btn-outline:hover:not(:disabled) {
-            background: #eef7ff;
-        }
-
-    .badge-mini {
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        font-weight: 600;
-    }
-</style>
-
 @code {
     private bool isLoading = false;
     private bool IsGiaoVienChuNhiem = false; // Bật cờ này để test giao diện khoá chọn lớp
@@ -285,3 +132,7 @@
         CurrentView = view;
     }
 }
+
+
+
+

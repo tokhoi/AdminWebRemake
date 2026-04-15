@@ -32,15 +32,15 @@
             @foreach (var item in FilteredAssignments)
             {
                 <div class="nt-list-item" @onclick="() => EditItem(item)">
-                    <div class="nt-date-box" style="background: #eef2ff; color: #4f46e5;">
+                    <div class="nt-date-box" style="background: var(--kg-primary-soft); color: var(--kg-primary);">
                         <span class="material-icons-round" style="font-size: 28px;">menu_book</span>
                     </div>
 
                     <div class="nt-item-content">
                         <div class="nt-item-title" style="color: var(--nt-primary);">[@item.Subject] - @item.Title</div>
                         <div class="nt-item-desc">@item.Content</div>
-                        <div class="nt-item-meta" style="color: #64748b;">
-                            <span class="nt-badge" style="background:#e0f2fe; color:#0369a1;">@item.Class</span>
+                        <div class="nt-item-meta" style="color: var(--kg-text-muted);">
+                            <span class="nt-badge" style="background:var(--kg-primary-soft); color:var(--kg-primary-strong);">@item.Class</span>
                             <span style="display:flex; align-items:center; gap:4px;">
                                 <span class="material-icons-round" style="font-size:14px;">event</span> Hạn nộp: @item.DueDate.ToString("dd/MM/yyyy")
                             </span>
@@ -152,3 +152,5 @@
         showModal = false;
     }
 }
+
+

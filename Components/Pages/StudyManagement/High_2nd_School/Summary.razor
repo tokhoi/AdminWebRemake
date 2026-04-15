@@ -1,10 +1,10 @@
 ﻿@page "/learning/finalsummary"
 @rendermode InteractiveServer
 
-<div class="st-page-wrapper">
+<div class="st-page-wrapper score-sheet-page score-sheet-page--summary">
     @* --- HEADER --- *@
     <div class="st-page-header">
-        <div class="st-title-icon" style="background:#0ea5e9">
+        <div class="st-title-icon" style="background:var(--kg-primary)">
             <span class="material-icons-round">summarize</span>
         </div>
         <h4>TỔNG HỢP SỔ ĐIỂM</h4>
@@ -41,7 +41,7 @@
 
         <div class="st-filter-group st-search-group" style="flex:1;">
             <div style="position:relative; width:100%">
-                <span class="material-icons-round" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:18px">search</span>
+                <span class="material-icons-round" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--kg-text-muted); font-size:18px">search</span>
                 <input class="st-form-control" style="padding-left:34px;" placeholder="Nhập tên hoặc mã học sinh..." @bind="SearchTerm" @bind:event="oninput" />
             </div>
         </div>
@@ -71,7 +71,7 @@
                         <tr>
                             <td class="st-text-center">@s.Stt</td>
                             <td>
-                                <span class="st-badge st-bg-light" style="font-family:monospace; border:1px solid #ddd">@s.Code</span>
+                                <span class="st-badge st-bg-light" style="font-family: var(--font-body); border:1px solid var(--kg-border)">@s.Code</span>
                             </td>
                             <td class="st-fw-bold st-text-dark">@s.Name</td>
                             <td>@s.Dob.ToString("dd/MM/yyyy")</td>
@@ -102,7 +102,7 @@
         </table>
 
         @* Pagination Footer *@
-        <div class="st-modal-footer" style="background:white; border-top:1px solid #eee; justify-content:space-between; border-radius:0 0 8px 8px;">
+        <div class="st-modal-footer" style="background:var(--kg-bg-card); border-top:1px solid var(--kg-border); justify-content:space-between; border-radius:0 0 8px 8px;">
             <span class="st-text-muted" style="font-size:13px">Hiển thị @FilteredStudents.Count() học sinh</span>
             <div class="st-d-flex st-gap-2">
                 <button class="st-btn-icon"><span class="material-icons-round">chevron_left</span></button>
@@ -122,7 +122,7 @@
             <div class="st-modal-header">
                 <div class="st-d-flex st-align-center st-gap-2">
                     <span class="material-icons-round">school</span>
-                    <h5 style="color:white; margin:0">BẢNG ĐIỂM CÁ NHÂN</h5>
+                    <h5 style="color:var(--kg-bg-card); margin:0">BẢNG ĐIỂM CÁ NHÂN</h5>
                 </div>
                 <button class="st-close-btn" @onclick="CloseModal">
                     <span class="material-icons-round">close</span>
@@ -137,40 +137,40 @@
                     <div class="st-info-content">
                         <h3 class="st-student-name">@ViewingStudent.Name</h3>
                         <div class="st-info-grid">
-                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#0ea5e9">badge</span> Mã HS: <b class="st-text-dark">@ViewingStudent.Code</b></div>
-                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#f59e0b">class</span> Lớp: <b class="st-text-dark">@SelectedClass</b></div>
-                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#ec4899">cake</span> Ngày sinh: @ViewingStudent.Dob.ToString("dd/MM/yyyy")</div>
-                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:#8b5cf6">wc</span> Giới tính: @ViewingStudent.Gender</div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:var(--kg-primary)">badge</span> Mã HS: <b class="st-text-dark">@ViewingStudent.Code</b></div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:var(--kg-warning)">class</span> Lớp: <b class="st-text-dark">@SelectedClass</b></div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:var(--kg-danger)">cake</span> Ngày sinh: @ViewingStudent.Dob.ToString("dd/MM/yyyy")</div>
+                            <div class="st-info-label"><span class="material-icons-round" style="font-size:16px; color:var(--kg-purple)">wc</span> Giới tính: @ViewingStudent.Gender</div>
                         </div>
                     </div>
                     <div class="st-score-box">
-                        <div style="font-size:0.8rem; color:#888; text-transform:uppercase; font-weight:600; margin-bottom:5px;">Điểm Trung Bình</div>
+                        <div style="font-size:0.8rem; color:var(--kg-text-muted); text-transform:uppercase; font-weight:600; margin-bottom:5px;">Điểm Trung Bình</div>
                         <div class="st-score-val">@ViewingStudent.AvgYear</div>
                     </div>
                 </div>
 
-                <div style="border:1px solid #eee; border-radius:6px; overflow:hidden">
+                <div style="border:1px solid var(--kg-border); border-radius:6px; overflow:hidden">
                     <table class="st-table">
-                        <thead style="background:#f1f5f9">
+                        <thead style="background:var(--kg-bg-subtle)">
                             <tr>
                                 <th>Môn Học</th>
                                 <th class="st-text-center">Miệng</th>
                                 <th class="st-text-center">15 Phút</th>
                                 <th class="st-text-center">1 Tiết</th>
                                 <th class="st-text-center">Thi HK</th>
-                                <th class="st-text-center" style="background:#e0f2fe; color:var(--st-primary)">TB Môn</th>
+                                <th class="st-text-center" style="background:var(--kg-primary-soft); color:var(--st-primary)">TB Môn</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var sub in StudentTranscript)
                             {
                                 <tr>
-                                    <td class="st-fw-bold" style="color:#334155">@sub.SubjectName</td>
+                                    <td class="st-fw-bold" style="color:var(--kg-text-main)">@sub.SubjectName</td>
                                     <td class="st-text-center">@sub.ScoreOral</td>
                                     <td class="st-text-center">@sub.Score15</td>
                                     <td class="st-text-center">@sub.Score45</td>
                                     <td class="st-text-center st-fw-bold">@sub.ScoreExam</td>
-                                    <td class="st-text-center st-fw-bold st-text-primary" style="background:#f0f9ff">@sub.Average</td>
+                                    <td class="st-text-center st-fw-bold st-text-primary" style="background:var(--kg-primary-soft)">@sub.Average</td>
                                 </tr>
                             }
                         </tbody>
@@ -284,3 +284,7 @@
         return $"{ho[rnd.Next(ho.Length)]} {dem[rnd.Next(dem.Length)]} {ten[rnd.Next(ten.Length)]}";
     }
 }
+
+
+
+

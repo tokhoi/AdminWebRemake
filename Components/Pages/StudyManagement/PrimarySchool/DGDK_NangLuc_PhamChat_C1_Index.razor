@@ -1,6 +1,6 @@
 ﻿@page "/learning/ratingtalent"
 
-<div class="point-page">
+<div class="point-page score-grade-page score-grade-page--talent">
     <div class="page-title">
         <div class="icon-title"><i class="fa-solid fa-user-graduate"></i></div>
         <h4>ĐÁNH GIÁ ĐỊNH KỲ NĂNG LỰC PHẨM CHẤT</h4>
@@ -72,101 +72,4 @@
     private void SwitchView(string v) => CurrentView = v;
 }
 
-<style>
-    .point-page {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        padding: 10px;
-        background: #f5f7fa;
-        overflow: visible;
-        font-family: 'Segoe UI', sans-serif;
-        font-size: 13px;
-    }
 
-    .page-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-        color: #1e3c72;
-        flex-shrink: 0;
-    }
-
-    .icon-title {
-        width: 32px;
-        height: 32px;
-        background: #1e3c72;
-        color: white;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .filter-bar {
-        background: white;
-        border: 1px solid #ddd;
-        padding: 8px 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border-radius: 6px;
-        margin-bottom: 8px;
-        flex-wrap: wrap;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        flex-shrink: 0;
-    }
-
-    .group {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-weight: 600;
-        color: #444;
-    }
-    .sub-filter {
-        background: transparent;
-        border: none;
-        padding: 0 0 8px 0;
-    }
-
-    .content-area-wrapper {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .select-highlight {
-        padding: 4px 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        min-width: 100px;
-    }
-
-    .btn-custom {
-        padding: 5px 15px;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        display: flex;
-        align-items: center;
-    }
-
-    .btn-primary {
-        background: #1e3c72;
-        color: white;
-    }
-
-    .btn-outline {
-        border: 1px solid #1e3c72;
-        color: #1e3c72;
-        background: white;
-    }
-
-    .ms-auto {
-        margin-left: auto;
-    }
-</style>
